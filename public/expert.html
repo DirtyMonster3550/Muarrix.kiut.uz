@@ -1,0 +1,383 @@
+﻿<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/png" sizes="32x32" href="/img/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/img/favicon-16x16.png">
+  <link rel="apple-touch-icon" href="/img/apple-touch-icon.png">
+  <title>Панель эксперта</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <style>
+    :root {
+      --primary: #1a3a6b;
+      --primary-dark: #0f2347;
+      --primary-light: #4a7fc1;
+      --accent: #e8b94f;
+      --success: #059669;
+      --danger: #dc2626;
+      --warning: #d97706;
+      --text: #1e293b;
+      --text-muted: #64748b;
+      --border: #e2e8f0;
+      --bg: #f8fafc;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+    .expert-layout { display: flex; min-height: 100vh; }
+
+    /* Sidebar */
+    .expert-sidebar {
+      width: 260px; flex-shrink: 0; background: var(--primary-dark); color: #fff;
+      display: flex; flex-direction: column; position: fixed; top: 0; bottom: 0; left: 0; z-index: 100;
+    }
+    .sidebar-logo {
+      padding: 24px 20px 20px; border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+    .sidebar-logo-row {
+      display: flex; align-items: flex-start; justify-content: space-between; gap: 12px;
+    }
+    .sidebar-logo h2 { font-size: 15px; font-weight: 700; color: var(--accent); }
+    .sidebar-logo p { font-size: 11px; color: rgba(255,255,255,0.5); margin-top: 4px; }
+    .sidebar-user-info {
+      padding: 16px 20px; border-bottom: 1px solid rgba(255,255,255,0.1);
+      font-size: 13px;
+    }
+    .sidebar-user-info .role-badge {
+      display: inline-block; padding: 2px 10px; border-radius: 20px;
+      font-size: 11px; font-weight: 600; margin-top: 6px;
+    }
+    .role-tech { background: rgba(124,58,237,0.3); color: #c4b5fd; }
+    .role-editorial { background: rgba(5,150,105,0.3); color: #6ee7b7; }
+    .sidebar-nav { list-style: none; padding: 12px 0; flex: 1; }
+    .sidebar-nav a, .sidebar-nav button {
+      display: flex; align-items: center; gap: 10px; padding: 11px 20px;
+      color: rgba(255,255,255,0.75); text-decoration: none; font-size: 14px;
+      background: none; border: none; width: 100%; cursor: pointer; transition: all 0.15s;
+    }
+    .sidebar-nav a:hover, .sidebar-nav button:hover { background: rgba(255,255,255,0.08); color: #fff; }
+    .sidebar-nav a.active { background: rgba(255,255,255,0.13); color: #fff; font-weight: 600; }
+    .sidebar-badge {
+      margin-left: auto; background: var(--accent); color: #1a1a1a; border-radius: 20px;
+      padding: 1px 8px; font-size: 11px; font-weight: 700;
+    }
+
+    /* Main */
+    .expert-main { margin-left: 260px; flex: 1; padding: 32px; }
+    .page-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; }
+    .page-header h2 { font-size: 22px; font-weight: 700; color: var(--primary); }
+
+    /* Stats row */
+    .stats-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px,1fr)); gap: 16px; margin-bottom: 28px; }
+    .stat-card {
+      background: #fff; border-radius: 12px; padding: 20px;
+      border: 1px solid var(--border); text-align: center;
+    }
+    .stat-card .num { font-size: 32px; font-weight: 800; color: var(--primary); }
+    .stat-card .lbl { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
+    .stat-card.queue .num { color: var(--warning); }
+    .stat-card.ok .num { color: var(--success); }
+    .stat-card.bad .num { color: var(--danger); }
+
+    /* Article cards */
+    .article-card {
+      background: #fff; border: 1px solid var(--border); border-radius: 12px;
+      padding: 20px 24px; margin-bottom: 16px; transition: box-shadow 0.15s;
+    }
+    .article-card:hover { box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+    .article-card .ac-title { font-size: 16px; font-weight: 700; color: var(--primary); margin-bottom: 6px; }
+    .article-card .ac-meta { font-size: 12px; color: var(--text-muted); margin-bottom: 12px; display: flex; flex-wrap: wrap; gap: 12px; }
+    .article-card .ac-abstract {
+      font-size: 13px; color: var(--text); background: #f8fafc;
+      border-left: 3px solid var(--primary-light); padding: 10px 12px;
+      border-radius: 0 6px 6px 0; margin-bottom: 14px; line-height: 1.6;
+      max-height: 80px; overflow: hidden; cursor: pointer;
+    }
+    .article-card .ac-abstract.expanded { max-height: none; }
+    .ac-actions { display: flex; align-items: flex-end; gap: 12px; flex-wrap: wrap; }
+    .ac-actions textarea {
+      flex: 1; min-width: 220px; padding: 9px 12px; border: 1px solid var(--border);
+      border-radius: 8px; font-size: 13px; font-family: inherit; resize: vertical; min-height: 60px;
+    }
+    .ac-btns { display: flex; gap: 8px; align-items: center; }
+
+    /* Buttons */
+    .btn { padding: 9px 18px; border-radius: 8px; border: none; cursor: pointer; font-size: 13px; font-weight: 600; transition: all 0.15s; }
+    .btn-approve { background: var(--success); color: #fff; }
+    .btn-approve:hover { background: #047857; }
+    .btn-reject { background: var(--danger); color: #fff; }
+    .btn-reject:hover { background: #b91c1c; }
+    .btn-file { background: var(--primary); color: #fff; }
+    .btn-file:hover { background: var(--primary-dark); }
+    .btn-sm { padding: 5px 12px; font-size: 12px; }
+
+    /* Empty / loading states */
+    .empty-box {
+      text-align: center; padding: 60px 20px; color: var(--text-muted);
+    }
+    .empty-box .icon { font-size: 48px; margin-bottom: 12px; }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+
+    /* Toast */
+    #toast-container { position: fixed; bottom: 24px; right: 24px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; }
+    .toast { padding: 12px 20px; border-radius: 10px; font-size: 14px; font-weight: 600; box-shadow: 0 4px 16px rgba(0,0,0,0.15); animation: slideIn 0.3s; color: #fff; }
+    .toast.success { background: var(--success); }
+    .toast.error { background: var(--danger); }
+    .toast.info { background: var(--primary); }
+    @keyframes slideIn { from { transform: translateX(100px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+  </style>
+</head>
+<body data-i18n-doc="expert">
+<div class="expert-layout">
+
+  <!-- Sidebar -->
+  <aside class="expert-sidebar">
+    <div class="sidebar-logo">
+      <div class="sidebar-logo-row">
+        <div>
+          <h2 data-i18n="brand_title_main">Центрально-азиатский журнал STEM</h2>
+          <p data-i18n="expert_panel">Панель эксперта</p>
+        </div>
+        <div class="lang-switch lang-switch--inline" data-lang-switch role="group">
+          <button type="button" class="lang-switch__btn" data-set-lang="uz">UZ</button>
+          <button type="button" class="lang-switch__btn" data-set-lang="ru">RU</button>
+          <button type="button" class="lang-switch__btn" data-set-lang="en">EN</button>
+        </div>
+      </div>
+    </div>
+    <div class="sidebar-user-info">
+      <div id="sb-name" style="font-weight:700;font-size:14px">—</div>
+      <div id="sb-email" style="font-size:12px;color:rgba(255,255,255,0.5);margin-top:2px">—</div>
+      <span id="sb-role-badge" class="role-badge">—</span>
+    </div>
+    <ul class="sidebar-nav">
+      <li><a href="javascript:void(0)" class="active" data-tab="queue" onclick="return switchTab('queue',this)">
+        <span>📋</span> <span data-i18n="expert_my_queue">Моя очередь</span>
+        <span class="sidebar-badge" id="queue-badge" style="display:none">0</span>
+      </a></li>
+      <li><a href="javascript:void(0)" data-tab="notifications" onclick="return switchTab('notifications',this)">
+        <span>🔔</span> <span data-i18n="dash_notifications">Уведомления</span>
+        <span class="sidebar-badge" id="notif-badge" style="display:none">0</span>
+      </a></li>
+      <li><button onclick="logout()"><span>🚪</span> <span data-i18n="nav_logout">Выйти</span></button></li>
+    </ul>
+  </aside>
+
+  <!-- Main -->
+  <main class="expert-main">
+    <!-- Queue tab -->
+    <div id="tab-queue" class="tab-content active">
+      <div class="page-header">
+        <h2 id="queue-title" data-i18n="expert_queue_title">Очередь на проверку</h2>
+        <button class="btn btn-file btn-sm" onclick="loadQueue()" data-i18n="expert_refresh">↻ Обновить</button>
+      </div>
+
+      <div class="stats-row" id="stats-row">
+        <div class="stat-card queue"><div class="num" id="st-queue">—</div><div class="lbl" data-i18n="expert_stat_queue">В очереди</div></div>
+        <div class="stat-card ok"><div class="num" id="st-approved">—</div><div class="lbl" data-i18n="expert_stat_approved">Одобрено мной</div></div>
+        <div class="stat-card bad"><div class="num" id="st-rejected">—</div><div class="lbl" data-i18n="expert_stat_rejected">Отклонено мной</div></div>
+        <div class="stat-card"><div class="num" id="st-total">—</div><div class="lbl" data-i18n="expert_stat_total">Всего в системе</div></div>
+      </div>
+
+      <div id="queue-body">
+        <div class="empty-box"><div class="icon">⏳</div><p data-i18n="expert_loading">Загрузка…</p></div>
+      </div>
+    </div>
+
+    <!-- Notifications tab -->
+    <div id="tab-notifications" class="tab-content">
+      <div class="page-header"><h2 data-i18n="dash_notifications">Уведомления</h2></div>
+      <div id="notif-body">
+        <div class="empty-box"><div class="icon">⏳</div><p data-i18n="expert_loading">Загрузка…</p></div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<div id="toast-container"></div>
+
+<script src="/js/stem-locale-site.js"></script>
+<script src="/js/i18n.js"></script>
+<script src="/js/app.js"></script>
+<script>
+  let TOKEN = Auth.getToken();
+  let currentUser = null;
+
+  function applyExpertRoleLabels() {
+    if (!currentUser) return;
+    const badge = document.getElementById('sb-role-badge');
+    const titleEl = document.getElementById('queue-title');
+    if (currentUser.role === 'tech_expert') {
+      badge.textContent = i18t('expert_role_tech');
+      badge.className = 'role-badge role-tech';
+      if (titleEl) titleEl.textContent = i18t('expert_queue_tech');
+    } else {
+      badge.textContent = i18t('expert_role_editorial');
+      badge.className = 'role-badge role-editorial';
+      if (titleEl) titleEl.textContent = i18t('expert_queue_editorial');
+    }
+  }
+
+  async function init() {
+    if (!TOKEN) { location.href = '/login.html'; return; }
+    try {
+      const me = await API.get('/auth/me');
+      if (!['tech_expert', 'editorial_expert'].includes(me.role)) {
+        if (me.role === 'admin') { location.href = '/admin.html'; return; }
+        location.href = '/dashboard.html';
+        return;
+      }
+      currentUser = me;
+      document.getElementById('sb-name').textContent = me.full_name;
+      document.getElementById('sb-email').textContent = me.email;
+      applyExpertRoleLabels();
+      loadStats();
+      loadQueue();
+      loadNotifications();
+    } catch { location.href = '/login.html'; }
+  }
+
+  // ── Tab switcher ──────────────────────────────────────────────────────────
+  function switchTab(name, el) {
+    document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.sidebar-nav a').forEach(a => a.classList.remove('active'));
+    document.getElementById('tab-' + name).classList.add('active');
+    if (el) el.classList.add('active');
+    if (name === 'notifications') loadNotifications();
+    return false;
+  }
+
+  // logout() — from app.js
+
+  // ── Stats ─────────────────────────────────────────────────────────────────
+  async function loadStats() {
+    try {
+      const d = await API.get('/review/stats');
+      document.getElementById('st-queue').textContent    = d.inQueue;
+      document.getElementById('st-approved').textContent = d.approved;
+      document.getElementById('st-rejected').textContent = d.rejected;
+      document.getElementById('st-total').textContent    = d.total;
+      const qb = document.getElementById('queue-badge');
+      if (d.inQueue > 0) { qb.textContent = d.inQueue; qb.style.display = ''; }
+      else qb.style.display = 'none';
+    } catch {}
+  }
+
+  // ── Queue ─────────────────────────────────────────────────────────────────
+  async function loadQueue() {
+    const body = document.getElementById('queue-body');
+    body.innerHTML = '<div class="empty-box"><div class="icon">⏳</div><p>' + i18t('expert_loading') + '</p></div>';
+    try {
+      const items = await API.get('/review/queue');
+      if (!items.length) {
+        body.innerHTML = '<div class="empty-box"><div class="icon">✅</div><h3>' + i18t('expert_queue_empty_title') + '</h3><p>' + i18t('expert_queue_empty_p') + '</p></div>';
+        return;
+      }
+      body.innerHTML = items.map(a => articleCard(a)).join('');
+      document.querySelectorAll('[data-i18n-placeholder-id]').forEach(el => {
+        el.placeholder = i18t(el.getAttribute('data-i18n-placeholder-id'));
+      });
+    } catch(e) {
+      body.innerHTML = `<div class="empty-box"><div class="icon">❌</div><p>${escHtml(e.message)}</p></div>`;
+    }
+  }
+
+  function articleCard(a) {
+    const fileBtn = a.file_path
+      ? `<a class="btn btn-file btn-sm" href="/uploads/${escHtml(a.file_path)}?token=${Auth.getToken()}" target="_blank">${i18t('expert_download')}</a>`
+      : `<span style="font-size:12px;color:var(--text-muted)">${i18t('expert_no_file')}</span>`;
+    const abstract = a.abstract
+      ? `<div class="ac-abstract" onclick="this.classList.toggle('expanded')" title="${escHtml(i18t('expert_abstract_expand'))}">${escHtml(a.abstract)}</div>`
+      : '';
+    const journalLabel = typeof journalName === 'function' ? journalName(a.journal) : a.journal;
+    return `
+    <div class="article-card" id="card-${a.id}">
+      <div class="ac-title">${escHtml(a.title)}</div>
+      <div class="ac-meta">
+        <span>👤 ${escHtml(a.full_name)}</span>
+        <span>✉️ ${escHtml(a.email)}</span>
+        <span>📰 ${escHtml(journalLabel)}</span>
+        ${a.issue_title ? `<span>🗂 ${escHtml(a.issue_title)}</span>` : ''}
+        <span>📅 ${formatDate(a.submitted_at)}</span>
+      </div>
+      ${abstract}
+      <div style="margin-bottom:8px;font-size:12px;color:var(--text-muted)">
+        <strong>${i18t('expert_authors_label')}</strong> ${escHtml(a.authors)}
+      </div>
+      <div class="ac-actions">
+        ${fileBtn}
+        <textarea id="note-${a.id}" data-i18n-placeholder-id="expert_note_ph" placeholder="${escHtml(i18t('expert_note_ph'))}"></textarea>
+        <div class="ac-btns">
+          <button class="btn btn-approve" onclick="approve(${a.id})">${i18t('expert_btn_approve')}</button>
+          <button class="btn btn-reject" onclick="reject(${a.id})">${i18t('expert_btn_reject')}</button>
+        </div>
+      </div>
+    </div>`;
+  }
+
+  async function approve(id) {
+    const note = document.getElementById('note-' + id)?.value || '';
+    try {
+      await API.post(`/review/submissions/${id}/approve`, { note });
+      showToast(i18t('expert_approve_ok'), 'success');
+      document.getElementById('card-' + id)?.remove();
+      loadStats();
+    } catch(e) { showToast(e.message, 'error'); }
+  }
+
+  async function reject(id) {
+    const reason = document.getElementById('note-' + id)?.value || '';
+    if (!reason.trim()) { showToast(i18t('expert_reject_reason'), 'error'); return; }
+    try {
+      await API.post(`/review/submissions/${id}/reject`, { reason });
+      showToast(i18t('expert_reject_ok'), 'success');
+      document.getElementById('card-' + id)?.remove();
+      loadStats();
+    } catch(e) { showToast(e.message, 'error'); }
+  }
+
+  // ── Notifications ─────────────────────────────────────────────────────────
+  async function loadNotifications() {
+    const body = document.getElementById('notif-body');
+    try {
+      const items = await API.get('/submissions/notifications');
+      const unread = items.filter(n => !n.is_read).length;
+      const nb = document.getElementById('notif-badge');
+      if (unread > 0) { nb.textContent = unread; nb.style.display = ''; }
+      else nb.style.display = 'none';
+
+      if (!items.length) {
+        body.innerHTML = '<div class="empty-box"><div class="icon">🔔</div><p>' + i18t('dash_notif_none') + '</p></div>';
+        return;
+      }
+      body.innerHTML = `<div style="display:flex;flex-direction:column;gap:10px;padding:4px 0">` +
+        items.map(n => `
+          <div style="background:#fff;border:1px solid var(--border);border-radius:10px;padding:14px 18px;${!n.is_read?'border-left:4px solid var(--primary-light)':''}">
+            <div style="font-size:13px">${escHtml(n.message)}</div>
+            <div style="font-size:11px;color:var(--text-muted);margin-top:6px">${formatDate(n.sent_at)}</div>
+          </div>`).join('') + `</div>`;
+    } catch(e) {
+      body.innerHTML = `<div class="empty-box"><p>${escHtml(e.message)}</p></div>`;
+    }
+  }
+
+  // ── Utils ─────────────────────────────────────────────────────────────────
+  function escHtml(s) {
+    return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  document.addEventListener('kiut:langchange', () => {
+    applyExpertRoleLabels();
+    const active = document.querySelector('.sidebar-nav a.active');
+    const tab = active?.getAttribute('data-tab') || 'queue';
+    if (tab === 'queue') loadQueue();
+    if (tab === 'notifications') loadNotifications();
+  });
+
+  init();
+</script>
+</body>
+</html>

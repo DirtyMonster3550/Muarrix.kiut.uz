@@ -1,0 +1,188 @@
+﻿<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/png" sizes="32x32" href="/img/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/img/favicon-16x16.png">
+  <link rel="apple-touch-icon" href="/img/apple-touch-icon.png">
+  <title>Вход</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body class="auth-page" data-i18n-doc="login">
+
+<header class="site-header">
+  <div class="header-top">
+    <a href="/" class="header-logo" style="text-decoration:none;color:inherit;">
+      <img src="/img/android-chrome-192x192.png" alt="KIUT" style="height:52px;width:auto;flex-shrink:0">
+      <div class="logo-text">
+        <h1 data-i18n="brand_title_main">Центрально-азиатский журнал STEM</h1>
+        <p data-i18n="uni_brand_line">Kimyo International University in Tashkent</p>
+      </div>
+    </a>
+    <div class="header-top-right">
+      <div class="lang-switch lang-switch--inline" data-lang-switch role="group">
+        <button type="button" class="lang-switch__btn" data-set-lang="uz">UZ</button>
+        <button type="button" class="lang-switch__btn" data-set-lang="ru">RU</button>
+        <button type="button" class="lang-switch__btn" data-set-lang="en">EN</button>
+      </div>
+      <div class="header-auth">
+        <a href="/register.html" class="btn-accent" data-i18n="nav_register">Регистрация</a>
+      </div>
+    </div>
+  </div>
+  <nav class="journal-nav">
+    <span class="journal-nav-label" data-i18n="journal_nav_label">Раздел:</span>
+    <a href="/archives.html" class="journal-btn"><span class="j-icon">📚</span> <span data-i18n="nav_archive">Архив</span></a>
+    <a href="/" class="journal-btn" data-i18n="nav_back_home">← На главную</a>
+  </nav>
+</header>
+
+<div class="auth-container">
+  <div class="auth-card">
+    <div class="auth-logo">
+      <img src="/img/android-chrome-192x192.png" alt="KIUT" style="height:52px;width:auto;flex-shrink:0">
+      <h2 data-i18n="auth_login_h2">Вход в систему</h2>
+      <p data-i18n="auth_login_sub">Личный кабинет автора</p>
+    </div>
+
+    <div id="alert-box"></div>
+
+    <form id="login-form">
+      <div class="form-group">
+        <label class="form-label"><span data-i18n="auth_email">Email</span> <span class="req-mark">*</span></label>
+        <input type="email" id="email" class="form-control" placeholder="example@mail.com" required autocomplete="email">
+      </div>
+      <div class="form-group">
+        <label class="form-label" style="display:flex;justify-content:space-between;align-items:center">
+          <span><span data-i18n="auth_password">Пароль</span> <span class="req-mark">*</span></span>
+          <a href="javascript:void(0)" id="forgot-link" style="font-size:12px;font-weight:400;color:var(--primary-light)" data-i18n="auth_forgot">Забыли пароль?</a>
+        </label>
+        <input type="password" id="password" class="form-control" data-i18n-placeholder="auth_password_ph" placeholder="Введите пароль" required autocomplete="current-password">
+      </div>
+
+      <button type="submit" class="btn btn-primary btn-block" id="submit-btn" data-i18n="auth_login_btn">
+        Войти
+      </button>
+    </form>
+
+    <div class="form-footer">
+      <span data-i18n="auth_no_account">Нет аккаунта?</span> <a href="/register.html" data-i18n="auth_register_link">Зарегистрироваться</a>
+    </div>
+  </div>
+</div>
+
+<div id="forgot-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:1000;align-items:center;justify-content:center;padding:20px">
+  <div style="background:#fff;border-radius:16px;padding:32px;max-width:420px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,0.2);position:relative">
+    <button onclick="closeForgot()" style="position:absolute;top:14px;right:16px;background:none;border:none;font-size:20px;color:#aaa;cursor:pointer;line-height:1">✕</button>
+    <div style="text-align:center;margin-bottom:20px">
+      <div style="font-size:36px;margin-bottom:8px">🔑</div>
+      <h3 style="margin:0 0 6px;color:var(--primary)" data-i18n="auth_forgot_h3">Восстановление пароля</h3>
+      <p style="margin:0;font-size:13px;color:var(--text-muted)" data-i18n="auth_forgot_sub">Введите email — мы отправим ссылку для сброса</p>
+    </div>
+    <div id="forgot-alert"></div>
+    <div id="forgot-form-wrap">
+      <div class="form-group">
+        <input type="email" id="forgot-email" class="form-control" data-i18n-placeholder="auth_forgot_email_ph" placeholder="Ваш email" autocomplete="email">
+      </div>
+      <button onclick="submitForgot()" id="forgot-btn" class="btn btn-primary btn-block" data-i18n="auth_forgot_btn">Отправить ссылку</button>
+    </div>
+    <div id="forgot-success" style="display:none;text-align:center;padding:10px 0">
+      <div style="font-size:40px;margin-bottom:10px">📧</div>
+      <p style="color:var(--success);font-weight:600;margin-bottom:6px" data-i18n="auth_forgot_sent">Письмо отправлено!</p>
+      <p style="font-size:13px;color:var(--text-muted)" data-i18n="auth_forgot_sent_p">Проверьте вашу почту и перейдите по ссылке в письме. Ссылка действительна 1 час.</p>
+    </div>
+  </div>
+</div>
+
+<footer style="text-align:center;padding:24px 16px 16px;font-size:12px;color:#bbb">
+  <span data-i18n="footer_copyright">© 2024–2026</span>
+  <a href="https://www.kiut.uz" target="_blank" style="color:#bbb;text-decoration:none" data-i18n="uni_brand_line">Kimyo International University in Tashkent</a>.
+  <span data-i18n="footer_rights">Все права защищены.</span>
+</footer>
+
+<script src="/js/stem-locale-site.js"></script>
+<script src="/js/i18n.js"></script>
+<script src="/js/app.js"></script>
+<script>
+  if (Auth.isLoggedIn()) {
+    const _r = Auth.getUser()?.role;
+    if (_r === 'admin') window.location.href = '/admin.html';
+    else if (_r === 'tech_expert' || _r === 'editorial_expert') window.location.href = '/expert.html';
+    else window.location.href = '/dashboard.html';
+  }
+
+  document.getElementById('login-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const alertBox = document.getElementById('alert-box');
+    const btn = document.getElementById('submit-btn');
+
+    const email = document.getElementById('email').value.trim();
+    const password = document.getElementById('password').value;
+
+    alertBox.innerHTML = '';
+    btn.innerHTML = '<span class="loader"></span> ' + i18t('auth_login_loading');
+    btn.disabled = true;
+
+    try {
+      const data = await API.post('/auth/login', { email, password });
+      Auth.setSession(data.token, data.user);
+      showToast(i18t('auth_welcome'), 'success');
+      setTimeout(() => {
+        const role = data.user.role;
+        if (role === 'admin') window.location.href = '/admin.html';
+        else if (role === 'tech_expert' || role === 'editorial_expert') window.location.href = '/expert.html';
+        else window.location.href = '/dashboard.html';
+      }, 800);
+    } catch (err) {
+      alertBox.innerHTML = `<div class="alert alert-danger">❌ ${err.message}</div>`;
+      btn.textContent = i18t('auth_login_btn');
+      btn.disabled = false;
+    }
+  });
+
+  const modal = document.getElementById('forgot-modal');
+
+  document.getElementById('forgot-link').addEventListener('click', () => {
+    document.getElementById('forgot-alert').innerHTML = '';
+    document.getElementById('forgot-email').value = '';
+    document.getElementById('forgot-form-wrap').style.display = 'block';
+    document.getElementById('forgot-success').style.display = 'none';
+    modal.style.display = 'flex';
+  });
+
+  function closeForgot() {
+    modal.style.display = 'none';
+  }
+
+  modal.addEventListener('click', (e) => {
+    if (e.target === modal) closeForgot();
+  });
+
+  async function submitForgot() {
+    const email = document.getElementById('forgot-email').value.trim();
+    const alertEl = document.getElementById('forgot-alert');
+    const btn = document.getElementById('forgot-btn');
+
+    alertEl.innerHTML = '';
+    if (!email) {
+      alertEl.innerHTML = '<div class="alert alert-danger" style="margin-bottom:12px">❌ ' + i18t('auth_forgot_enter_email') + '</div>';
+      return;
+    }
+
+    btn.disabled = true;
+    btn.innerHTML = '<span class="loader"></span> ' + i18t('auth_forgot_sending');
+
+    try {
+      await API.post('/auth/forgot-password', { email });
+      document.getElementById('forgot-form-wrap').style.display = 'none';
+      document.getElementById('forgot-success').style.display = 'block';
+    } catch (err) {
+      alertEl.innerHTML = `<div class="alert alert-danger" style="margin-bottom:12px">❌ ${err.message}</div>`;
+      btn.disabled = false;
+      btn.textContent = i18t('auth_forgot_btn');
+    }
+  }
+</script>
+</body>
+</html>
