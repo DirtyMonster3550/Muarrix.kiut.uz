@@ -1,220 +1,220 @@
 ﻿<!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Правила для авторов — Центрально-азиатский журнал STEM</title>
-  <link rel="icon" type="image/png" sizes="32x32" href="/img/favicon-32x32.png">
-  <link rel="icon" type="image/png" sizes="16x16" href="/img/favicon-16x16.png">
-  <link rel="apple-touch-icon" href="/img/apple-touch-icon.png">
-  <link rel="stylesheet" href="/css/style.css">
-  <style>
-    .req-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-      gap: 8px;
-      margin: 10px 0 16px;
-    }
-    .req-item {
-      background: #f8f9fa;
-      border-radius: 8px;
-      padding: 10px 12px;
-      font-size: 12px;
-    }
-    .req-item strong { display: block; font-size: 9px; text-transform: uppercase; letter-spacing: 0.4px; color: var(--text-muted); margin-bottom: 3px; }
-    .req-item span { font-weight: 700; color: var(--primary); }
+ <meta charset="UTF-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1.0">
+ <title>Правила для авторов — Центрально-азиатский журнал STEM</title>
+ <link rel="icon" type="image/png" sizes="32x32" href="/img/favicon-32x32.png">
+ <link rel="icon" type="image/png" sizes="16x16" href="/img/favicon-16x16.png">
+ <link rel="apple-touch-icon" href="/img/apple-touch-icon.png">
+ <link rel="stylesheet" href="/css/style.css">
+ <style>
+.req-grid {
+ display: grid;
+ grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+ gap: 8px;
+ margin: 10px 0 16px;
+ }
+.req-item {
+ background: #f8f9fa;
+ border-radius: 8px;
+ padding: 10px 12px;
+ font-size: 12px;
+ }
+.req-item strong { display: block; font-size: 9px; text-transform: uppercase; letter-spacing: 0.4px; color: var(--text-muted); margin-bottom: 3px; }
+.req-item span { font-weight: 700; color: var(--primary); }
 
-    /* IMRAD блоки */
-    .imrad-block {
-      border-left: 4px solid var(--primary-light);
-      background: #f8faff;
-      border-radius: 0 10px 10px 0;
-      margin-bottom: 14px;
-      overflow: hidden;
-    }
-    .imrad-block summary {
-      padding: 14px 18px;
-      font-size: 15px;
-      font-weight: 700;
-      color: var(--primary);
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      list-style: none;
-      user-select: none;
-    }
-    .imrad-block summary::-webkit-details-marker { display: none; }
-    .imrad-block summary::after {
-      content: '▾';
-      margin-left: auto;
-      font-size: 14px;
-      color: var(--text-muted);
-      transition: transform 0.2s;
-    }
-    .imrad-block[open] summary::after { transform: rotate(180deg); }
-    .imrad-block .imrad-body {
-      padding: 0 18px 18px;
-      font-size: 14px;
-      line-height: 1.75;
-      color: var(--text);
-      border-top: 1px solid var(--border);
-    }
-    .imrad-block .imrad-body ul { padding-left: 20px; margin-top: 10px; }
-    .imrad-block .imrad-body li { margin-bottom: 4px; }
-    .imrad-letter {
-      width: 32px; height: 32px;
-      border-radius: 8px;
-      background: var(--primary);
-      color: #fff;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 16px;
-      font-weight: 900;
-      flex-shrink: 0;
-    }
-    .imrad-header-row {
-      display: flex;
-      align-items: center;
-      gap: 20px;
-      background: linear-gradient(135deg, var(--primary), var(--primary-light));
-      border-radius: var(--radius);
-      padding: 24px 28px;
-      color: #fff;
-      margin-bottom: 24px;
-    }
-    .imrad-header-row .big-text { font-size: 28px; font-weight: 900; letter-spacing: 4px; }
-    .imrad-header-row p { font-size: 14px; color: rgba(255,255,255,0.85); margin-top: 6px; }
-    .imrad-header-row a { color: var(--accent-light); text-decoration: underline; }
-    .content-card > div[data-i18n-html="rules_lit_ul_html"] ul { margin: 10px 0 0; padding-left: 22px; }
-  </style>
+ /* IMRAD блоки */
+.imrad-block {
+ border-left: 4px solid var(--primary-light);
+ background: #f8faff;
+ border-radius: 0 10px 10px 0;
+ margin-bottom: 14px;
+ overflow: hidden;
+ }
+.imrad-block summary {
+ padding: 14px 18px;
+ font-size: 15px;
+ font-weight: 700;
+ color: var(--primary);
+ cursor: pointer;
+ display: flex;
+ align-items: center;
+ gap: 10px;
+ list-style: none;
+ user-select: none;
+ }
+.imrad-block summary::-webkit-details-marker { display: none; }
+.imrad-block summary::after {
+ content: '▾';
+ margin-left: auto;
+ font-size: 14px;
+ color: var(--text-muted);
+ transition: transform 0.2s;
+ }
+.imrad-block[open] summary::after { transform: rotate(180deg); }
+.imrad-block.imrad-body {
+ padding: 0 18px 18px;
+ font-size: 14px;
+ line-height: 1.75;
+ color: var(--text);
+ border-top: 1px solid var(--border);
+ }
+.imrad-block.imrad-body ul { padding-left: 20px; margin-top: 10px; }
+.imrad-block.imrad-body li { margin-bottom: 4px; }
+.imrad-letter {
+ width: 32px; height: 32px;
+ border-radius: 8px;
+ background: var(--primary);
+ color: #fff;
+ display: flex; align-items: center; justify-content: center;
+ font-size: 16px;
+ font-weight: 900;
+ flex-shrink: 0;
+ }
+.imrad-header-row {
+ display: flex;
+ align-items: center;
+ gap: 20px;
+ background: linear-gradient(135deg, var(--primary), var(--primary-light));
+ border-radius: var(--radius);
+ padding: 24px 28px;
+ color: #fff;
+ margin-bottom: 24px;
+ }
+.imrad-header-row.big-text { font-size: 28px; font-weight: 900; letter-spacing: 4px; }
+.imrad-header-row p { font-size: 14px; color: rgba(255,255,255,0.85); margin-top: 6px; }
+.imrad-header-row a { color: var(--accent-light); text-decoration: underline; }
+.content-card > div[data-i18n-html="rules_lit_ul_html"] ul { margin: 10px 0 0; padding-left: 22px; }
+ </style>
 </head>
 <body class="page-unified" data-i18n-doc="rules">
 
 <header class="site-header site-header--unified">
-  <div class="header-top">
-    <a href="/" class="header-logo" style="text-decoration:none;color:inherit;">
-      <img src="/img/android-chrome-192x192.png" alt="KIUT" style="height:52px;width:auto;flex-shrink:0">
-      <div class="logo-text">
-        <p data-i18n="uni_brand_line">Kimyo International University in Tashkent</p>
-        <h1 data-i18n="brand_title_main">Центрально-азиатский журнал STEM</h1>
-      </div>
-    </a>
-    <div class="header-top-right">
-      <div class="lang-switch lang-switch--inline" data-lang-switch role="group">
-        <button type="button" class="lang-switch__btn" data-set-lang="uz" aria-pressed="false">UZ</button>
-        <button type="button" class="lang-switch__btn" data-set-lang="ru" aria-pressed="false">RU</button>
-        <button type="button" class="lang-switch__btn" data-set-lang="en" aria-pressed="false">EN</button>
-      </div>
-    </div>
-  </div>
-  <nav class="journal-nav">
-    <span class="journal-nav-label" data-i18n="journal_nav_label">Раздел:</span>
-    <a href="/#stem-current-issue" class="journal-btn"><span class="j-icon">📌</span> <span data-i18n="nav_current_issue">Текущий выпуск</span></a>
-    <a href="/archives.html" class="journal-btn"><span class="j-icon">📚</span> <span data-i18n="nav_archive">Архив</span></a>
-    <a href="/register.html" class="journal-btn"><span class="j-icon">✍️</span> <span data-i18n="nav_submit">Подать статью</span></a>
-    <a href="/payment.html" class="journal-btn"><span class="j-icon">💳</span> <span data-i18n="nav_payment">Оплата и сроки</span></a>
-  </nav>
+ <div class="header-top">
+ <a href="/" class="header-logo" style="text-decoration:none;color:inherit;">
+ <img src="/img/android-chrome-192x192.png" alt="KIUT" style="height:52px;width:auto;flex-shrink:0">
+ <div class="logo-text">
+ <p data-i18n="uni_brand_line">Kimyo International University in Tashkent</p>
+ <h1 data-i18n="brand_title_main">Центрально-азиатский журнал STEM</h1>
+ </div>
+ </a>
+ <div class="header-top-right">
+ <div class="lang-switch lang-switch--inline" data-lang-switch role="group">
+ <button type="button" class="lang-switch__btn" data-set-lang="uz" aria-pressed="false">UZ</button>
+ <button type="button" class="lang-switch__btn" data-set-lang="ru" aria-pressed="false">RU</button>
+ <button type="button" class="lang-switch__btn" data-set-lang="en" aria-pressed="false">EN</button>
+ </div>
+ </div>
+ </div>
+ <nav class="journal-nav">
+ <span class="journal-nav-label" data-i18n="journal_nav_label">Раздел:</span>
+ <a href="/#stem-current-issue" class="journal-btn"><span data-i18n="nav_current_issue">Текущий выпуск</span></a>
+ <a href="/archives.html" class="journal-btn"><span data-i18n="nav_archive">Архив</span></a>
+ <a href="/register.html" class="journal-btn"><span data-i18n="nav_submit">Подать статью</span></a>
+ <a href="/payment.html" class="journal-btn"><span data-i18n="nav_payment">Оплата и сроки</span></a>
+ </nav>
 </header>
 
 <nav class="sub-nav sub-nav--center">
-  <a href="/how-to-publish.html">📝 <span data-i18n="nav_publish">Как опубликовать статью</span></a>
-  <a href="/rules.html" class="active">📋 <span data-i18n="nav_rules">Правила для авторов</span></a>
-  <a href="/faq.html">❓ <span data-i18n="nav_faq">Вопрос — ответ</span></a>
+ <a href="/how-to-publish.html"> <span data-i18n="nav_publish">Как опубликовать статью</span></a>
+ <a href="/rules.html" class="active"> <span data-i18n="nav_rules">Правила для авторов</span></a>
+ <a href="/faq.html"> <span data-i18n="nav_faq">Вопрос — ответ</span></a>
 </nav>
 
 <main class="main-content">
-  <div class="content-page">
-    <div class="page-breadcrumb">
-      <a href="/" data-i18n="breadcrumb_home">Главная</a>
-      ›
-      <a href="/" data-i18n="bc_parent">Центрально-азиатский журнал STEM</a>
-      ›
-      <span data-i18n="breadcrumb_rules">Правила для авторов</span>
-    </div>
+ <div class="content-page">
+ <div class="page-breadcrumb">
+ <a href="/" data-i18n="breadcrumb_home">Главная</a>
+ ›
+ <a href="/" data-i18n="bc_parent">Центрально-азиатский журнал STEM</a>
+ ›
+ <span data-i18n="breadcrumb_rules">Правила для авторов</span>
+ </div>
 
-    <div class="content-card">
-      <h1 data-i18n="rules_h1">📋 Правила для авторов</h1>
-      <p class="lead"><span data-i18n="rules_lead_before">Статьи в </span><strong data-i18n="rules_lead_strong">Центрально-азиатском журнале STEM</strong><span data-i18n="rules_lead_after"> оформляются по международному стандарту IMRAD и должны соответствовать техническим требованиям ниже.</span></p>
+ <div class="content-card">
+ <h1 data-i18n="rules_h1"> Правила для авторов</h1>
+ <p class="lead"><span data-i18n="rules_lead_before">Статьи в </span><strong data-i18n="rules_lead_strong">Центрально-азиатском журнале STEM</strong><span data-i18n="rules_lead_after"> оформляются по международному стандарту IMRAD и должны соответствовать техническим требованиям ниже.</span></p>
 
-      <!-- IMRAD banner -->
-      <div class="imrad-header-row">
-        <div>
-          <div class="big-text">I·M·R·A·D</div>
-          <p data-i18n-html="rules_imrad_banner_p_html"></p>
-        </div>
-        <div class="rules-imrad-legend" style="margin-left:auto;text-align:right;font-size:13px;color:rgba(255,255,255,0.75)" data-i18n-html="rules_imrad_words_html"></div>
-      </div>
+ <!-- IMRAD banner -->
+ <div class="imrad-header-row">
+ <div>
+ <div class="big-text">I·M·R·A·D</div>
+ <p data-i18n-html="rules_imrad_banner_p_html"></p>
+ </div>
+ <div class="rules-imrad-legend" style="margin-left:auto;text-align:right;font-size:13px;color:rgba(255,255,255,0.75)" data-i18n-html="rules_imrad_words_html"></div>
+ </div>
 
-      <h2 data-i18n="rules_structure_h2">Структура статьи по стандарту IMRAD</h2>
-      <p style="margin-bottom:16px" data-i18n="rules_structure_intro">Раскройте каждый раздел, чтобы увидеть требования:</p>
+ <h2 data-i18n="rules_structure_h2">Структура статьи по стандарту IMRAD</h2>
+ <p style="margin-bottom:16px" data-i18n="rules_structure_intro">Раскройте каждый раздел, чтобы увидеть требования:</p>
 
-      <details class="imrad-block" open>
-        <summary><div class="imrad-letter">I</div>&nbsp;<span data-i18n="rules_sum_i">Introduction — Введение</span></summary>
-        <div class="imrad-body" data-i18n-html="rules_body_i_html"></div>
-      </details>
+ <details class="imrad-block" open>
+ <summary><div class="imrad-letter">I</div>&nbsp;<span data-i18n="rules_sum_i">Introduction — Введение</span></summary>
+ <div class="imrad-body" data-i18n-html="rules_body_i_html"></div>
+ </details>
 
-      <details class="imrad-block">
-        <summary><div class="imrad-letter">M</div>&nbsp;<span data-i18n="rules_sum_m">Methods — Материалы и методы</span></summary>
-        <div class="imrad-body" data-i18n-html="rules_body_m_html"></div>
-      </details>
+ <details class="imrad-block">
+ <summary><div class="imrad-letter">M</div>&nbsp;<span data-i18n="rules_sum_m">Methods — Материалы и методы</span></summary>
+ <div class="imrad-body" data-i18n-html="rules_body_m_html"></div>
+ </details>
 
-      <details class="imrad-block">
-        <summary><div class="imrad-letter">R</div>&nbsp;<span data-i18n="rules_sum_r">Results — Результаты</span></summary>
-        <div class="imrad-body" data-i18n-html="rules_body_r_html"></div>
-      </details>
+ <details class="imrad-block">
+ <summary><div class="imrad-letter">R</div>&nbsp;<span data-i18n="rules_sum_r">Results — Результаты</span></summary>
+ <div class="imrad-body" data-i18n-html="rules_body_r_html"></div>
+ </details>
 
-      <details class="imrad-block">
-        <summary><div class="imrad-letter" style="background:var(--text-muted)">A</div>&nbsp;<span data-i18n="rules_sum_a">And — связующее слово</span></summary>
-        <div class="imrad-body" data-i18n-html="rules_body_a_html"></div>
-      </details>
+ <details class="imrad-block">
+ <summary><div class="imrad-letter" style="background:var(--text-muted)">A</div>&nbsp;<span data-i18n="rules_sum_a">And — связующее слово</span></summary>
+ <div class="imrad-body" data-i18n-html="rules_body_a_html"></div>
+ </details>
 
-      <details class="imrad-block">
-        <summary><div class="imrad-letter">D</div>&nbsp;<span data-i18n="rules_sum_d">Discussion — Обсуждение и выводы</span></summary>
-        <div class="imrad-body" data-i18n-html="rules_body_d_html"></div>
-      </details>
+ <details class="imrad-block">
+ <summary><div class="imrad-letter">D</div>&nbsp;<span data-i18n="rules_sum_d">Discussion — Обсуждение и выводы</span></summary>
+ <div class="imrad-body" data-i18n-html="rules_body_d_html"></div>
+ </details>
 
-      <div class="highlight-box" style="margin-top:8px" data-i18n-html="rules_extra_imrad_html"></div>
+ <div class="highlight-box" style="margin-top:8px" data-i18n-html="rules_extra_imrad_html"></div>
 
-      <h2 data-i18n="rules_tech_h2">Технические требования к оформлению</h2>
+ <h2 data-i18n="rules_tech_h2">Технические требования к оформлению</h2>
 
-      <div class="req-grid" data-i18n-html="rules_req_grid_html"></div>
+ <div class="req-grid" data-i18n-html="rules_req_grid_html"></div>
 
-      <div class="highlight-box" style="margin-top:4px" data-i18n-html="rules_pdf_notice_html"></div>
+ <div class="highlight-box" style="margin-top:4px" data-i18n-html="rules_pdf_notice_html"></div>
 
-      <h2 data-i18n="rules_freq_h2">Периодичность выхода</h2>
-      <p data-i18n-html="rules_freq_p_html"></p>
+ <h2 data-i18n="rules_freq_h2">Периодичность выхода</h2>
+ <p data-i18n-html="rules_freq_p_html"></p>
 
-      <h2 data-i18n="rules_lit_h2">Список литературы</h2>
-      <p data-i18n-html="rules_lit_p_html"></p>
-      <div class="highlight-box" data-i18n-html="rules_lit_example_html"></div>
-      <div data-i18n-html="rules_lit_ul_html"></div>
+ <h2 data-i18n="rules_lit_h2">Список литературы</h2>
+ <p data-i18n-html="rules_lit_p_html"></p>
+ <div class="highlight-box" data-i18n-html="rules_lit_example_html"></div>
+ <div data-i18n-html="rules_lit_ul_html"></div>
 
-      <h2 data-i18n="rules_ethics_h2">Этика публикации</h2>
-      <div class="warn-box" data-i18n-html="rules_ethics_warn_html"></div>
+ <h2 data-i18n="rules_ethics_h2">Этика публикации</h2>
+ <div class="warn-box" data-i18n-html="rules_ethics_warn_html"></div>
 
-      <div style="margin-top:32px;padding:24px;background:#e8f0fd;border-radius:12px;display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap">
-        <div>
-          <strong style="font-size:17px;color:var(--primary)" data-i18n="rules_editor_box_title">Вопросы к редакции</strong><br>
-          <span style="font-size:14px;color:var(--text-muted)" data-i18n="rules_editor_box_sub">Контакты редакции STEM и порядок подачи — на этой платформе</span>
-        </div>
-        <div style="display:flex;gap:10px;flex-wrap:wrap">
-          <a href="/how-to-publish.html" class="btn btn-secondary btn-sm"><span data-i18n="nav_publish">Как опубликовать статью</span></a>
-          <a href="mailto:g.isamova@gmail.com" class="btn btn-primary">g.isamova@gmail.com →</a>
-        </div>
-      </div>
-    </div>
-  </div>
+ <div style="margin-top:32px;padding:24px;background:#e8f0fd;border-radius:12px;display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap">
+ <div>
+ <strong style="font-size:17px;color:var(--primary)" data-i18n="rules_editor_box_title">Вопросы к редакции</strong><br>
+ <span style="font-size:14px;color:var(--text-muted)" data-i18n="rules_editor_box_sub">Контакты редакции STEM и порядок подачи — на этой платформе</span>
+ </div>
+ <div style="display:flex;gap:10px;flex-wrap:wrap">
+ <a href="/how-to-publish.html" class="btn btn-secondary btn-sm"><span data-i18n="nav_publish">Как опубликовать статью</span></a>
+ <a href="mailto:g.isamova@kiut.uz" class="btn btn-primary">g.isamova@kiut.uz →</a>
+ </div>
+ </div>
+ </div>
+ </div>
 </main>
 
 <footer class="site-footer">
-  <div style="display:flex;justify-content:center;gap:24px;flex-wrap:wrap;margin-bottom:14px;font-size:13px">
-    <a href="/how-to-publish.html" style="color:rgba(255,255,255,0.7)"><span data-i18n="nav_publish">Как опубликовать статью</span></a>
-    <a href="/rules.html" style="color:rgba(255,255,255,0.7)"><span data-i18n="nav_rules">Правила для авторов</span></a>
-    <a href="/faq.html" style="color:rgba(255,255,255,0.7)"><span data-i18n="nav_faq">Вопрос — ответ</span></a>
-  </div>
-  <strong data-i18n="brand_title_main">Центрально-азиатский журнал STEM</strong> &nbsp;|&nbsp;
-  <span data-i18n="uni_brand_line">Kimyo International University in Tashkent</span> &nbsp;|&nbsp;
-  <a href="https://www.kiut.uz" target="_blank" rel="noopener noreferrer" data-i18n="footer_kiut">www.kiut.uz</a>
+ <div style="display:flex;justify-content:center;gap:24px;flex-wrap:wrap;margin-bottom:14px;font-size:13px">
+ <a href="/how-to-publish.html" style="color:rgba(255,255,255,0.7)"><span data-i18n="nav_publish">Как опубликовать статью</span></a>
+ <a href="/rules.html" style="color:rgba(255,255,255,0.7)"><span data-i18n="nav_rules">Правила для авторов</span></a>
+ <a href="/faq.html" style="color:rgba(255,255,255,0.7)"><span data-i18n="nav_faq">Вопрос — ответ</span></a>
+ </div>
+ <strong data-i18n="brand_title_main">Центрально-азиатский журнал STEM</strong> &nbsp;|&nbsp;
+ <span data-i18n="uni_brand_line">Kimyo International University in Tashkent</span> &nbsp;|&nbsp;
+ <a href="https://www.kiut.uz" target="_blank" rel="noopener noreferrer" data-i18n="footer_kiut">www.kiut.uz</a>
 </footer>
 
 <script src="/js/stem-locale-site.js"></script>

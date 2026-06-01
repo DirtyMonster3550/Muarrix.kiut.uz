@@ -1,4 +1,4 @@
-require('dotenv').config();
+require('dotenv').config({ quiet: true });
 const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
@@ -6,7 +6,7 @@ const rateLimit = require('express-rate-limit');
 const path = require('path');
 const { archivesDirectory } = require('./lib/paths');
 const jwt = require('jsonwebtoken');
-const { init } = require('./db/database');
+const { init, db } = require('./db/database');
 const { checkBan } = require('./middleware/security');
 
 const app = express();
@@ -76,21 +76,27 @@ app.use('/archives', express.static(archivesDirectory()));
 // ── Static files (public only — NO /uploads here) ────────────────────────────
 app.use(express.static(path.join(__dirname, 'public')));
 
-// ── Protected /uploads – requires valid JWT ───────────────────────────────────
+// ── Protected /uploads – staff + author of the submission ─────────────────────
 app.use('/uploads', (req, res, next) => {
   const token = req.headers.authorization?.split(' ')[1]
-    || req.query.token;               // allow ?token= for direct links
+    || req.query.token;
   if (!token) return res.status(401).json({ error: 'Не авторизован' });
   try {
-    jwt.verify(token, process.env.JWT_SECRET || 'secret');
-    next();
+    const payload = jwt.verify(token, process.env.JWT_SECRET || 'secret');
+    const staffRoles = ['admin', 'tech_expert', 'editorial_expert'];
+    if (staffRoles.includes(payload.role)) return next();
+
+    const filename = path.basename(decodeURIComponent(req.path));
+    const sub = db.prepare('SELECT user_id FROM submissions WHERE file_path = ?').get(filename);
+    if (sub && sub.user_id === payload.id) return next();
+
+    return res.status(403).json({ error: 'Нет доступа к файлу' });
   } catch {
     return res.status(401).json({ error: 'Токен недействителен' });
   }
 }, express.static(path.join(__dirname, 'uploads')));
 
 // ── Public API ────────────────────────────────────────────────────────────────
-const { db } = require('./db/database');
 
 app.get('/api/announce', (req, res) => {
   const rows = db.prepare("SELECT key, value FROM settings WHERE key IN ('announce_text','announce_enabled','announce_cta','site_email','site_phone','site_address')").all();
@@ -136,9 +142,14 @@ app.use((err, req, res, next) => {
 // ── Bootstrap ─────────────────────────────────────────────────────────────────
 init();
 
-app.listen(PORT, () => {
-  console.log(`\n🚀 KIUT Ilmiy Nashrlar server started`);
-  console.log(`   → http://localhost:${PORT}`);
-  console.log(`   → Admin: ${process.env.ADMIN_EMAIL || 'admin@kiut.uz'}\n`);
-  // NOTE: never log the password
+const server = app.listen(PORT);
+server.on('error', (err) => {
+  if (err.code === 'EADDRINUSE') {
+    console.error(`Порт ${PORT} уже занят — сервер STEM, скорее всего, уже запущен.`);
+    console.error(`Откройте http://localhost:${PORT} или остановите старый процесс (Ctrl+C в том терминале).`);
+    console.error('Windows: netstat -ano | findstr :3000  →  taskkill /PID <номер> /F');
+    process.exit(1);
+  }
+  console.error(err);
+  process.exit(1);
 });

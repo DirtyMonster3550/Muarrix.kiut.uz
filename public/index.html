@@ -1,237 +1,244 @@
 ﻿<!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="icon" type="image/png" sizes="32x32" href="/img/favicon-32x32.png">
-  <link rel="icon" type="image/png" sizes="16x16" href="/img/favicon-16x16.png">
-  <link rel="apple-touch-icon" href="/img/apple-touch-icon.png">
-  <title>Научные публикации</title>
-  <link rel="stylesheet" href="/css/style.css">
-  <link rel="stylesheet" href="/css/landing.css">
+ <meta charset="UTF-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1.0">
+ <link rel="icon" type="image/png" sizes="32x32" href="/img/favicon-32x32.png">
+ <link rel="icon" type="image/png" sizes="16x16" href="/img/favicon-16x16.png">
+ <link rel="apple-touch-icon" href="/img/apple-touch-icon.png">
+ <title>Научные публикации</title>
+ <link rel="stylesheet" href="/css/style.css">
+ <link rel="stylesheet" href="/css/landing.css">
 </head>
 <body class="home-page" data-i18n-doc="index">
 
 <!-- LANDING HEADER -->
 <header class="landing-header">
-  <div class="landing-nav-inner">
-    <a href="/" class="landing-brand">
-      <img src="/img/android-chrome-192x192.png" alt="KIUT" style="height:60px;width:auto;display:block;filter:drop-shadow(0 2px 8px rgba(0,0,0,0.25))">
-      <div class="landing-brand-text">
-        <span class="landing-brand-sm" data-i18n="uni_brand_line">Kimyo International University in Tashkent</span>
-        <span class="landing-brand-lg"></span>
-      </div>
-    </a>
+ <div class="landing-nav-inner">
+ <a href="/" class="landing-brand">
+ <img src="/img/android-chrome-192x192.png" alt="KIUT" style="height:60px;width:auto;display:block;filter:drop-shadow(0 2px 8px rgba(0,0,0,0.25))">
+ <div class="landing-brand-text">
+ <span class="landing-brand-sm" data-i18n="uni_brand_line">Kimyo International University in Tashkent</span>
+ <span class="landing-brand-lg"></span>
+ </div>
+ </a>
 
-    <nav class="landing-menu" data-i18n-aria="nav_main_menu_aria" aria-label="Основное меню">
-      <a href="/" data-i18n="nav_home">Главная</a>
-      <a href="/archives.html" data-i18n="nav_archive">Архив</a>
-      <div class="landing-dropdown">
-        <button type="button"><span data-i18n="nav_submission_menu">Подача материалов</span> <span aria-hidden="true">▾</span></button>
-        <div class="landing-dropdown-panel">
-          <div class="muted" data-i18n="nav_on_platform">На платформе</div>
-          <a href="/register.html" data-i18n="nav_register_submit">Подать статью (регистрация)</a>
-          <a href="/login.html" data-i18n="nav_enter_cabinet">Войти в кабинет</a>
-        </div>
-      </div>
-      <a href="/payment.html" data-i18n="nav_payment">Оплата и сроки</a>
-    </nav>
+ <nav class="landing-menu" data-i18n-aria="nav_main_menu_aria" aria-label="Основное меню">
+ <div class="landing-dropdown">
+ <button type="button"><span data-i18n="nav_home">Главная</span> <span aria-hidden="true">▾</span></button>
+ <div class="landing-dropdown-panel">
+ <a href="/about.html" data-i18n="nav_about_journal">О журнале</a>
+ <a href="/editorial-board.html" data-i18n="nav_editorial_board">Редакционный совет</a>
+ </div>
+ </div>
+ <a href="/archives.html" data-i18n="nav_archive">Архив</a>
+ <div class="landing-dropdown">
+ <button type="button"><span data-i18n="nav_submission_menu">Подача материалов</span> <span aria-hidden="true">▾</span></button>
+ <div class="landing-dropdown-panel">
+ <div class="muted" data-i18n="nav_on_platform">На платформе</div>
+ <a href="/register.html" data-i18n="nav_register_submit">Подать статью (регистрация)</a>
+ <a href="/login.html" data-i18n="nav_enter_cabinet">Войти в кабинет</a>
+ </div>
+ </div>
+ </nav>
 
-    <div class="landing-actions">
-      <div class="lang-switch lang-switch--inline" data-lang-switch role="group">
-        <button type="button" class="lang-switch__btn" data-set-lang="uz" aria-pressed="false">UZ</button>
-        <button type="button" class="lang-switch__btn" data-set-lang="ru" aria-pressed="false">RU</button>
-        <button type="button" class="lang-switch__btn" data-set-lang="en" aria-pressed="false">EN</button>
-      </div>
-      <div id="header-auth">
-        <a href="/login.html" class="landing-link-login" data-i18n="nav_login_account">Войти в аккаунт</a>
-      </div>
-    </div>
-  </div>
+ <div class="landing-actions">
+ <div class="lang-switch lang-switch--inline" data-lang-switch role="group">
+ <button type="button" class="lang-switch__btn" data-set-lang="uz" aria-pressed="false">UZ</button>
+ <button type="button" class="lang-switch__btn" data-set-lang="ru" aria-pressed="false">RU</button>
+ <button type="button" class="lang-switch__btn" data-set-lang="en" aria-pressed="false">EN</button>
+ </div>
+ <div id="header-auth">
+ <a href="/login.html" class="landing-link-login" data-i18n="nav_login_account">Войти в аккаунт</a>
+ </div>
+ </div>
+ </div>
 </header>
 
 <!-- HERO -->
 <section class="landing-hero" aria-labelledby="hero-title">
-  <div class="landing-hero-grid" aria-hidden="true"></div>
-  <div class="landing-hero-glow" aria-hidden="true"></div>
-  <div class="landing-hero-inner">
-    <div class="landing-hero-copy">
-      <h1 id="hero-title" data-i18n="landing_hero_title">Центрально-азиатский журнал STEM</h1>
-      <p class="sub" data-i18n="landing_hero_sub">Включено на основании постановления Президиума ВАКРУз от 15 июня 2023 года No 339/4.</p>
-      <div class="landing-hero-cta-row">
-        <a href="/payment.html" class="landing-hero-ghost btn-pulse-ad btn-pulse-ad--soft" data-i18n="nav_payment">Оплата и сроки</a>
-      </div>
-    </div>
-    <div class="landing-hero-art" aria-hidden="true">
-      <div class="tech-holo">
-        <img src="/img/hero-holo.png" alt="" class="tech-holo-img" width="660" height="auto" decoding="async">
-        <!-- Лёгкое движение механизма (левая часть) -->
-        <div class="tech-holo-gears" aria-hidden="true">
-          <img src="/img/hero-holo.png" alt="" width="660" height="auto">
-        </div>
-        <!-- Лучи по краям механизма -->
-        <div class="tech-holo-rays tech-holo-rays--gears" aria-hidden="true">
-          <span class="ray ray-h ray-t"></span>
-          <span class="ray ray-h ray-b"></span>
-          <span class="ray ray-v ray-l"></span>
-          <span class="ray ray-v ray-r"></span>
-        </div>
-        <!-- Лёгкое движение зданий на рисунке (правая часть) -->
-        <div class="tech-holo-buildings" aria-hidden="true">
-          <img src="/img/hero-holo.png" alt="" width="660" height="auto">
-        </div>
-        <!-- Лучи по краям зданий (дом) -->
-        <div class="tech-holo-rays tech-holo-rays--buildings" aria-hidden="true">
-          <span class="ray ray-h ray-t"></span>
-          <span class="ray ray-h ray-b"></span>
-          <span class="ray ray-v ray-l"></span>
-          <span class="ray ray-d ray-tl"></span>
-        </div>
-        <!-- Лучи по башням -->
-        <div class="tech-holo-rays tech-holo-rays--towers" aria-hidden="true">
-          <span class="ray ray-h ray-t"></span>
-          <span class="ray ray-h ray-m"></span>
-          <span class="ray ray-h ray-b"></span>
-          <span class="ray ray-v tower-a"></span>
-          <span class="ray ray-v tower-b"></span>
-          <span class="ray ray-v tower-c"></span>
-          <span class="ray ray-d tower-d1"></span>
-          <span class="ray ray-d tower-d2"></span>
-        </div>
-        <!-- Анимированная wireframe-графика -->
-        <svg class="tech-city-graphic" viewBox="0 0 300 340" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-          <g class="city-group">
-            <!-- Дом -->
-            <g class="city-house">
-              <polygon class="city-stroke" points="40,220 40,140 95,105 150,140 150,220"/>
-              <line class="city-stroke" x1="40" y1="175" x2="150" y2="175"/>
-              <line class="city-stroke" x1="95" y1="105" x2="95" y2="220"/>
-              <rect class="city-window" x="58" y="150" width="22" height="18"/>
-              <rect class="city-window" x="108" y="150" width="22" height="18"/>
-              <rect class="city-window city-window--glow" x="78" y="188" width="34" height="24"/>
-            </g>
-            <!-- Башни -->
-            <g class="city-towers">
-              <rect class="city-stroke" x="168" y="120" width="36" height="100"/>
-              <rect class="city-stroke" x="212" y="85" width="42" height="135"/>
-              <rect class="city-stroke city-stroke--accent" x="262" y="110" width="28" height="110"/>
-              <line class="city-stroke city-stroke--dim" x1="168" y1="145" x2="204" y2="145"/>
-              <line class="city-stroke city-stroke--dim" x1="212" y1="115" x2="254" y2="115"/>
-              <line class="city-stroke city-stroke--dim" x1="212" y1="155" x2="254" y2="155"/>
-            </g>
-            <!-- Городской силуэт -->
-            <path class="city-stroke city-stroke--dim" d="M30 220 H270"/>
-            <circle class="city-node" cx="175" cy="100" r="3"/>
-            <circle class="city-node city-node--orange" cx="232" cy="72" r="3"/>
-            <circle class="city-node" cx="276" cy="95" r="3"/>
-            <line class="city-data" x1="175" y1="100" x2="232" y2="72"/>
-            <line class="city-data" x1="232" y1="72" x2="276" y2="95"/>
-          </g>
-        </svg>
-        <div class="tech-holo-scan"></div>
-        <div class="tech-holo-glow-pulse"></div>
-      </div>
-    </div>
-  </div>
+ <div class="landing-hero-grid" aria-hidden="true"></div>
+ <div class="landing-hero-glow" aria-hidden="true"></div>
+ <div class="landing-hero-inner">
+ <div class="landing-hero-copy">
+ <h1 id="hero-title" data-i18n="landing_hero_title">Центрально-азиатский журнал STEM</h1>
+ <p class="sub" data-i18n="landing_hero_sub">Включено на основании постановления Президиума ВАКРУз от 15 июня 2023&nbsp;года No&nbsp;339/4.</p>
+ <div class="landing-hero-cta-row">
+ <a href="/payment.html" class="landing-hero-ghost btn-pulse-ad btn-pulse-ad--soft" data-i18n="nav_payment">Оплата и сроки</a>
+ </div>
+ </div>
+ <div class="landing-hero-art" aria-hidden="true">
+ <div class="tech-holo">
+ <img src="/img/hero-holo.png" alt="" class="tech-holo-img" width="660" height="auto" decoding="async">
+ <!-- Лёгкое движение механизма (левая часть) -->
+ <div class="tech-holo-gears" aria-hidden="true">
+ <img src="/img/hero-holo.png" alt="" width="660" height="auto">
+ </div>
+ <!-- Лучи по краям механизма -->
+ <div class="tech-holo-rays tech-holo-rays--gears" aria-hidden="true">
+ <span class="ray ray-h ray-t"></span>
+ <span class="ray ray-h ray-b"></span>
+ <span class="ray ray-v ray-l"></span>
+ <span class="ray ray-v ray-r"></span>
+ </div>
+ <!-- Лёгкое движение зданий на рисунке (правая часть) -->
+ <div class="tech-holo-buildings" aria-hidden="true">
+ <img src="/img/hero-holo.png" alt="" width="660" height="auto">
+ </div>
+ <!-- Лучи по краям зданий (дом) -->
+ <div class="tech-holo-rays tech-holo-rays--buildings" aria-hidden="true">
+ <span class="ray ray-h ray-t"></span>
+ <span class="ray ray-h ray-b"></span>
+ <span class="ray ray-v ray-l"></span>
+ <span class="ray ray-d ray-tl"></span>
+ </div>
+ <!-- Лучи по башням -->
+ <div class="tech-holo-rays tech-holo-rays--towers" aria-hidden="true">
+ <span class="ray ray-h ray-t"></span>
+ <span class="ray ray-h ray-m"></span>
+ <span class="ray ray-h ray-b"></span>
+ <span class="ray ray-v tower-a"></span>
+ <span class="ray ray-v tower-b"></span>
+ <span class="ray ray-v tower-c"></span>
+ <span class="ray ray-d tower-d1"></span>
+ <span class="ray ray-d tower-d2"></span>
+ </div>
+ <!-- Анимированная wireframe-графика -->
+ <svg class="tech-city-graphic" viewBox="0 0 300 340" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+ <g class="city-group">
+ <!-- Дом -->
+ <g class="city-house">
+ <polygon class="city-stroke" points="40,220 40,140 95,105 150,140 150,220"/>
+ <line class="city-stroke" x1="40" y1="175" x2="150" y2="175"/>
+ <line class="city-stroke" x1="95" y1="105" x2="95" y2="220"/>
+ <rect class="city-window" x="58" y="150" width="22" height="18"/>
+ <rect class="city-window" x="108" y="150" width="22" height="18"/>
+ <rect class="city-window city-window--glow" x="78" y="188" width="34" height="24"/>
+ </g>
+ <!-- Башни -->
+ <g class="city-towers">
+ <rect class="city-stroke" x="168" y="120" width="36" height="100"/>
+ <rect class="city-stroke" x="212" y="85" width="42" height="135"/>
+ <rect class="city-stroke city-stroke--accent" x="262" y="110" width="28" height="110"/>
+ <line class="city-stroke city-stroke--dim" x1="168" y1="145" x2="204" y2="145"/>
+ <line class="city-stroke city-stroke--dim" x1="212" y1="115" x2="254" y2="115"/>
+ <line class="city-stroke city-stroke--dim" x1="212" y1="155" x2="254" y2="155"/>
+ </g>
+ <!-- Городской силуэт -->
+ <path class="city-stroke city-stroke--dim" d="M30 220 H270"/>
+ <circle class="city-node" cx="175" cy="100" r="3"/>
+ <circle class="city-node city-node--orange" cx="232" cy="72" r="3"/>
+ <circle class="city-node" cx="276" cy="95" r="3"/>
+ <line class="city-data" x1="175" y1="100" x2="232" y2="72"/>
+ <line class="city-data" x1="232" y1="72" x2="276" y2="95"/>
+ </g>
+ </svg>
+ <div class="tech-holo-scan"></div>
+ <div class="tech-holo-glow-pulse"></div>
+ </div>
+ </div>
+ </div>
 </section>
 
 <!-- MAIN -->
 <main class="main-content">
 
-  <!-- Stats strip (виден только авторизованному администратору) -->
-  <div id="home-stats-strip" style="display:none;flex-wrap:wrap;gap:32px;margin-bottom:32px;align-items:center" class="home-stats-strip">
-    <div style="display:flex;align-items:center;gap:10px">
-      <span style="font-size:28px;font-weight:800;color:#0c3d82" id="stat-total">—</span>
-      <span style="font-size:13px;color:var(--text-muted)" data-i18n-html="stat_submitted">статей<br>подано</span>
-    </div>
-    <div style="width:1px;height:36px;background:var(--border)"></div>
-    <div style="display:flex;align-items:center;gap:10px">
-      <span style="font-size:28px;font-weight:800;color:var(--success)" id="stat-approved">—</span>
-      <span style="font-size:13px;color:var(--text-muted)" data-i18n-html="stat_approved">статей<br>одобрено</span>
-    </div>
-    <div style="width:1px;height:36px;background:var(--border)"></div>
-    <div style="display:flex;align-items:center;gap:10px">
-      <span style="font-size:28px;font-weight:800;color:#ff6b00" id="stat-users">—</span>
-      <span style="font-size:13px;color:var(--text-muted)" data-i18n-html="stat_authors">авторов<br>зарегистрировано</span>
-    </div>
-    <div style="margin-left:auto">
-      <a href="/register.html" class="btn btn-primary" style="background:linear-gradient(180deg,#ff8c1a,#ff6b00);border:none">✍️ <span data-i18n="nav_submit">Подать статью</span></a>
-    </div>
-  </div>
+ <!-- Stats strip (виден только авторизованному администратору) -->
+ <div id="home-stats-strip" style="display:none;flex-wrap:wrap;gap:32px;margin-bottom:32px;align-items:center" class="home-stats-strip">
+ <div style="display:flex;align-items:center;gap:10px">
+ <span style="font-size:28px;font-weight:800;color:#0c3d82" id="stat-total">—</span>
+ <span style="font-size:13px;color:var(--text-muted)" data-i18n-html="stat_submitted">статей<br>подано</span>
+ </div>
+ <div style="width:1px;height:36px;background:var(--border)"></div>
+ <div style="display:flex;align-items:center;gap:10px">
+ <span style="font-size:28px;font-weight:800;color:var(--success)" id="stat-approved">—</span>
+ <span style="font-size:13px;color:var(--text-muted)" data-i18n-html="stat_approved">статей<br>одобрено</span>
+ </div>
+ <div style="width:1px;height:36px;background:var(--border)"></div>
+ <div style="display:flex;align-items:center;gap:10px">
+ <span style="font-size:28px;font-weight:800;color:#ff6b00" id="stat-users">—</span>
+ <span style="font-size:13px;color:var(--text-muted)" data-i18n-html="stat_authors">авторов<br>зарегистрировано</span>
+ </div>
+ <div style="margin-left:auto">
+ <a href="/register.html" class="btn btn-primary" style="background:linear-gradient(180deg,#ff8c1a,#ff6b00);border:none"> <span data-i18n="nav_submit">Подать статью</span></a>
+ </div>
+ </div>
 
-  <!-- STEM Journal Card -->
-  <div class="landing-journal-wrap">
-    <article class="issue-card stem-journal-card" id="stem-current-issue">
-      <div class="issue-cover stem-journal-card__cover">
-        <img src="/img/journal-cover.png" alt="Central Asian Journal of STEM" class="stem-journal-card__cover-img">
-      </div>
-      <div class="issue-info stem-journal-card__body">
-        <div class="stem-journal-card__head">
-          <p class="stem-journal-card__eyebrow" data-i18n="card_eyebrow">Центрально-азиатский журнал · ISSN 2181-2934</p>
-          <h3 class="stem-journal-card__title">Central Asian Journal of STEM</h3>
-          <p class="issue-subtitle stem-journal-card__meta" id="stem-card-issue-line" data-i18n="card_meta_default">Выходит дважды в год · Английский, узбекский, русский</p>
-        </div>
-        <div class="stem-journal-card__pricing">
-          <div class="stem-journal-card__price-block">
-            <span class="stem-journal-card__price-label" data-i18n="card_price_pub">Публикационный взнос</span>
-            <span class="stem-journal-card__price-value" data-i18n="card_price_on_request">По запросу</span>
-            <span class="stem-journal-card__price-note" data-i18n="card_price_contact">свяжитесь с редакцией</span>
-          </div>
-          <div class="stem-journal-card__price-block">
-            <span class="stem-journal-card__price-label" data-i18n="card_price_electronic">Электронная версия</span>
-            <span class="stem-journal-card__price-value stem-journal-card__price-value--free" data-i18n="card_price_free">Бесплатно</span>
-            <span class="stem-journal-card__price-note" data-i18n="card_price_pdf_note">PDF на сайте журнала</span>
-          </div>
-        </div>
-        <div class="stem-journal-card__actions">
-          <a href="/register.html" class="btn btn-primary btn-pulse-ad stem-journal-card__btn" data-i18n="card_submit_btn">Подать статью →</a>
-        </div>
-      </div>
-    </article>
-  </div>
-
+ <!-- STEM Journal Card -->
+ <div class="landing-journal-wrap">
+ <article class="issue-card stem-journal-card" id="stem-current-issue">
+ <div class="issue-cover stem-journal-card__cover">
+ <img src="/img/journal-cover.png" alt="Central Asian Journal of STEM" class="stem-journal-card__cover-img" id="stem-journal-cover-img">
+ </div>
+ <div class="issue-info stem-journal-card__body">
+ <div class="stem-journal-card__head">
+ <p class="stem-journal-card__eyebrow" data-i18n="card_eyebrow">Центрально-азиатский журнал · ISSN 2181-2934</p>
+ <h3 class="stem-journal-card__title">Central Asian Journal of STEM</h3>
+ <p class="issue-subtitle stem-journal-card__meta" id="stem-card-issue-line" data-i18n="card_meta_default">Выходит дважды в год · Английский, узбекский, русский</p>
+ </div>
+ <div class="stem-journal-card__pricing">
+ <div class="stem-journal-card__price-block">
+ <span class="stem-journal-card__price-label" data-i18n="card_price_pub">Публикационный взнос</span>
+ <span class="stem-journal-card__price-value" data-i18n="card_price_on_request">По запросу</span>
+ <span class="stem-journal-card__price-note" data-i18n="card_price_contact">свяжитесь с редакцией</span>
+ </div>
+ <div class="stem-journal-card__price-block">
+ <span class="stem-journal-card__price-label" data-i18n="card_price_electronic">Электронная версия</span>
+ <span class="stem-journal-card__price-value stem-journal-card__price-value--free" data-i18n="card_price_free">Бесплатно</span>
+ <span class="stem-journal-card__price-note" data-i18n="card_price_pdf_note"></span>
+ </div>
+ </div>
+ <div class="stem-journal-card__actions">
+ <a href="/archives.html" class="btn btn-secondary stem-journal-card__btn" id="stem-read-issue-link" style="display:none" data-i18n="card_read_issue">Читать выпуск →</a>
+ <a href="/register.html" class="btn btn-primary btn-pulse-ad stem-journal-card__btn" data-i18n="card_submit_btn">Подать статью →</a>
+ </div>
+ </div>
+ </article>
+ </div>
 
 </main>
 
 <!-- FOOTER -->
 <footer class="site-footer" style="background:linear-gradient(180deg,#082448,#0a2d5c);padding:40px 24px 24px">
 
-  <!-- Footer grid: links + contacts + about -->
-  <div style="max-width:960px;margin:0 auto 28px;display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:28px;text-align:left">
+ <!-- Footer grid: links + contacts + about -->
+ <div style="max-width:960px;margin:0 auto 28px;display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:28px;text-align:left">
 
-    <!-- Column 1: Navigation -->
-    <div>
-      <div style="font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,0.4);margin-bottom:12px" data-i18n="footer_nav_title">Навигация</div>
-      <div style="display:flex;flex-direction:column;gap:8px">
-        <a href="/how-to-publish.html" style="color:rgba(255,255,255,0.75);font-size:13px" data-i18n="nav_publish">Как опубликовать статью</a>
-        <a href="/rules.html" style="color:rgba(255,255,255,0.75);font-size:13px" data-i18n="nav_rules">Правила для авторов</a>
-        <a href="/payment.html" style="color:rgba(255,255,255,0.75);font-size:13px" data-i18n="nav_payment">Оплата и сроки</a>
-        <a href="/faq.html" style="color:rgba(255,255,255,0.75);font-size:13px" data-i18n="nav_faq">Вопрос — ответ</a>
-        <a href="/archives.html" style="color:rgba(255,255,255,0.75);font-size:13px" data-i18n="footer_archive">Архив STEM</a>
-      </div>
-    </div>
+ <!-- Column 1: Navigation -->
+ <div>
+ <div style="font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,0.4);margin-bottom:12px" data-i18n="footer_nav_title">Навигация</div>
+ <div style="display:flex;flex-direction:column;gap:8px">
+ <a href="/how-to-publish.html" style="color:rgba(255,255,255,0.75);font-size:13px" data-i18n="nav_publish">Как опубликовать статью</a>
+ <a href="/about.html" style="color:rgba(255,255,255,0.75);font-size:13px" data-i18n="nav_about_journal">О журнале</a>
+ <a href="/editorial-board.html" style="color:rgba(255,255,255,0.75);font-size:13px" data-i18n="nav_editorial_board">Редакционный совет</a>
+ <a href="/rules.html" style="color:rgba(255,255,255,0.75);font-size:13px" data-i18n="nav_rules">Правила для авторов</a>
+ <a href="/payment.html" style="color:rgba(255,255,255,0.75);font-size:13px" data-i18n="nav_payment">Оплата и сроки</a>
+ <a href="/faq.html" style="color:rgba(255,255,255,0.75);font-size:13px" data-i18n="nav_faq">Вопрос — ответ</a>
+ <a href="/archives.html" style="color:rgba(255,255,255,0.75);font-size:13px" data-i18n="footer_archive">Архив STEM</a>
+ </div>
+ </div>
 
-    <!-- Column 2: Contacts -->
-    <div>
-      <div style="font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,0.4);margin-bottom:12px" data-i18n="footer_contacts_title">Контакты</div>
-      <div style="display:flex;flex-direction:column;gap:8px;font-size:13px;color:rgba(255,255,255,0.75)">
-        <div data-i18n-html="footer_address_html">📍 ул. Шота Руставели, 156<br>Ташкент, 100121, Узбекистан</div>
-        <div>📞 <a href="tel:+998781294040" style="color:rgba(255,255,255,0.75)">+998 78 129 40 40</a></div>
-        <div>✉️ <a href="mailto:g.isamova@kiut.uz" id="footer-email" style="color:rgba(255,255,255,0.75)">g.isamova@kiut.uz</a></div>
-        <div>🌐 <a href="https://www.kiut.uz" target="_blank" style="color:rgba(255,255,255,0.75)">www.kiut.uz</a></div>
-      </div>
-    </div>
+ <!-- Column 2: Contacts -->
+ <div>
+ <div style="font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,0.4);margin-bottom:12px" data-i18n="footer_contacts_title">Контакты</div>
+ <div style="display:flex;flex-direction:column;gap:8px;font-size:13px;color:rgba(255,255,255,0.75)">
+ <div data-i18n-html="footer_address_html"> ул. Шота Руставели, 156<br>Ташкент, 100121, Узбекистан</div>
+ <div> <a href="tel:+998781294040" style="color:rgba(255,255,255,0.75)">+998 78 129 40 40 (121)</a></div>
+ <div> <a href="mailto:g.isamova@kiut.uz" id="footer-email" style="color:rgba(255,255,255,0.75)">g.isamova@kiut.uz</a></div>
+ <div> <a href="https://www.kiut.uz" target="_blank" style="color:rgba(255,255,255,0.75)">www.kiut.uz</a></div>
+ </div>
+ </div>
 
-  </div>
+ </div>
 
-  <!-- Bottom bar -->
-  <div style="border-top:1px solid rgba(255,255,255,0.1);padding-top:18px;text-align:center;font-size:12px;color:rgba(255,255,255,0.4)">
-    <span data-i18n="footer_copyright">© 2024–2026</span> <strong style="color:rgba(255,255,255,0.6)">Kimyo International University in Tashkent</strong>
-    &nbsp;|&nbsp;
-    <a href="/archives.html" style="color:rgba(255,255,255,0.5)" data-i18n="footer_archive">Архив STEM</a>
-    &nbsp;|&nbsp;
-    <a href="https://www.kiut.uz" target="_blank" style="color:rgba(255,255,255,0.5)">www.kiut.uz</a>
-  </div>
+ <!-- Bottom bar -->
+ <div style="border-top:1px solid rgba(255,255,255,0.1);padding-top:18px;text-align:center;font-size:12px;color:rgba(255,255,255,0.4)">
+ <span data-i18n="footer_copyright">© 2024–2026</span> <strong style="color:rgba(255,255,255,0.6)">Kimyo International University in Tashkent</strong>
+ &nbsp;|&nbsp;
+ <a href="/archives.html" style="color:rgba(255,255,255,0.5)" data-i18n="footer_archive">Архив STEM</a>
+ &nbsp;|&nbsp;
+ <a href="https://www.kiut.uz" target="_blank" style="color:rgba(255,255,255,0.5)">www.kiut.uz</a>
+ </div>
 
 </footer>
 
@@ -239,91 +246,140 @@
 <script src="/js/i18n.js"></script>
 <script src="/js/app.js"></script>
 <script>
-  document.addEventListener('DOMContentLoaded', function () {
-    if (typeof updateHeaderAuth === 'function') updateHeaderAuth();
-  });
+ document.addEventListener('DOMContentLoaded', function () {
+ if (typeof updateHeaderAuth === 'function') updateHeaderAuth();
+ });
 
-  function issueSuffix() {
-    return typeof KiutI18n !== 'undefined' ? KiutI18n.t(KiutI18n.getLang(), 'issue_meta_suffix') : 'ISSN 2181-2934';
-  }
+ function issueSuffix() {
+ return typeof KiutI18n!== 'undefined'? KiutI18n.t(KiutI18n.getLang(), 'issue_meta_suffix'): 'ISSN 2181-2934';
+ }
 
-  (async function loadStemCurrentFromApi() {
-    var cardLine = document.getElementById('stem-card-issue-line');
+ var stemIssueSnapshot = null;
 
-    function setCardLine(tit, extraMuted) {
-      if (!cardLine) return;
-      cardLine.innerHTML = '';
-      cardLine.appendChild(document.createTextNode(tit + ' · '));
-      var span = document.createElement('span');
-      span.style.color = 'var(--text-muted)';
-      span.style.fontWeight = '500';
-      span.textContent = extraMuted || issueSuffix();
-      cardLine.appendChild(span);
-    }
+ function setStemCardLine(tit, extraMuted) {
+ var cardLine = document.getElementById('stem-card-issue-line');
+ if (!cardLine) return;
+ cardLine.innerHTML = '';
+ cardLine.appendChild(document.createTextNode(tit + ' · '));
+ var span = document.createElement('span');
+ span.style.color = 'var(--text-muted)';
+ span.style.fontWeight = '500';
+ span.textContent = extraMuted || issueSuffix();
+ cardLine.appendChild(span);
+ }
 
-    function setStemVisual(cur, cardNote) {
-      if (!cur) return;
-      setCardLine(cur.title || '', cardNote || issueSuffix());
-    }
+ function applyStemSnapshot() {
+ if (!stemIssueSnapshot || !stemIssueSnapshot.cur) return;
+ setStemCardLine(
+ stemIssueSnapshot.cur.title || '',
+ stemIssueSnapshot.noOpen ? i18t('issue_no_open') : issueSuffix()
+ );
+ }
 
-    try {
-      var open = await fetch('/api/issues/open?journal=stem').then(function (r) { return r.json(); });
-      var cur = open && open.length ? open[0] : null;
-      if (cur) { setStemVisual(cur); return; }
-      var all = await fetch('/api/issues?journal=stem').then(function (r) { return r.json(); });
-      var next = (all || []).find(function (x) { return x.accepting_submissions; }) || (all && all[0]);
-      if (next) {
-        setStemVisual(next, next.accepting_submissions ? null : i18t('issue_no_open'));
-        return;
-      }
-      if (cardLine) {
-        cardLine.innerHTML = '';
-        cardLine.appendChild(document.createTextNode(i18t('issue_soon') + ' · '));
-        var s = document.createElement('span');
-        s.style.color = 'var(--text-muted)';
-        s.style.fontWeight = '500';
-        s.textContent = i18t('issue_soon_hint');
-        cardLine.appendChild(s);
-      }
-    } catch (e) {
-      if (cardLine) {
-        cardLine.innerHTML = '';
-        cardLine.appendChild(document.createTextNode(i18t('issue_load_error') + ' · '));
-        var sp = document.createElement('span');
-        sp.style.color = 'var(--text-muted)';
-        sp.textContent = i18t('issue_load_error_hint');
-        cardLine.appendChild(sp);
-      }
-    }
-  })();
+ async function loadStemCurrentFromApi() {
+ var cardLine = document.getElementById('stem-card-issue-line');
 
-  (async function loadHomeStats() {
-    var strip = document.getElementById('home-stats-strip');
-    if (!strip || typeof Auth === 'undefined' || !Auth.isAdmin()) return;
-    strip.style.display = 'flex';
-    try {
-      var d = await API.get('/admin/stats');
-      document.getElementById('stat-total').textContent = d.total;
-      document.getElementById('stat-approved').textContent = d.approved;
-      document.getElementById('stat-users').textContent = d.users;
-    } catch (e) {
-      strip.style.display = 'none';
-    }
-  })();
+ function setStemVisual(cur, noOpen) {
+ if (!cur) return;
+ stemIssueSnapshot = { cur: cur, noOpen: !!noOpen, fallback: null };
+ setStemCardLine(cur.title || '', noOpen ? i18t('issue_no_open') : issueSuffix());
+ var coverImg = document.getElementById('stem-journal-cover-img');
+ if (coverImg && cur.cover_image) coverImg.src = cur.cover_image;
+ var readLink = document.getElementById('stem-read-issue-link');
+ if (readLink) {
+ if (cur.archive_folder) {
+ readLink.href = '/archive-issue.html?folder=' + encodeURIComponent(cur.archive_folder);
+ readLink.style.display = '';
+ loadStemIssueArticles(cur);
+ } else {
+ readLink.style.display = 'none';
+ }
+ }
+ }
 
-  // Load contact email from settings for footer
-  (async function loadFooterContacts() {
-    try {
-      var d = await fetch('/api/announce').then(function(r){ return r.json(); });
-      if (d.site_email) {
-        var els = document.querySelectorAll('#footer-email, #footer-support-email');
-        els.forEach(function(el) {
-          el.textContent = d.site_email;
-          el.href = 'mailto:' + d.site_email;
-        });
-      }
-    } catch(e) {}
-  })();
+ async function loadStemIssueArticles(cur) {
+ if (!cur || !cur.archive_folder) return;
+ try {
+ var data = await fetch('/api/file-archive/issue?folder=' + encodeURIComponent(cur.archive_folder)).then(function (r) { return r.json(); });
+ var n = (data.files && data.files.length) || 0;
+ if (n > 0) {
+ var forms = { one: i18t('archive_art_one'), few: i18t('archive_art_few'), many: i18t('archive_art_many'), other: i18t('archive_art_many') };
+ var word = (typeof KiutI18n !== 'undefined' && KiutI18n.plural)
+ ? KiutI18n.plural(KiutI18n.getLang(), n, forms)
+ : forms.many;
+ setStemCardLine(cur.title || '', n + ' ' + word);
+ }
+ } catch (e) { /* ignore */ }
+ }
+
+ try {
+ var open = await fetch('/api/issues/open?journal=stem').then(function (r) { return r.json(); });
+ var cur = open && open.length? open[0]: null;
+ if (cur) { setStemVisual(cur); return; }
+ var all = await fetch('/api/issues?journal=stem').then(function (r) { return r.json(); });
+ var next = (all || []).find(function (x) { return x.accepting_submissions; }) || (all && all[0]);
+ if (next) {
+ setStemVisual(next, !next.accepting_submissions);
+ return;
+ }
+ stemIssueSnapshot = { cur: null, noOpen: false, fallback: 'soon' };
+ if (cardLine) {
+ cardLine.innerHTML = '';
+ cardLine.appendChild(document.createTextNode(i18t('issue_soon') + ' · '));
+ var s = document.createElement('span');
+ s.style.color = 'var(--text-muted)';
+ s.style.fontWeight = '500';
+ s.textContent = i18t('issue_soon_hint');
+ cardLine.appendChild(s);
+ }
+ } catch (e) {
+ stemIssueSnapshot = { cur: null, noOpen: false, fallback: 'error' };
+ if (cardLine) {
+ cardLine.innerHTML = '';
+ cardLine.appendChild(document.createTextNode(i18t('issue_load_error') + ' · '));
+ var sp = document.createElement('span');
+ sp.style.color = 'var(--text-muted)';
+ sp.textContent = i18t('issue_load_error_hint');
+ cardLine.appendChild(sp);
+ }
+ }
+ }
+
+ document.addEventListener('kiut:langchange', function () {
+ if (!stemIssueSnapshot) return;
+ if (stemIssueSnapshot.cur) applyStemSnapshot();
+ else loadStemCurrentFromApi();
+ });
+
+ loadStemCurrentFromApi();
+
+ (async function loadHomeStats() {
+ var strip = document.getElementById('home-stats-strip');
+ if (!strip || typeof Auth === 'undefined' ||!Auth.isAdmin()) return;
+ strip.style.display = 'flex';
+ try {
+ var d = await API.get('/admin/stats');
+ document.getElementById('stat-total').textContent = d.total;
+ document.getElementById('stat-approved').textContent = d.approved;
+ document.getElementById('stat-users').textContent = d.users;
+ } catch (e) {
+ strip.style.display = 'none';
+ }
+ })();
+
+ // Load contact email from settings for footer
+ (async function loadFooterContacts() {
+ try {
+ var d = await fetch('/api/announce').then(function(r){ return r.json(); });
+ if (d.site_email) {
+ var els = document.querySelectorAll('#footer-email, #footer-support-email');
+ els.forEach(function(el) {
+ el.textContent = d.site_email;
+ el.href = 'mailto:' + d.site_email;
+ });
+ }
+ } catch(e) {}
+ })();
 </script>
 
 </body>

@@ -1,200 +1,279 @@
 ﻿<!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="icon" type="image/png" sizes="32x32" href="/img/favicon-32x32.png">
-  <link rel="icon" type="image/png" sizes="16x16" href="/img/favicon-16x16.png">
-  <link rel="apple-touch-icon" href="/img/apple-touch-icon.png">
-  <title>Панель эксперта</title>
-  <link rel="stylesheet" href="/css/style.css">
-  <style>
-    :root {
-      --primary: #1a3a6b;
-      --primary-dark: #0f2347;
-      --primary-light: #4a7fc1;
-      --accent: #e8b94f;
-      --success: #059669;
-      --danger: #dc2626;
-      --warning: #d97706;
-      --text: #1e293b;
-      --text-muted: #64748b;
-      --border: #e2e8f0;
-      --bg: #f8fafc;
-    }
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+ <meta charset="UTF-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1.0">
+ <link rel="icon" type="image/png" sizes="32x32" href="/img/favicon-32x32.png">
+ <link rel="icon" type="image/png" sizes="16x16" href="/img/favicon-16x16.png">
+ <link rel="apple-touch-icon" href="/img/apple-touch-icon.png">
+ <title>Панель эксперта</title>
+ <link rel="stylesheet" href="/css/style.css">
+ <style>
+:root {
+ --primary: #1a3a6b;
+ --primary-dark: #0f2347;
+ --primary-light: #4a7fc1;
+ --accent: #e8b94f;
+ --success: #059669;
+ --danger: #dc2626;
+ --warning: #d97706;
+ --text: #1e293b;
+ --text-muted: #64748b;
+ --border: #e2e8f0;
+ --bg: #f8fafc;
+ }
+ * { box-sizing: border-box; margin: 0; padding: 0; }
+ body {
+   font-family: 'Segoe UI', sans-serif;
+   background: var(--bg);
+   color: var(--text);
+   min-height: 100vh;
+   font-size: 18px;
+   line-height: 1.55;
+ }
 
-    .expert-layout { display: flex; min-height: 100vh; }
+ .expert-layout { display: flex; min-height: 100vh; }
 
-    /* Sidebar */
-    .expert-sidebar {
-      width: 260px; flex-shrink: 0; background: var(--primary-dark); color: #fff;
-      display: flex; flex-direction: column; position: fixed; top: 0; bottom: 0; left: 0; z-index: 100;
-    }
-    .sidebar-logo {
-      padding: 24px 20px 20px; border-bottom: 1px solid rgba(255,255,255,0.1);
-    }
-    .sidebar-logo-row {
-      display: flex; align-items: flex-start; justify-content: space-between; gap: 12px;
-    }
-    .sidebar-logo h2 { font-size: 15px; font-weight: 700; color: var(--accent); }
-    .sidebar-logo p { font-size: 11px; color: rgba(255,255,255,0.5); margin-top: 4px; }
-    .sidebar-user-info {
-      padding: 16px 20px; border-bottom: 1px solid rgba(255,255,255,0.1);
-      font-size: 13px;
-    }
-    .sidebar-user-info .role-badge {
-      display: inline-block; padding: 2px 10px; border-radius: 20px;
-      font-size: 11px; font-weight: 600; margin-top: 6px;
-    }
-    .role-tech { background: rgba(124,58,237,0.3); color: #c4b5fd; }
-    .role-editorial { background: rgba(5,150,105,0.3); color: #6ee7b7; }
-    .sidebar-nav { list-style: none; padding: 12px 0; flex: 1; }
-    .sidebar-nav a, .sidebar-nav button {
-      display: flex; align-items: center; gap: 10px; padding: 11px 20px;
-      color: rgba(255,255,255,0.75); text-decoration: none; font-size: 14px;
-      background: none; border: none; width: 100%; cursor: pointer; transition: all 0.15s;
-    }
-    .sidebar-nav a:hover, .sidebar-nav button:hover { background: rgba(255,255,255,0.08); color: #fff; }
-    .sidebar-nav a.active { background: rgba(255,255,255,0.13); color: #fff; font-weight: 600; }
-    .sidebar-badge {
-      margin-left: auto; background: var(--accent); color: #1a1a1a; border-radius: 20px;
-      padding: 1px 8px; font-size: 11px; font-weight: 700;
-    }
+ /* Sidebar */
+ .expert-sidebar {
+   width: 300px; flex-shrink: 0; background: var(--primary-dark); color: #fff;
+   display: flex; flex-direction: column; position: fixed; top: 0; bottom: 0; left: 0; z-index: 100;
+ }
+ .sidebar-logo {
+   padding: 28px 22px 22px; border-bottom: 1px solid rgba(255,255,255,0.12);
+ }
+ .sidebar-logo-row {
+   display: flex; align-items: flex-start; justify-content: space-between; gap: 14px;
+ }
+ .sidebar-logo h2 { font-size: 18px; font-weight: 700; color: var(--accent); line-height: 1.4; }
+ .sidebar-logo p { font-size: 14px; color: rgba(255,255,255,0.72); margin-top: 6px; }
+ .expert-sidebar .lang-switch__btn {
+   font-size: 14px; padding: 8px 12px; min-width: 44px; min-height: 40px;
+ }
+ .sidebar-user-info {
+   padding: 20px 22px; border-bottom: 1px solid rgba(255,255,255,0.12); font-size: 16px;
+ }
+ .sidebar-user-info .role-badge {
+   display: inline-block; padding: 6px 14px; border-radius: 20px;
+   font-size: 14px; font-weight: 600; margin-top: 10px;
+ }
+ .role-tech { background: rgba(124,58,237,0.35); color: #ddd6fe; }
+ .role-editorial { background: rgba(5,150,105,0.35); color: #6ee7b7; }
+ .expert-sidebar .sidebar-nav {
+   list-style: none; padding: 14px 0; flex: 1; margin: 0;
+ }
+ .expert-sidebar .sidebar-nav li a,
+ .expert-sidebar .sidebar-nav li button {
+   display: flex; align-items: center; gap: 12px; padding: 16px 22px;
+   color: rgba(255,255,255,0.92) !important; text-decoration: none !important;
+   font-size: 17px; font-weight: 600;
+   background: none !important; border: none; width: 100%; cursor: pointer;
+   transition: background 0.15s, color 0.15s; text-align: left;
+   border-radius: 0; min-height: 52px;
+ }
+ .expert-sidebar .sidebar-nav li a:hover,
+ .expert-sidebar .sidebar-nav li button:hover {
+   background: rgba(255,255,255,0.1) !important; color: #fff !important;
+ }
+ .expert-sidebar .sidebar-nav li a.active {
+   background: rgba(255,255,255,0.16) !important; color: #fff !important;
+   font-weight: 700; border-left: 4px solid var(--accent);
+   padding-left: 18px;
+ }
+ .expert-sidebar .sidebar-badge {
+   margin-left: auto; background: var(--accent); color: #1a1a1a; border-radius: 20px;
+   padding: 4px 10px; font-size: 14px; font-weight: 700; min-width: 28px; text-align: center;
+ }
+ .expert-sidebar .sidebar-footer {
+   margin-top: auto; padding: 18px 18px 22px;
+   border-top: 1px solid rgba(255,255,255,0.12);
+ }
+ .expert-sidebar .sidebar-footer button {
+   display: flex; align-items: center; justify-content: center; gap: 10px;
+   width: 100%; padding: 14px 18px; border-radius: 10px; min-height: 52px;
+   border: 1px solid rgba(255,255,255,0.35); background: rgba(255,255,255,0.08);
+   color: #fff !important; font-size: 17px; font-weight: 600; cursor: pointer;
+   transition: background 0.15s, border-color 0.15s;
+ }
+ .expert-sidebar .sidebar-footer button:hover {
+   background: rgba(220, 38, 38, 0.22); border-color: rgba(252, 165, 165, 0.55);
+   color: #fecaca !important;
+ }
 
-    /* Main */
-    .expert-main { margin-left: 260px; flex: 1; padding: 32px; }
-    .page-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; }
-    .page-header h2 { font-size: 22px; font-weight: 700; color: var(--primary); }
+ /* Main */
+.expert-main { margin-left: 300px; flex: 1; padding: 36px 40px; max-width: 1200px; }
+.page-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; margin-bottom: 28px; flex-wrap: wrap; }
+.page-header h2 { font-size: 28px; font-weight: 700; color: var(--primary); line-height: 1.3; }
+.page-header .page-sub { font-size: 16px; color: var(--text-muted); margin-top: 8px; line-height: 1.5; max-width: 52rem; }
 
-    /* Stats row */
-    .stats-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px,1fr)); gap: 16px; margin-bottom: 28px; }
-    .stat-card {
-      background: #fff; border-radius: 12px; padding: 20px;
-      border: 1px solid var(--border); text-align: center;
-    }
-    .stat-card .num { font-size: 32px; font-weight: 800; color: var(--primary); }
-    .stat-card .lbl { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
-    .stat-card.queue .num { color: var(--warning); }
-    .stat-card.ok .num { color: var(--success); }
-    .stat-card.bad .num { color: var(--danger); }
+ /* Stats row */
+.stats-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 20px; margin-bottom: 32px; }
+.stat-card {
+ background: #fff; border-radius: 14px; padding: 24px 20px;
+ border: 1px solid var(--border); text-align: center;
+ }
+ .stat-card .num { font-size: 40px; font-weight: 800; color: var(--primary); line-height: 1.1; }
+ .stat-card .lbl { font-size: 15px; color: var(--text-muted); margin-top: 8px; font-weight: 500; }
+ .stat-card.queue .num { color: var(--warning); }
+ .stat-card.ok .num { color: var(--success); }
+ .stat-card.bad .num { color: var(--danger); }
 
-    /* Article cards */
-    .article-card {
-      background: #fff; border: 1px solid var(--border); border-radius: 12px;
-      padding: 20px 24px; margin-bottom: 16px; transition: box-shadow 0.15s;
-    }
-    .article-card:hover { box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
-    .article-card .ac-title { font-size: 16px; font-weight: 700; color: var(--primary); margin-bottom: 6px; }
-    .article-card .ac-meta { font-size: 12px; color: var(--text-muted); margin-bottom: 12px; display: flex; flex-wrap: wrap; gap: 12px; }
-    .article-card .ac-abstract {
-      font-size: 13px; color: var(--text); background: #f8fafc;
-      border-left: 3px solid var(--primary-light); padding: 10px 12px;
-      border-radius: 0 6px 6px 0; margin-bottom: 14px; line-height: 1.6;
-      max-height: 80px; overflow: hidden; cursor: pointer;
-    }
-    .article-card .ac-abstract.expanded { max-height: none; }
-    .ac-actions { display: flex; align-items: flex-end; gap: 12px; flex-wrap: wrap; }
-    .ac-actions textarea {
-      flex: 1; min-width: 220px; padding: 9px 12px; border: 1px solid var(--border);
-      border-radius: 8px; font-size: 13px; font-family: inherit; resize: vertical; min-height: 60px;
-    }
-    .ac-btns { display: flex; gap: 8px; align-items: center; }
+ /* Article cards */
+ .article-card {
+   background: #fff; border: 1px solid var(--border); border-radius: 14px;
+   padding: 26px 28px; margin-bottom: 20px; transition: box-shadow 0.15s;
+ }
+ .article-card:hover { box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+ .article-card .ac-title { font-size: 20px; font-weight: 700; color: var(--primary); margin-bottom: 10px; line-height: 1.4; }
+ .article-card .ac-meta { font-size: 15px; color: var(--text-muted); margin-bottom: 14px; display: flex; flex-wrap: wrap; gap: 14px; line-height: 1.5; }
+ .article-card .ac-authors {
+   margin-bottom: 12px; font-size: 16px; color: var(--text); line-height: 1.5;
+ }
+ .article-card .ac-authors strong { font-weight: 700; }
+ .article-card .ac-abstract {
+ font-size: 16px; color: var(--text); background: #f8fafc;
+ border-left: 4px solid var(--primary-light); padding: 14px 16px;
+ border-radius: 0 8px 8px 0; margin-bottom: 16px; line-height: 1.65;
+ max-height: 96px; overflow: hidden; cursor: pointer;
+ }
+ .article-card .ac-abstract.expanded { max-height: none; }
+ .ac-actions { display: flex; align-items: flex-end; gap: 16px; flex-wrap: wrap; }
+.ac-actions textarea {
+ flex: 1; min-width: 260px; padding: 14px 16px; border: 2px solid var(--border);
+ border-radius: 10px; font-size: 16px; font-family: inherit; resize: vertical; min-height: 88px;
+ line-height: 1.5;
+ }
+ .ac-btns { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+ .ac-assign { display: flex; flex-direction: column; gap: 8px; min-width: 280px; flex: 1; }
+ .ac-assign label { font-size: 15px; font-weight: 700; color: var(--text); }
+ .ac-assign select {
+   padding: 14px 16px; border: 2px solid var(--border); border-radius: 10px;
+   font-size: 16px; font-family: inherit; background: #fff; min-height: 52px;
+ }
+ .ac-watch-note { font-size: 15px; color: var(--text-muted); padding: 10px 0; line-height: 1.5; }
+ .ac-no-file { font-size: 15px; color: var(--text-muted); }
+ .article-card .status-badge {
+   font-size: 14px; padding: 6px 14px; margin-left: 6px; vertical-align: middle;
+ }
 
-    /* Buttons */
-    .btn { padding: 9px 18px; border-radius: 8px; border: none; cursor: pointer; font-size: 13px; font-weight: 600; transition: all 0.15s; }
-    .btn-approve { background: var(--success); color: #fff; }
-    .btn-approve:hover { background: #047857; }
-    .btn-reject { background: var(--danger); color: #fff; }
-    .btn-reject:hover { background: #b91c1c; }
-    .btn-file { background: var(--primary); color: #fff; }
-    .btn-file:hover { background: var(--primary-dark); }
-    .btn-sm { padding: 5px 12px; font-size: 12px; }
+ /* Buttons — крупные для удобства 50+ */
+.btn {
+ padding: 14px 26px; border-radius: 10px; border: none; cursor: pointer;
+ font-size: 17px; font-weight: 700; transition: all 0.15s;
+ min-height: 52px; line-height: 1.2;
+ }
+.btn-approve { background: var(--success); color: #fff; }
+.btn-approve:hover { background: #047857; }
+.btn-reject { background: var(--danger); color: #fff; }
+.btn-reject:hover { background: #b91c1c; }
+.btn-file { background: var(--primary); color: #fff; }
+.btn-file:hover { background: var(--primary-dark); }
+.btn-sm { padding: 14px 22px; font-size: 16px; min-height: 48px; }
 
-    /* Empty / loading states */
-    .empty-box {
-      text-align: center; padding: 60px 20px; color: var(--text-muted);
-    }
-    .empty-box .icon { font-size: 48px; margin-bottom: 12px; }
-    .tab-content { display: none; }
-    .tab-content.active { display: block; }
+ /* Empty / loading states */
+.empty-box {
+ text-align: center; padding: 72px 24px; color: var(--text-muted); font-size: 17px; line-height: 1.5;
+ }
+ .empty-box .icon { font-size: 56px; margin-bottom: 16px; }
+ .empty-box h3 { font-size: 22px; color: var(--text); margin-bottom: 10px; }
+.tab-content { display: none; }
+.tab-content.active { display: block; }
 
-    /* Toast */
-    #toast-container { position: fixed; bottom: 24px; right: 24px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; }
-    .toast { padding: 12px 20px; border-radius: 10px; font-size: 14px; font-weight: 600; box-shadow: 0 4px 16px rgba(0,0,0,0.15); animation: slideIn 0.3s; color: #fff; }
-    .toast.success { background: var(--success); }
-    .toast.error { background: var(--danger); }
-    .toast.info { background: var(--primary); }
-    @keyframes slideIn { from { transform: translateX(100px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
-  </style>
+ /* Notifications */
+ .notif-list { display: flex; flex-direction: column; gap: 14px; padding: 6px 0; }
+ .notif-item {
+   background: #fff; border: 1px solid var(--border); border-radius: 12px;
+   padding: 18px 22px; font-size: 16px; line-height: 1.55;
+ }
+ .notif-item.unread { border-left: 5px solid var(--primary-light); }
+ .notif-item .notif-date { font-size: 14px; color: var(--text-muted); margin-top: 8px; }
+
+ /* Toast */
+ #toast-container { position: fixed; bottom: 28px; right: 28px; z-index: 9999; display: flex; flex-direction: column; gap: 12px; }
+.toast { padding: 16px 24px; border-radius: 12px; font-size: 16px; font-weight: 600; box-shadow: 0 4px 16px rgba(0,0,0,0.15); animation: slideIn 0.3s; color: #fff; max-width: 420px; line-height: 1.45; }
+.toast.success { background: var(--success); }
+.toast.error { background: var(--danger); }
+.toast.info { background: var(--primary); }
+ @keyframes slideIn { from { transform: translateX(100px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+
+ @media (max-width: 900px) {
+   .expert-sidebar { width: 100%; position: relative; }
+   .expert-main { margin-left: 0; padding: 24px 18px; }
+   .expert-layout { flex-direction: column; }
+ }
+ </style>
 </head>
 <body data-i18n-doc="expert">
 <div class="expert-layout">
 
-  <!-- Sidebar -->
-  <aside class="expert-sidebar">
-    <div class="sidebar-logo">
-      <div class="sidebar-logo-row">
-        <div>
-          <h2 data-i18n="brand_title_main">Центрально-азиатский журнал STEM</h2>
-          <p data-i18n="expert_panel">Панель эксперта</p>
-        </div>
-        <div class="lang-switch lang-switch--inline" data-lang-switch role="group">
-          <button type="button" class="lang-switch__btn" data-set-lang="uz">UZ</button>
-          <button type="button" class="lang-switch__btn" data-set-lang="ru">RU</button>
-          <button type="button" class="lang-switch__btn" data-set-lang="en">EN</button>
-        </div>
-      </div>
-    </div>
-    <div class="sidebar-user-info">
-      <div id="sb-name" style="font-weight:700;font-size:14px">—</div>
-      <div id="sb-email" style="font-size:12px;color:rgba(255,255,255,0.5);margin-top:2px">—</div>
-      <span id="sb-role-badge" class="role-badge">—</span>
-    </div>
-    <ul class="sidebar-nav">
-      <li><a href="javascript:void(0)" class="active" data-tab="queue" onclick="return switchTab('queue',this)">
-        <span>📋</span> <span data-i18n="expert_my_queue">Моя очередь</span>
-        <span class="sidebar-badge" id="queue-badge" style="display:none">0</span>
-      </a></li>
-      <li><a href="javascript:void(0)" data-tab="notifications" onclick="return switchTab('notifications',this)">
-        <span>🔔</span> <span data-i18n="dash_notifications">Уведомления</span>
-        <span class="sidebar-badge" id="notif-badge" style="display:none">0</span>
-      </a></li>
-      <li><button onclick="logout()"><span>🚪</span> <span data-i18n="nav_logout">Выйти</span></button></li>
-    </ul>
-  </aside>
+ <!-- Sidebar -->
+ <aside class="expert-sidebar">
+ <div class="sidebar-logo">
+ <div class="sidebar-logo-row">
+ <div>
+ <h2 data-i18n="brand_title_main">Центрально-азиатский журнал STEM</h2>
+ <p data-i18n="expert_panel">Панель эксперта</p>
+ </div>
+ <div class="lang-switch lang-switch--inline" data-lang-switch role="group">
+ <button type="button" class="lang-switch__btn" data-set-lang="uz">UZ</button>
+ <button type="button" class="lang-switch__btn" data-set-lang="ru">RU</button>
+ <button type="button" class="lang-switch__btn" data-set-lang="en">EN</button>
+ </div>
+ </div>
+ </div>
+ <div class="sidebar-user-info">
+ <div id="sb-name" style="font-weight:700;font-size:17px">—</div>
+ <div id="sb-email" style="font-size:15px;color:rgba(255,255,255,0.58);margin-top:4px">—</div>
+ <span id="sb-role-badge" class="role-badge">—</span>
+ </div>
+ <ul class="sidebar-nav">
+ <li><a href="javascript:void(0)" class="active" data-tab="queue" onclick="return switchTab('queue',this)">
+ <span data-i18n="expert_my_queue">Моя очередь</span>
+ <span class="sidebar-badge" id="queue-badge" style="display:none">0</span>
+ </a></li>
+ <li><a href="javascript:void(0)" data-tab="notifications" onclick="return switchTab('notifications',this)">
+ <span data-i18n="dash_notifications">Уведомления</span>
+ <span class="sidebar-badge" id="notif-badge" style="display:none">0</span>
+ </a></li>
+ </ul>
+ <div class="sidebar-footer">
+ <button type="button" onclick="logout()"><span data-i18n="nav_logout">Выйти</span></button>
+ </div>
+ </aside>
 
-  <!-- Main -->
-  <main class="expert-main">
-    <!-- Queue tab -->
-    <div id="tab-queue" class="tab-content active">
-      <div class="page-header">
-        <h2 id="queue-title" data-i18n="expert_queue_title">Очередь на проверку</h2>
-        <button class="btn btn-file btn-sm" onclick="loadQueue()" data-i18n="expert_refresh">↻ Обновить</button>
-      </div>
+ <!-- Main -->
+ <main class="expert-main">
+ <!-- Queue tab -->
+ <div id="tab-queue" class="tab-content active">
+ <div class="page-header">
+ <div>
+ <h2 id="queue-title" data-i18n="expert_queue_title">Очередь на проверку</h2>
+ <p class="page-sub" data-i18n="expert_queue_sub">Все статьи на этапе видны здесь — файл можно скачать. Решение принимает эксперт, которому назначена проверка.</p>
+ </div>
+ <button class="btn btn-file" onclick="loadQueue()" data-i18n="expert_refresh">↻ Обновить</button>
+ </div>
 
-      <div class="stats-row" id="stats-row">
-        <div class="stat-card queue"><div class="num" id="st-queue">—</div><div class="lbl" data-i18n="expert_stat_queue">В очереди</div></div>
-        <div class="stat-card ok"><div class="num" id="st-approved">—</div><div class="lbl" data-i18n="expert_stat_approved">Одобрено мной</div></div>
-        <div class="stat-card bad"><div class="num" id="st-rejected">—</div><div class="lbl" data-i18n="expert_stat_rejected">Отклонено мной</div></div>
-        <div class="stat-card"><div class="num" id="st-total">—</div><div class="lbl" data-i18n="expert_stat_total">Всего в системе</div></div>
-      </div>
+ <div class="stats-row" id="stats-row">
+ <div class="stat-card queue"><div class="num" id="st-queue">—</div><div class="lbl" data-i18n="expert_stat_queue">В очереди</div></div>
+ <div class="stat-card ok"><div class="num" id="st-approved">—</div><div class="lbl" data-i18n="expert_stat_approved">Одобрено мной</div></div>
+ <div class="stat-card bad"><div class="num" id="st-rejected">—</div><div class="lbl" data-i18n="expert_stat_rejected">Отклонено мной</div></div>
+ <div class="stat-card"><div class="num" id="st-total">—</div><div class="lbl" data-i18n="expert_stat_total">Всего в системе</div></div>
+ </div>
 
-      <div id="queue-body">
-        <div class="empty-box"><div class="icon">⏳</div><p data-i18n="expert_loading">Загрузка…</p></div>
-      </div>
-    </div>
+ <div id="queue-body">
+ <div class="empty-box"><div class="icon">⏳</div><p data-i18n="expert_loading">Загрузка…</p></div>
+ </div>
+ </div>
 
-    <!-- Notifications tab -->
-    <div id="tab-notifications" class="tab-content">
-      <div class="page-header"><h2 data-i18n="dash_notifications">Уведомления</h2></div>
-      <div id="notif-body">
-        <div class="empty-box"><div class="icon">⏳</div><p data-i18n="expert_loading">Загрузка…</p></div>
-      </div>
-    </div>
+ <!-- Notifications tab -->
+ <div id="tab-notifications" class="tab-content">
+ <div class="page-header"><h2 data-i18n="dash_notifications">Уведомления</h2></div>
+ <div id="notif-body">
+ <div class="empty-box"><div class="icon">⏳</div><p data-i18n="expert_loading">Загрузка…</p></div>
+ </div>
+ </div>
 
-  </main>
+ </main>
 </div>
 
 <div id="toast-container"></div>
@@ -203,181 +282,236 @@
 <script src="/js/i18n.js"></script>
 <script src="/js/app.js"></script>
 <script>
-  let TOKEN = Auth.getToken();
-  let currentUser = null;
+ let TOKEN = Auth.getToken();
+ let currentUser = null;
+ let editorialExperts = [];
 
-  function applyExpertRoleLabels() {
-    if (!currentUser) return;
-    const badge = document.getElementById('sb-role-badge');
-    const titleEl = document.getElementById('queue-title');
-    if (currentUser.role === 'tech_expert') {
-      badge.textContent = i18t('expert_role_tech');
-      badge.className = 'role-badge role-tech';
-      if (titleEl) titleEl.textContent = i18t('expert_queue_tech');
-    } else {
-      badge.textContent = i18t('expert_role_editorial');
-      badge.className = 'role-badge role-editorial';
-      if (titleEl) titleEl.textContent = i18t('expert_queue_editorial');
-    }
-  }
+ function applyExpertRoleLabels() {
+ if (!currentUser) return;
+ const badge = document.getElementById('sb-role-badge');
+ const titleEl = document.getElementById('queue-title');
+ if (currentUser.role === 'tech_expert') {
+ badge.textContent = i18t('expert_role_tech');
+ badge.className = 'role-badge role-tech';
+ if (titleEl) titleEl.textContent = i18t('expert_queue_tech');
+ } else {
+ badge.textContent = i18t('expert_role_editorial');
+ badge.className = 'role-badge role-editorial';
+ if (titleEl) titleEl.textContent = i18t('expert_queue_editorial');
+ }
+ }
 
-  async function init() {
-    if (!TOKEN) { location.href = '/login.html'; return; }
-    try {
-      const me = await API.get('/auth/me');
-      if (!['tech_expert', 'editorial_expert'].includes(me.role)) {
-        if (me.role === 'admin') { location.href = '/admin.html'; return; }
-        location.href = '/dashboard.html';
-        return;
-      }
-      currentUser = me;
-      document.getElementById('sb-name').textContent = me.full_name;
-      document.getElementById('sb-email').textContent = me.email;
-      applyExpertRoleLabels();
-      loadStats();
-      loadQueue();
-      loadNotifications();
-    } catch { location.href = '/login.html'; }
-  }
+ async function init() {
+ if (!TOKEN) { location.href = '/login.html'; return; }
+ try {
+ const me = await API.get('/auth/me');
+ if (!['tech_expert', 'editorial_expert'].includes(me.role)) {
+ if (me.role === 'admin') { location.href = '/admin.html'; return; }
+ location.href = '/dashboard.html';
+ return;
+ }
+ currentUser = me;
+ document.getElementById('sb-name').textContent = me.full_name;
+ document.getElementById('sb-email').textContent = me.email;
+ applyExpertRoleLabels();
+ if (me.role === 'tech_expert') {
+ try { editorialExperts = await API.get('/review/editorial-experts'); } catch { editorialExperts = []; }
+ }
+ loadStats();
+ loadQueue();
+ loadNotifications();
+ } catch { location.href = '/login.html'; }
+ }
 
-  // ── Tab switcher ──────────────────────────────────────────────────────────
-  function switchTab(name, el) {
-    document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-    document.querySelectorAll('.sidebar-nav a').forEach(a => a.classList.remove('active'));
-    document.getElementById('tab-' + name).classList.add('active');
-    if (el) el.classList.add('active');
-    if (name === 'notifications') loadNotifications();
-    return false;
-  }
+ // ── Tab switcher ──────────────────────────────────────────────────────────
+ function switchTab(name, el) {
+ document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+ document.querySelectorAll('.sidebar-nav a').forEach(a => a.classList.remove('active'));
+ document.getElementById('tab-' + name).classList.add('active');
+ if (el) el.classList.add('active');
+ if (name === 'notifications') loadNotifications();
+ return false;
+ }
 
-  // logout() — from app.js
+ // logout() — from app.js
 
-  // ── Stats ─────────────────────────────────────────────────────────────────
-  async function loadStats() {
-    try {
-      const d = await API.get('/review/stats');
-      document.getElementById('st-queue').textContent    = d.inQueue;
-      document.getElementById('st-approved').textContent = d.approved;
-      document.getElementById('st-rejected').textContent = d.rejected;
-      document.getElementById('st-total').textContent    = d.total;
-      const qb = document.getElementById('queue-badge');
-      if (d.inQueue > 0) { qb.textContent = d.inQueue; qb.style.display = ''; }
-      else qb.style.display = 'none';
-    } catch {}
-  }
+ // ── Stats ─────────────────────────────────────────────────────────────────
+ async function loadStats() {
+ try {
+ const d = await API.get('/review/stats');
+ document.getElementById('st-queue').textContent = d.inQueue;
+ document.getElementById('st-approved').textContent = d.approved;
+ document.getElementById('st-rejected').textContent = d.rejected;
+ document.getElementById('st-total').textContent = d.total;
+ const qb = document.getElementById('queue-badge');
+ if (d.inQueue > 0) { qb.textContent = d.inQueue; qb.style.display = ''; }
+ else qb.style.display = 'none';
+ } catch {}
+ }
 
-  // ── Queue ─────────────────────────────────────────────────────────────────
-  async function loadQueue() {
-    const body = document.getElementById('queue-body');
-    body.innerHTML = '<div class="empty-box"><div class="icon">⏳</div><p>' + i18t('expert_loading') + '</p></div>';
-    try {
-      const items = await API.get('/review/queue');
-      if (!items.length) {
-        body.innerHTML = '<div class="empty-box"><div class="icon">✅</div><h3>' + i18t('expert_queue_empty_title') + '</h3><p>' + i18t('expert_queue_empty_p') + '</p></div>';
-        return;
-      }
-      body.innerHTML = items.map(a => articleCard(a)).join('');
-      document.querySelectorAll('[data-i18n-placeholder-id]').forEach(el => {
-        el.placeholder = i18t(el.getAttribute('data-i18n-placeholder-id'));
-      });
-    } catch(e) {
-      body.innerHTML = `<div class="empty-box"><div class="icon">❌</div><p>${escHtml(e.message)}</p></div>`;
-    }
-  }
+ // ── Queue ─────────────────────────────────────────────────────────────────
+ async function loadQueue() {
+ const body = document.getElementById('queue-body');
+ body.innerHTML = '<div class="empty-box"><div class="icon">⏳</div><p>' + i18t('expert_loading') + '</p></div>';
+ try {
+ const items = await API.get('/review/queue');
+ if (!items.length) {
+ body.innerHTML = '<div class="empty-box"><div class="icon"></div><h3>' + i18t('expert_queue_empty_title') + '</h3><p>' + i18t('expert_queue_empty_p') + '</p></div>';
+ return;
+ }
+ body.innerHTML = items.map(a => articleCard(a)).join('');
+ document.querySelectorAll('[data-i18n-placeholder-id]').forEach(el => {
+ el.placeholder = i18t(el.getAttribute('data-i18n-placeholder-id'));
+ });
+ } catch(e) {
+ body.innerHTML = `<div class="empty-box"><div class="icon"></div><p>${escHtml(e.message)}</p></div>`;
+ }
+ }
 
-  function articleCard(a) {
-    const fileBtn = a.file_path
-      ? `<a class="btn btn-file btn-sm" href="/uploads/${escHtml(a.file_path)}?token=${Auth.getToken()}" target="_blank">${i18t('expert_download')}</a>`
-      : `<span style="font-size:12px;color:var(--text-muted)">${i18t('expert_no_file')}</span>`;
-    const abstract = a.abstract
-      ? `<div class="ac-abstract" onclick="this.classList.toggle('expanded')" title="${escHtml(i18t('expert_abstract_expand'))}">${escHtml(a.abstract)}</div>`
-      : '';
-    const journalLabel = typeof journalName === 'function' ? journalName(a.journal) : a.journal;
-    return `
-    <div class="article-card" id="card-${a.id}">
-      <div class="ac-title">${escHtml(a.title)}</div>
-      <div class="ac-meta">
-        <span>👤 ${escHtml(a.full_name)}</span>
-        <span>✉️ ${escHtml(a.email)}</span>
-        <span>📰 ${escHtml(journalLabel)}</span>
-        ${a.issue_title ? `<span>🗂 ${escHtml(a.issue_title)}</span>` : ''}
-        <span>📅 ${formatDate(a.submitted_at)}</span>
-      </div>
-      ${abstract}
-      <div style="margin-bottom:8px;font-size:12px;color:var(--text-muted)">
-        <strong>${i18t('expert_authors_label')}</strong> ${escHtml(a.authors)}
-      </div>
-      <div class="ac-actions">
-        ${fileBtn}
-        <textarea id="note-${a.id}" data-i18n-placeholder-id="expert_note_ph" placeholder="${escHtml(i18t('expert_note_ph'))}"></textarea>
-        <div class="ac-btns">
-          <button class="btn btn-approve" onclick="approve(${a.id})">${i18t('expert_btn_approve')}</button>
-          <button class="btn btn-reject" onclick="reject(${a.id})">${i18t('expert_btn_reject')}</button>
-        </div>
-      </div>
-    </div>`;
-  }
+ function editorialAssignSelect(a) {
+ if (currentUser?.role !== 'tech_expert' || a.status !== 'pending') return '';
+ const id = a.id;
+ if (!editorialExperts.length) {
+ return `<div class="ac-assign"><label>${i18t('expert_assign_label')}</label><span class="ac-no-file" style="color:var(--danger)">${i18t('expert_assign_none')}</span></div>`;
+ }
+ const opts = editorialExperts.map(e =>
+ `<option value="${e.id}">${escHtml(e.full_name)} (${escHtml(e.email)})</option>`
+ ).join('');
+ return `
+ <div class="ac-assign">
+ <label for="assign-${id}">${i18t('expert_assign_label')}</label>
+ <select id="assign-${id}" required>
+ <option value="">${i18t('expert_assign_ph')}</option>
+ ${opts}
+ </select>
+ </div>`;
+ }
 
-  async function approve(id) {
-    const note = document.getElementById('note-' + id)?.value || '';
-    try {
-      await API.post(`/review/submissions/${id}/approve`, { note });
-      showToast(i18t('expert_approve_ok'), 'success');
-      document.getElementById('card-' + id)?.remove();
-      loadStats();
-    } catch(e) { showToast(e.message, 'error'); }
-  }
+ function canActOnArticle(a) {
+ if (a.status === 'editorial_approved') return false;
+ if (currentUser?.role === 'tech_expert' && a.status === 'pending') return true;
+ if (currentUser?.role === 'editorial_expert' && a.status === 'tech_approved') {
+ return a.can_review === true || a.can_review === 1 || a.assigned_editorial_id === currentUser.id;
+ }
+ return a.can_review === true || a.can_review === 1;
+ }
 
-  async function reject(id) {
-    const reason = document.getElementById('note-' + id)?.value || '';
-    if (!reason.trim()) { showToast(i18t('expert_reject_reason'), 'error'); return; }
-    try {
-      await API.post(`/review/submissions/${id}/reject`, { reason });
-      showToast(i18t('expert_reject_ok'), 'success');
-      document.getElementById('card-' + id)?.remove();
-      loadStats();
-    } catch(e) { showToast(e.message, 'error'); }
-  }
+ function articleCard(a) {
+ const canAct = canActOnArticle(a);
+ const fileBtn = a.file_path
+? `<a class="btn btn-file" href="/uploads/${escHtml(a.file_path)}?token=${Auth.getToken()}" target="_blank" download>${i18t('expert_download')}</a>`
+: `<span class="ac-no-file">${i18t('expert_no_file')}</span>`;
+ const abstract = a.abstract
+? `<div class="ac-abstract" onclick="this.classList.toggle('expanded')" title="${escHtml(i18t('expert_abstract_expand'))}">${escHtml(a.abstract)}</div>`
+: '';
+ const journalLabel = typeof journalName === 'function'? journalName(a.journal): a.journal;
+ const statusHtml = typeof statusBadge === 'function' ? statusBadge(a.status) : escHtml(a.status);
+ let watchNote = '';
+ if (!canAct) {
+ if (a.status === 'tech_approved' && a.assigned_editorial_name) {
+ watchNote = `${i18t('expert_assigned_to')}: ${escHtml(a.assigned_editorial_name)}`;
+ } else if (a.status === 'tech_approved' && currentUser?.role === 'tech_expert') {
+ watchNote = i18t('expert_sent_editorial');
+ } else if (a.status === 'editorial_approved') {
+ watchNote = i18t('expert_wait_admin');
+ }
+ }
+ const actionsBlock = canAct
+? `${editorialAssignSelect(a)}
+ <textarea id="note-${a.id}" data-i18n-placeholder-id="expert_note_ph" placeholder="${escHtml(i18t('expert_note_ph'))}"></textarea>
+ <div class="ac-btns">
+ <button class="btn btn-approve" onclick="approve(${a.id})">${i18t('expert_btn_approve')}</button>
+ <button class="btn btn-reject" onclick="reject(${a.id})">${i18t('expert_btn_reject')}</button>
+ </div>`
+: `<div class="ac-watch-note">${watchNote || i18t('expert_watch_only')}</div>`;
+ return `
+ <div class="article-card" id="card-${a.id}">
+ <div class="ac-title">${escHtml(a.title)} ${statusHtml}</div>
+ <div class="ac-meta">
+ <span> ${escHtml(a.full_name)}</span>
+ <span> ${escHtml(a.email)}</span>
+ <span> ${escHtml(journalLabel)}</span>
+ ${a.issue_title? `<span> ${escHtml(a.issue_title)}</span>`: ''}
+ ${a.tech_reviewer_name? `<span> ${i18t('expert_tech_ok')}: ${escHtml(a.tech_reviewer_name)}</span>`: ''}
+ <span> ${formatDate(a.submitted_at)}</span>
+ </div>
+ ${abstract}
+ <div class="ac-authors">
+ <strong>${i18t('expert_authors_label')}</strong> ${escHtml(a.authors)}
+ </div>
+ <div class="ac-actions">
+ ${fileBtn}
+ ${actionsBlock}
+ </div>
+ </div>`;
+ }
 
-  // ── Notifications ─────────────────────────────────────────────────────────
-  async function loadNotifications() {
-    const body = document.getElementById('notif-body');
-    try {
-      const items = await API.get('/submissions/notifications');
-      const unread = items.filter(n => !n.is_read).length;
-      const nb = document.getElementById('notif-badge');
-      if (unread > 0) { nb.textContent = unread; nb.style.display = ''; }
-      else nb.style.display = 'none';
+ async function approve(id) {
+ const note = document.getElementById('note-' + id)?.value || '';
+ const payload = { note };
+ if (currentUser?.role === 'tech_expert') {
+ const sel = document.getElementById('assign-' + id);
+ if (!sel?.value) { showToast(i18t('expert_assign_required'), 'error'); return; }
+ payload.editorial_expert_id = parseInt(sel.value, 10);
+ }
+ try {
+ await API.post(`/review/submissions/${id}/approve`, payload);
+ showToast(i18t('expert_approve_ok'), 'success');
+ document.getElementById('card-' + id)?.remove();
+ loadStats();
+ } catch(e) { showToast(e.message, 'error'); }
+ }
 
-      if (!items.length) {
-        body.innerHTML = '<div class="empty-box"><div class="icon">🔔</div><p>' + i18t('dash_notif_none') + '</p></div>';
-        return;
-      }
-      body.innerHTML = `<div style="display:flex;flex-direction:column;gap:10px;padding:4px 0">` +
-        items.map(n => `
-          <div style="background:#fff;border:1px solid var(--border);border-radius:10px;padding:14px 18px;${!n.is_read?'border-left:4px solid var(--primary-light)':''}">
-            <div style="font-size:13px">${escHtml(n.message)}</div>
-            <div style="font-size:11px;color:var(--text-muted);margin-top:6px">${formatDate(n.sent_at)}</div>
-          </div>`).join('') + `</div>`;
-    } catch(e) {
-      body.innerHTML = `<div class="empty-box"><p>${escHtml(e.message)}</p></div>`;
-    }
-  }
+ async function reject(id) {
+ const reason = document.getElementById('note-' + id)?.value || '';
+ if (!reason.trim()) { showToast(i18t('expert_reject_reason'), 'error'); return; }
+ try {
+ await API.post(`/review/submissions/${id}/reject`, { reason });
+ showToast(i18t('expert_reject_ok'), 'success');
+ document.getElementById('card-' + id)?.remove();
+ loadStats();
+ } catch(e) { showToast(e.message, 'error'); }
+ }
 
-  // ── Utils ─────────────────────────────────────────────────────────────────
-  function escHtml(s) {
-    return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-  }
+ // ── Notifications ─────────────────────────────────────────────────────────
+ async function loadNotifications() {
+ const body = document.getElementById('notif-body');
+ try {
+ const items = await API.get('/submissions/notifications');
+ const unread = items.filter(n =>!n.is_read).length;
+ const nb = document.getElementById('notif-badge');
+ if (unread > 0) { nb.textContent = unread; nb.style.display = ''; }
+ else nb.style.display = 'none';
 
-  document.addEventListener('kiut:langchange', () => {
-    applyExpertRoleLabels();
-    const active = document.querySelector('.sidebar-nav a.active');
-    const tab = active?.getAttribute('data-tab') || 'queue';
-    if (tab === 'queue') loadQueue();
-    if (tab === 'notifications') loadNotifications();
-  });
+ if (!items.length) {
+ body.innerHTML = '<div class="empty-box"><div class="icon"></div><p>' + i18t('dash_notif_none') + '</p></div>';
+ return;
+ }
+ body.innerHTML = `<div class="notif-list">` +
+ items.map(n => `
+ <div class="notif-item${!n.is_read ? ' unread' : ''}">
+ <div>${escHtml(n.message)}</div>
+ <div class="notif-date">${formatDate(n.sent_at)}</div>
+ </div>`).join('') + `</div>`;
+ } catch(e) {
+ body.innerHTML = `<div class="empty-box"><p>${escHtml(e.message)}</p></div>`;
+ }
+ }
 
-  init();
+ // ── Utils ─────────────────────────────────────────────────────────────────
+ function escHtml(s) {
+ return String(s?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+ }
+
+ document.addEventListener('kiut:langchange', () => {
+ applyExpertRoleLabels();
+ const active = document.querySelector('.sidebar-nav a.active');
+ const tab = active?.getAttribute('data-tab') || 'queue';
+ if (tab === 'queue') loadQueue();
+ if (tab === 'notifications') loadNotifications();
+ });
+
+ init();
 </script>
 </body>
 </html>

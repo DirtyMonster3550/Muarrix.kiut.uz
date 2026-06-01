@@ -7,66 +7,95 @@ const { db } = require('../db/database');
 const { requireAuth } = require('./auth');
 
 // ── File magic-byte signatures ────────────────────────────────────────────────
-// We read the first 8 bytes of the saved file and verify the real format,
-// so attackers cannot bypass the filter by just renaming a .php to .pdf.
-const MAGIC = {
-  pdf:  [0x25, 0x50, 0x44, 0x46],                         // %PDF
-  doc:  [0xD0, 0xCF, 0x11, 0xE0, 0xA1, 0xB1, 0x1A, 0xE1], // OLE2 (old .doc)
-  docx: [0x50, 0x4B, 0x03, 0x04],                         // ZIP (OOXML)
-};
+// Проверяем первые байты файла, чтобы нельзя было подменить расширение.
 
 function readMagic(filePath, n) {
   const buf = Buffer.alloc(n);
   const fd = fs.openSync(filePath, 'r');
-  fs.readSync(fd, buf, 0, n, 0);
-  fs.closeSync(fd);
-  return buf;
+  try {
+    const bytesRead = fs.readSync(fd, buf, 0, n, 0);
+    return buf.subarray(0, bytesRead);
+  } finally {
+    fs.closeSync(fd);
+  }
 }
 
-function isAllowedMime(filePath, ext) {
+function validateWordUpload(file) {
+  const ext = normalizeUploadExt(file);
+  if (!ALLOWED_EXTS.includes(ext)) return { ok: false, reason: 'ext' };
+
+  const fullPath = uploadedFilePath(file);
+  let stat;
   try {
-    if (ext === '.pdf') {
-      const b = readMagic(filePath, 4);
-      return MAGIC.pdf.every((v, i) => b[i] === v);
-    }
-    if (ext === '.doc') {
-      const b = readMagic(filePath, 8);
-      return MAGIC.doc.every((v, i) => b[i] === v);
-    }
-    if (ext === '.docx') {
-      const b = readMagic(filePath, 4);
-      return MAGIC.docx.every((v, i) => b[i] === v);
-    }
-    return false;
+    stat = fs.statSync(fullPath);
   } catch {
-    return false;
+    return { ok: false, reason: 'missing', fullPath };
   }
+  if (!stat.size) return { ok: false, reason: 'empty', fullPath };
+
+  // Блокируем только явный PDF, переименованный в .doc/.docx
+  try {
+    const head = readMagic(fullPath, 4);
+    if (head.length >= 4 && head[0] === 0x25 && head[1] === 0x50 && head[2] === 0x44 && head[3] === 0x46) {
+      return { ok: false, reason: 'pdf', fullPath };
+    }
+  } catch {
+    // не удалось прочитать заголовок — всё равно принимаем по расширению
+  }
+
+  return { ok: true, fullPath, ext };
+}
+
+const ALLOWED_EXTS = ['.doc', '.docx'];
+const MAX_AUTHOR_NAMES = 5;
+const UPLOADS_DIR = path.join(__dirname, '../uploads');
+
+function uploadedFilePath(file) {
+  if (file?.path && fs.existsSync(file.path)) return file.path;
+  return path.join(UPLOADS_DIR, file.filename);
+}
+
+function extFromUpload(file) {
+  let ext = path.extname(file.originalname || '').toLowerCase();
+  if (ALLOWED_EXTS.includes(ext)) return ext;
+  const mime = String(file.mimetype || '').toLowerCase();
+  if (
+    mime.includes('wordprocessingml') ||
+    mime.includes('ms-word.document') ||
+    mime.includes('macroenabled')
+  ) {
+    return '.docx';
+  }
+  if (mime === 'application/msword') return '.doc';
+  return ext;
 }
 
 // ── Multer storage ────────────────────────────────────────────────────────────
 const storage = multer.diskStorage({
-  destination: (req, file, cb) => cb(null, path.join(__dirname, '../uploads')),
+  destination: (req, file, cb) => cb(null, UPLOADS_DIR),
   filename: (req, file, cb) => {
-    // Use crypto-random suffix so filenames are not guessable
     const crypto = require('crypto');
     const rand = crypto.randomBytes(16).toString('hex');
-    const ext = path.extname(file.originalname).toLowerCase();
+    const ext = extFromUpload(file);
     cb(null, `${Date.now()}_${rand}${ext}`);
   },
 });
 
-const ALLOWED_EXTS = ['.pdf', '.doc', '.docx'];
-const MAX_AUTHOR_NAMES = 5;
+function normalizeUploadExt(file) {
+  const fromSaved = path.extname(file.filename || '').toLowerCase();
+  if (ALLOWED_EXTS.includes(fromSaved)) return fromSaved;
+  return extFromUpload(file);
+}
 
 const upload = multer({
   storage,
   limits: { fileSize: 20 * 1024 * 1024 },
   fileFilter: (req, file, cb) => {
-    const ext = path.extname(file.originalname).toLowerCase();
+    const ext = extFromUpload(file);
     if (ALLOWED_EXTS.includes(ext)) {
       cb(null, true);
     } else {
-      cb(new Error('Разрешены только PDF, DOC, DOCX файлы'));
+      cb(new Error('Разрешены только DOC и DOCX файлы'));
     }
   },
 });
@@ -90,7 +119,16 @@ function resolveIssueOrError(journal, issueIdRaw) {
   if (Number.isNaN(issueId)) issueId = null;
 
   if (journal === 'stem') {
-    if (!issueId) return { error: 'Выберите выпуск журнала STEM' };
+    if (!issueId) {
+      const open = db.prepare(`
+        SELECT id FROM issues
+        WHERE journal = 'stem' AND accepting_submissions = 1
+        ORDER BY sort_order DESC, id DESC
+        LIMIT 1
+      `).get();
+      if (!open) return { error: 'Сейчас нет выпуска с открытым приёмом статей' };
+      issueId = open.id;
+    }
     const issue = db.prepare('SELECT * FROM issues WHERE id = ?').get(issueId);
     if (!issue || issue.journal !== 'stem') return { error: 'Некорректный выпуск' };
     if (!issue.accepting_submissions) return { error: 'Приём статей в этот выпуск закрыт' };
@@ -106,9 +144,10 @@ function resolveIssueOrError(journal, issueIdRaw) {
 
 // ── Submit article ────────────────────────────────────────────────────────────
 router.post('/', requireAuth, upload.single('file'), (req, res) => {
-  const { title, authors, journal, abstract, issue_id: issueIdRaw, author_date } = req.body;
+  const journal = (req.body.journal || 'stem').trim();
+  const { title, authors, abstract, issue_id: issueIdRaw, author_date } = req.body;
 
-  if (!title || !authors || !journal) {
+  if (!title || !authors) {
     return res.status(400).json({ error: 'Заполните все обязательные поля' });
   }
 
@@ -134,17 +173,27 @@ router.post('/', requireAuth, upload.single('file'), (req, res) => {
   const issueRes = resolveIssueOrError(journal, issueIdRaw);
   if (issueRes.error) return res.status(400).json({ error: issueRes.error });
 
-  // ── MIME check (magic bytes) ──────────────────────────────────────────────
-  if (req.file) {
-    const ext = path.extname(req.file.originalname).toLowerCase();
-    const fullPath = req.file.path;
-    if (!isAllowedMime(fullPath, ext)) {
-      fs.unlinkSync(fullPath); // delete suspicious file immediately
-      return res.status(400).json({ error: 'Файл не является корректным PDF/DOC/DOCX' });
-    }
+  if (!req.file) {
+    return res.status(400).json({ error: 'Прикрепите файл рукописи (DOC или DOCX)' });
   }
 
-  const filePath = req.file ? req.file.filename : null;
+  const check = validateWordUpload(req.file);
+  if (!check.ok) {
+    if (check.fullPath && fs.existsSync(check.fullPath)) fs.unlinkSync(check.fullPath);
+    if (check.reason === 'pdf') {
+      return res.status(400).json({ error: 'PDF не принимается. Загрузите рукопись в формате DOC или DOCX.' });
+    }
+    if (check.reason === 'empty') {
+      return res.status(400).json({ error: 'Файл пустой. Сохраните документ Word и попробуйте снова.' });
+    }
+    if (check.reason === 'ext') {
+      return res.status(400).json({ error: 'Разрешены только DOC и DOCX файлы' });
+    }
+    console.error('[upload] file not found:', check.fullPath, req.file?.originalname);
+    return res.status(400).json({ error: 'Не удалось сохранить файл. Попробуйте ещё раз.' });
+  }
+
+  const filePath = req.file.filename;
 
   const result = db.prepare(`
     INSERT INTO submissions (user_id, title, authors, journal, abstract, file_path, issue_id, author_date)

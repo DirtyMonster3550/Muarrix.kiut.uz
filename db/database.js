@@ -1,8 +1,32 @@
 const Database = require('better-sqlite3');
 const path = require('path');
+const fs = require('fs');
 const bcrypt = require('bcryptjs');
 
-const db = new Database(path.join(__dirname, 'kiut_nashrlar.db'));
+const DB_FILE = 'stem.db';
+const LEGACY_DB_FILE = 'kiut_nashrlar.db';
+
+function resolveDatabasePath() {
+  const dir = __dirname;
+  const newPath = path.join(dir, DB_FILE);
+  const legacyPath = path.join(dir, LEGACY_DB_FILE);
+  if (fs.existsSync(newPath)) return newPath;
+  if (!fs.existsSync(legacyPath)) return newPath;
+  try {
+    fs.renameSync(legacyPath, newPath);
+    for (const ext of ['-wal', '-shm']) {
+      const from = legacyPath + ext;
+      const to = newPath + ext;
+      if (fs.existsSync(from)) fs.renameSync(from, to);
+    }
+  } catch {
+    return legacyPath;
+  }
+  return newPath;
+}
+
+const dbPath = resolveDatabasePath();
+const db = new Database(dbPath);
 
 db.pragma('journal_mode = WAL');
 db.pragma('foreign_keys = ON');
@@ -120,8 +144,22 @@ function init() {
   if (!subCols.includes('editorial_reviewer_id')) {
     db.exec('ALTER TABLE submissions ADD COLUMN editorial_reviewer_id INTEGER');
   }
+  if (!subCols.includes('assigned_editorial_id')) {
+    db.exec('ALTER TABLE submissions ADD COLUMN assigned_editorial_id INTEGER');
+  }
   if (!subCols.includes('published_at')) {
     db.exec('ALTER TABLE submissions ADD COLUMN published_at DATETIME');
+  }
+  if (!subCols.includes('published_archive_file')) {
+    db.exec('ALTER TABLE submissions ADD COLUMN published_archive_file TEXT');
+  }
+
+  const issueCols = db.prepare('PRAGMA table_info(issues)').all().map((c) => c.name);
+  if (!issueCols.includes('cover_image')) {
+    db.exec('ALTER TABLE issues ADD COLUMN cover_image TEXT');
+  }
+  if (!issueCols.includes('archive_folder')) {
+    db.exec('ALTER TABLE issues ADD COLUMN archive_folder TEXT');
   }
 
   const userCols = db.prepare('PRAGMA table_info(users)').all().map((c) => c.name);
@@ -140,8 +178,8 @@ function init() {
     ['announce_text', 'Приём статей открыт! Ближайший выпуск STEM — 1 июня 2026.'],
     ['announce_enabled', '1'],
     ['announce_cta', 'Подать статью →'],
-    ['site_email', 'g.isamova@gmail.com'],
-    ['site_phone', '+998 78 129 40 40'],
+    ['site_email', 'g.isamova@kiut.uz'],
+    ['site_phone', '+998 78 129 40 40 (121)'],
     ['site_address', 'ул. Шота Руставели, 156, Ташкент'],
   ];
   for (const [key, value] of defaultSettings) {
@@ -150,8 +188,18 @@ function init() {
 
   db.prepare(`
     UPDATE settings SET value = ?, updated_at = CURRENT_TIMESTAMP
-    WHERE key = 'site_email' AND value = 'info@kiut.uz'
-  `).run('g.isamova@gmail.com');
+    WHERE key = 'site_email' AND value IN ('info@kiut.uz', 'g.isamova@gmail.com')
+  `).run('g.isamova@kiut.uz');
+
+  db.prepare(`
+    UPDATE settings SET value = ?, updated_at = CURRENT_TIMESTAMP
+    WHERE key = 'site_phone' AND value = '+998 78 129 40 40'
+  `).run('+998 78 129 40 40 (121)');
+
+  db.prepare(`
+    UPDATE submissions SET rejection_stage = 'tech'
+    WHERE status = 'rejected' AND (rejection_stage IS NULL OR TRIM(rejection_stage) = '')
+  `).run();
 
   const issueCount = db.prepare('SELECT COUNT(*) as c FROM issues').get().c;
   if (issueCount === 0) {
@@ -185,6 +233,13 @@ function init() {
     );
   }
 
+  try {
+    const { syncArchiveIssueCovers } = require('../lib/syncIssueCovers');
+    syncArchiveIssueCovers(db);
+  } catch (e) {
+    console.error('[syncIssueCovers]', e.message);
+  }
+
   // Create default admin if not exists
   const admin = db.prepare('SELECT id FROM users WHERE role = ?').get('admin');
   if (!admin) {
@@ -193,8 +248,23 @@ function init() {
       INSERT INTO users (full_name, email, password, role)
       VALUES (?, ?, ?, 'admin')
     `).run('Администратор', process.env.ADMIN_EMAIL || 'admin@kiut.uz', hash);
-    console.log('✅ Admin account created');
+  }
+
+  // В системе только один администратор — лишних переводим в авторы
+  const admins = db.prepare("SELECT id FROM users WHERE role = 'admin' ORDER BY id ASC").all();
+  if (admins.length > 1) {
+    const keepId = admins[0].id;
+    const demote = admins.slice(1).map((a) => a.id);
+    db.prepare(`UPDATE users SET role = 'author' WHERE id IN (${demote.map(() => '?').join(',')})`).run(...demote);
+    console.log(`[init] Оставлен один admin (#${keepId}), снята роль у: ${demote.join(', ')}`);
+  }
+
+  // Старый статус approved обходил экспертизу — возвращаем в очередь тех. эксперта
+  const legacy = db.prepare("SELECT COUNT(*) AS c FROM submissions WHERE status = 'approved'").get().c;
+  if (legacy > 0) {
+    db.prepare("UPDATE submissions SET status = 'pending' WHERE status = 'approved'").run();
+    console.log(`[init] ${legacy} статей переведено из approved → pending (очередь тех. эксперта)`);
   }
 }
 
-module.exports = { db, init };
+module.exports = { db, init, dbPath, DB_FILE };

@@ -4,8 +4,47 @@
  */
 const express = require('express');
 const router = express.Router();
+const fs = require('fs');
+const path = require('path');
+const multer = require('multer');
 const { db } = require('../db/database');
 const { requireAdmin } = require('./adminAuth');
+const {
+  normalizeArchiveFolder,
+  ensureCoversDir,
+  coversDir,
+  deleteCoverFileIfLocal,
+} = require('../lib/issueCovers');
+
+const ALLOWED_JOURNALS = ['stem', 'finecs', 'conference'];
+const COVER_EXTS = new Set(['.jpg', '.jpeg', '.png', '.webp']);
+
+ensureCoversDir().catch((e) => console.error('[covers]', e));
+
+const coverStorage = multer.diskStorage({
+  destination: (_req, _file, cb) => {
+    try {
+      fs.mkdirSync(coversDir(), { recursive: true });
+      cb(null, coversDir());
+    } catch (e) {
+      cb(e);
+    }
+  },
+  filename: (req, file, cb) => {
+    const ext = path.extname(file.originalname).toLowerCase();
+    cb(null, `${req.params.id}${ext}`);
+  },
+});
+
+const coverUpload = multer({
+  storage: coverStorage,
+  limits: { fileSize: 3 * 1024 * 1024 },
+  fileFilter: (_req, file, cb) => {
+    const ext = path.extname(file.originalname).toLowerCase();
+    if (COVER_EXTS.has(ext)) cb(null, true);
+    else cb(new Error('Разрешены только JPG, PNG и WEBP'));
+  },
+});
 
 router.get('/', requireAdmin, (req, res) => {
   try {
@@ -17,10 +56,20 @@ router.get('/', requireAdmin, (req, res) => {
   }
 });
 
-const ALLOWED_JOURNALS = ['stem', 'finecs', 'conference'];
+router.get('/archive-folders', requireAdmin, async (_req, res) => {
+  try {
+    const { archivesDirectory } = require('../lib/paths');
+    const { discoverIssuesInDir } = require('../lib/archiveStructure');
+    const discovered = await discoverIssuesInDir(archivesDirectory());
+    res.json(discovered.map((d) => d.folder).sort((a, b) => a.localeCompare(b, 'ru', { numeric: true })));
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ error: 'Не удалось прочитать папки архива' });
+  }
+});
 
 router.post('/', requireAdmin, (req, res) => {
-  const { journal, title, description, sort_order, accepting_submissions, issued_at } = req.body;
+  const { journal, title, description, sort_order, accepting_submissions, issued_at, archive_folder } = req.body;
   if (!title || !journal) {
     return res.status(400).json({ error: 'Укажите журнал и название выпуска' });
   }
@@ -32,12 +81,13 @@ router.post('/', requireAdmin, (req, res) => {
   const acc = accepting_submissions === false || accepting_submissions === 0 || accepting_submissions === '0' ? 0 : 1;
   const ord = Number.isFinite(Number(sort_order)) ? Number(sort_order) : 0;
   const when = issued_at && String(issued_at).trim() ? String(issued_at).trim() : null;
+  const folder = normalizeArchiveFolder(archive_folder);
 
   try {
     const r = db.prepare(`
-      INSERT INTO issues (journal, title, description, sort_order, accepting_submissions, issued_at)
-      VALUES (?, ?, ?, ?, ?, ?)
-    `).run(journal, title, description != null ? String(description) : null, ord, acc, when);
+      INSERT INTO issues (journal, title, description, sort_order, accepting_submissions, issued_at, archive_folder)
+      VALUES (?, ?, ?, ?, ?, ?, ?)
+    `).run(journal, title, description != null ? String(description) : null, ord, acc, when, folder);
     res.json({ success: true, id: r.lastInsertRowid });
   } catch (e) {
     console.error(e);
@@ -46,7 +96,7 @@ router.post('/', requireAdmin, (req, res) => {
 });
 
 router.put('/:id', requireAdmin, (req, res) => {
-  const { journal, title, description, sort_order, accepting_submissions, issued_at } = req.body;
+  const { journal, title, description, sort_order, accepting_submissions, issued_at, archive_folder } = req.body;
   const id = parseInt(req.params.id, 10);
   if (Number.isNaN(id)) return res.status(400).json({ error: 'Некорректный id' });
   if (journal && !ALLOWED_JOURNALS.includes(journal)) {
@@ -59,23 +109,59 @@ router.put('/:id', requireAdmin, (req, res) => {
   const acc = accepting_submissions === false || accepting_submissions === 0 || accepting_submissions === '0' ? 0 : 1;
   const ord = Number.isFinite(Number(sort_order)) ? Number(sort_order) : 0;
   const when = issued_at && String(issued_at).trim() ? String(issued_at).trim() : null;
+  const folder = archive_folder != null ? normalizeArchiveFolder(archive_folder) : null;
 
   db.prepare(`
-    UPDATE issues SET journal = ?, title = ?, description = ?, sort_order = ?, accepting_submissions = ?, issued_at = ?
+    UPDATE issues SET journal = ?, title = ?, description = ?, sort_order = ?, accepting_submissions = ?, issued_at = ?, archive_folder = ?
     WHERE id = ?
-  `).run(journal, title, description != null ? String(description) : null, ord, acc, when, id);
+  `).run(journal, title, description != null ? String(description) : null, ord, acc, when, folder, id);
   res.json({ success: true });
 });
 
-router.delete('/:id', requireAdmin, (req, res) => {
+router.post('/:id/cover', requireAdmin, (req, res, next) => {
+  coverUpload.single('cover')(req, res, (err) => {
+    if (err) {
+      return res.status(400).json({ error: err.message || 'Ошибка загрузки файла' });
+    }
+    next();
+  });
+}, async (req, res) => {
+  const id = parseInt(req.params.id, 10);
+  if (Number.isNaN(id)) return res.status(400).json({ error: 'Некорректный id' });
+  if (!req.file) return res.status(400).json({ error: 'Выберите файл обложки (JPG, PNG или WEBP)' });
+
+  const row = db.prepare('SELECT cover_image FROM issues WHERE id = ?').get(id);
+  if (!row) {
+    try { fs.unlinkSync(req.file.path); } catch { /* ignore */ }
+    return res.status(404).json({ error: 'Выпуск не найден' });
+  }
+
+  const coverPath = `/covers/issues/${req.file.filename}`;
+  if (row.cover_image && row.cover_image !== coverPath) {
+    await deleteCoverFileIfLocal(row.cover_image);
+    const oldExt = path.extname(row.cover_image);
+    const newExt = path.extname(req.file.filename);
+    if (oldExt !== newExt) {
+      const stale = path.join(coversDir(), `${id}${oldExt}`);
+      try { fs.unlinkSync(stale); } catch { /* ignore */ }
+    }
+  }
+
+  db.prepare('UPDATE issues SET cover_image = ? WHERE id = ?').run(coverPath, id);
+  res.json({ success: true, cover_image: coverPath });
+});
+
+router.delete('/:id', requireAdmin, async (req, res) => {
   const id = parseInt(req.params.id, 10);
   if (Number.isNaN(id)) return res.status(400).json({ error: 'Некорректный id' });
   const inUse = db.prepare('SELECT COUNT(*) AS c FROM submissions WHERE issue_id = ?').get(id).c;
   if (inUse > 0) {
     return res.status(400).json({ error: 'К выпуску привязаны статьи — удаление невозможно' });
   }
+  const row = db.prepare('SELECT cover_image FROM issues WHERE id = ?').get(id);
   const r = db.prepare('DELETE FROM issues WHERE id = ?').run(id);
   if (!r.changes) return res.status(404).json({ error: 'Не найдено' });
+  if (row?.cover_image) await deleteCoverFileIfLocal(row.cover_image);
   res.json({ success: true });
 });
 

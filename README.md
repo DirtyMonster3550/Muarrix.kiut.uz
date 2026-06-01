@@ -1,6 +1,6 @@
-# KIUT Ilmiy Nashrlar
+# STEM — Central Asian Journal of STEM
 
-Платформа для управления научными публикациями Kimyo International University in Tashkent.
+Веб-платформа журнала **Central Asian Journal of STEM** (KIUT).
 
 ## Возможности
 - Регистрация и авторизация авторов
@@ -36,7 +36,7 @@ EMAIL_HOST=smtp.gmail.com
 EMAIL_PORT=587
 EMAIL_USER=your_email@gmail.com
 EMAIL_PASS=your_app_password   # Пароль приложения Gmail (не основной пароль!)
-EMAIL_FROM=KIUT Ilmiy Nashrlar <your_email@gmail.com>
+EMAIL_FROM=STEM Journal <your_email@gmail.com>
 ```
 
 ### Как получить пароль приложения Gmail:

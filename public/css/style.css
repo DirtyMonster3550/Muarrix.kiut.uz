@@ -152,14 +152,14 @@ a:hover { text-decoration: underline; }
 }
 
 .logo-text h1 {
-  font-size: 24px;
+  font-size: 26px;
   font-weight: 800;
   letter-spacing: 0.3px;
   line-height: 1.1;
 }
 
 .logo-text p {
-  font-size: 12px;
+  font-size: 14px;
   color: rgba(255,255,255,0.7);
   margin-top: 2px;
 }
@@ -252,9 +252,9 @@ a:hover { text-decoration: underline; }
   background: rgba(255,255,255,0.1);
   border: 1.5px solid rgba(255,255,255,0.2);
   color: #fff;
-  padding: 8px 16px;
+  padding: 10px 18px;
   border-radius: 8px;
-  font-size: 13px;
+  font-size: 15px;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s;
@@ -988,8 +988,8 @@ tr:hover td { background: #fafcff; }
   display: flex;
   align-items: center;
   gap: 7px;
-  padding: 14px 18px;
-  font-size: 14px;
+  padding: 16px 20px;
+  font-size: 16px;
   font-weight: 500;
   color: var(--text-muted);
   text-decoration: none;
@@ -1113,30 +1113,30 @@ tr:hover td { background: #fafcff; }
 
 /* ===== CONTENT PAGE ===== */
 .content-page { max-width: 900px; margin: 0 auto; }
-.content-card { background: var(--surface); border-radius: var(--radius); box-shadow: var(--shadow); border: 1px solid var(--border); padding: 40px 44px; }
-.content-card h1 { font-size: 26px; font-weight: 800; color: var(--primary); margin-bottom: 8px; }
-.content-card .lead { font-size: 16px; color: var(--text-muted); margin-bottom: 32px; padding-bottom: 20px; border-bottom: 1px solid var(--border); }
-.content-card h2 { font-size: 18px; font-weight: 700; color: var(--primary); margin: 28px 0 12px; }
-.content-card h3 { font-size: 16px; font-weight: 700; color: var(--text); margin: 20px 0 8px; }
-.content-card p { font-size: 15px; line-height: 1.75; color: var(--text); margin-bottom: 12px; }
-.content-card ul, .content-card ol { padding-left: 24px; margin-bottom: 14px; }
-.content-card li { font-size: 15px; line-height: 1.75; margin-bottom: 6px; }
+.content-card { background: var(--surface); border-radius: var(--radius); box-shadow: var(--shadow); border: 1px solid var(--border); padding: 44px 48px; }
+.content-card h1 { font-size: 32px; font-weight: 800; color: var(--primary); margin-bottom: 12px; }
+.content-card .lead { font-size: 18px; color: var(--text-muted); margin-bottom: 32px; padding-bottom: 20px; border-bottom: 1px solid var(--border); }
+.content-card h2 { font-size: 22px; font-weight: 700; color: var(--primary); margin: 32px 0 14px; }
+.content-card h3 { font-size: 19px; font-weight: 700; color: var(--text); margin: 22px 0 10px; }
+.content-card p { font-size: 17px; line-height: 1.8; color: var(--text); margin-bottom: 14px; }
+.content-card ul, .content-card ol { padding-left: 26px; margin-bottom: 16px; }
+.content-card li { font-size: 17px; line-height: 1.8; margin-bottom: 8px; }
 .content-card .highlight-box {
   background: #e8f0fd;
   border-left: 4px solid var(--primary-light);
   border-radius: 4px;
-  padding: 16px 20px;
-  margin: 16px 0;
-  font-size: 14px;
-  line-height: 1.6;
+  padding: 18px 22px;
+  margin: 18px 0;
+  font-size: 16px;
+  line-height: 1.65;
 }
 .content-card .warn-box {
   background: #fff8e1;
   border-left: 4px solid var(--warning);
   border-radius: 4px;
-  padding: 16px 20px;
-  margin: 16px 0;
-  font-size: 14px;
+  padding: 18px 22px;
+  margin: 18px 0;
+  font-size: 16px;
 }
 
 /* ===== Оплата и сроки — крупнее и жирнее ===== */

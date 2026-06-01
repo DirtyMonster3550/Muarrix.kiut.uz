@@ -1,7 +1,7 @@
 {
-  "name": "kiut-ilmy-nashrlari",
+  "name": "stem",
   "version": "1.0.0",
-  "description": "",
+  "description": "Central Asian Journal of STEM — web platform",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",

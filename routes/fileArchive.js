@@ -11,6 +11,9 @@ const {
 } = require('../lib/archiveStructure');
 const { getArticleMetadata, loadFolderArticleIndex } = require('../lib/articleMetadata');
 const { buildArchiveIndex, searchArchive } = require('../lib/archiveSearch');
+const { buildDbCoverMap, resolveCoverUrl } = require('../lib/issueCovers');
+const { mergeDbIssuesIntoArchive } = require('../lib/archiveDbMerge');
+const { db } = require('../db/database');
 
 const ARCHIVES_ROOT = archivesDirectory();
 
@@ -50,14 +53,21 @@ async function listFilesInFolder(folderRel) {
 router.get('/issues', async (_req, res) => {
   try {
     const discovered = await discoverIssuesInDir(ARCHIVES_ROOT);
-    const groups = groupIssuesByYearTom(discovered);
-    const issues = discovered.map(({ folder, fileCount, year, tom, num, label }) => ({
+    const merged = mergeDbIssuesIntoArchive(discovered, db);
+    const dbCoverByFolder = buildDbCoverMap(db);
+    const enriched = await Promise.all(merged.map(async (issue) => ({
+      ...issue,
+      coverUrl: await resolveCoverUrl({ folder: issue.folder, archiveRoot: ARCHIVES_ROOT, dbCoverByFolder }),
+    })));
+    const groups = groupIssuesByYearTom(enriched);
+    const issues = enriched.map(({ folder, fileCount, year, tom, num, label, coverUrl }) => ({
       folder,
       fileCount,
       year,
       tom,
       num,
       label,
+      coverUrl,
     }));
     res.json({ groups, issues });
   } catch (e) {
@@ -71,9 +81,9 @@ router.get('/search', async (req, res) => {
     const { articles, years } = await buildArchiveIndex(ARCHIVES_ROOT);
     const q = typeof req.query.q === 'string' ? req.query.q : '';
     const year = typeof req.query.year === 'string' ? req.query.year : '';
-    const tom = typeof req.query.tom === 'string' ? req.query.tom : '';
+    const num = typeof req.query.num === 'string' ? req.query.num : '';
 
-    const results = searchArchive(articles, { q, year, tom }).map((a) => ({
+    const results = searchArchive(articles, { q, year, num }).map((a) => ({
       title: a.title,
       authors: a.authors,
       file: a.file,
@@ -85,7 +95,7 @@ router.get('/search', async (req, res) => {
       issueLabel: formatIssueLabel(a),
     }));
 
-    res.json({ q, year, tom, years, count: results.length, results });
+    res.json({ q, year, num, years, count: results.length, results });
   } catch (e) {
     console.error('[file-archive search]', e);
     res.status(500).json({ error: 'Ошибка поиска по архиву' });
@@ -106,11 +116,22 @@ router.get('/issue', async (req, res) => {
     return res.status(400).json({ error: 'Укажите параметр folder' });
   }
   try {
-    const files = await listFilesInFolder(folder);
+    let files = await listFilesInFolder(folder);
     if (files === null) {
-      return res.status(404).json({ error: 'Выпуск не найден' });
+      const normalized = folder.replace(/\\/g, '/').replace(/^\/+|\/+$/g, '');
+      const issueRow = db.prepare(`
+        SELECT id FROM issues
+        WHERE REPLACE(TRIM(archive_folder), '\\', '/') = ?
+        LIMIT 1
+      `).get(normalized);
+      if (!issueRow) {
+        return res.status(404).json({ error: 'Выпуск не найден' });
+      }
+      files = [];
     }
-    res.json({ folder, files });
+    const dbCoverByFolder = buildDbCoverMap(db);
+    const coverUrl = await resolveCoverUrl({ folder, archiveRoot: ARCHIVES_ROOT, dbCoverByFolder });
+    res.json({ folder, files, coverUrl });
   } catch (e) {
     console.error('[file-archive]', e);
     res.status(500).json({ error: 'Ошибка чтения выпуска' });

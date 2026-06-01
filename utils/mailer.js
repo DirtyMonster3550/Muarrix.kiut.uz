@@ -1,5 +1,12 @@
 const nodemailer = require('nodemailer');
 
+const JOURNAL_NAME = 'Central Asian Journal of STEM';
+const JOURNAL_SHORT = 'STEM';
+
+function defaultFrom() {
+  return process.env.EMAIL_FROM || `${JOURNAL_SHORT} <${process.env.EMAIL_USER}>`;
+}
+
 let transporter = null;
 
 // Escape user-supplied strings before embedding in HTML emails
@@ -57,7 +64,7 @@ async function sendApprovalEmail(toEmail, authorName, submissionTitle, journal, 
   <body>
     <div class="container">
       <div class="header">
-        <h1>KIUT Ilmiy Nashrlar</h1>
+        <h1>${JOURNAL_NAME}</h1>
         <p>Kimyo International University in Tashkent</p>
       </div>
       <div class="body">
@@ -70,7 +77,7 @@ async function sendApprovalEmail(toEmail, authorName, submissionTitle, journal, 
         </div>
         ${note ? `<div class="note-box"><strong>Izoh / Примечание:</strong><br>${esc(note)}</div>` : ''}
         <p>Keyingi qadamlar uchun shaxsiy kabinetingizga kiring.</p>
-        <p style="margin-top:30px">Hurmat bilan,<br><strong>KIUT Ilmiy Nashrlar Tahrir Kengashi</strong></p>
+        <p style="margin-top:30px">Hurmat bilan,<br><strong>${JOURNAL_NAME} — tahrir kengashi</strong></p>
       </div>
       <div class="footer">
         &copy; ${new Date().getFullYear()} Kimyo International University in Tashkent &nbsp;|&nbsp;
@@ -82,7 +89,7 @@ async function sendApprovalEmail(toEmail, authorName, submissionTitle, journal, 
 
   try {
     await getTransporter().sendMail({
-      from: process.env.EMAIL_FROM || `KIUT Ilmiy Nashrlar <${process.env.EMAIL_USER}>`,
+      from: defaultFrom(),
       to: toEmail,
       subject: `✅ Maqolangiz tasdiqlandi — ${esc(submissionTitle)}`,
       html,
@@ -122,7 +129,7 @@ async function sendRejectionEmail(toEmail, authorName, submissionTitle, journal,
   <body>
     <div class="container">
       <div class="header">
-        <h1>KIUT Ilmiy Nashrlar</h1>
+        <h1>${JOURNAL_NAME}</h1>
         <p>Kimyo International University in Tashkent</p>
       </div>
       <div class="body">
@@ -135,7 +142,7 @@ async function sendRejectionEmail(toEmail, authorName, submissionTitle, journal,
         </div>
         ${note ? `<div class="note-box"><strong>Izoh / Примечание редактора:</strong><br>${esc(note)}</div>` : ''}
         <p>Tuzatishlarni kiritib, qaytadan yuborishingiz mumkin.</p>
-        <p style="margin-top:30px">Hurmat bilan,<br><strong>KIUT Ilmiy Nashrlar Tahrir Kengashi</strong></p>
+        <p style="margin-top:30px">Hurmat bilan,<br><strong>${JOURNAL_NAME} — tahrir kengashi</strong></p>
       </div>
       <div class="footer">&copy; ${new Date().getFullYear()} Kimyo International University in Tashkent</div>
     </div>
@@ -144,7 +151,7 @@ async function sendRejectionEmail(toEmail, authorName, submissionTitle, journal,
 
   try {
     await getTransporter().sendMail({
-      from: process.env.EMAIL_FROM || `KIUT Ilmiy Nashrlar <${process.env.EMAIL_USER}>`,
+      from: defaultFrom(),
       to: toEmail,
       subject: `Maqolangiz haqida xabar — ${esc(submissionTitle)}`,
       html,
@@ -164,7 +171,7 @@ async function sendTestEmail(toEmail) {
     await getTransporter().sendMail({
       from: process.env.EMAIL_FROM || process.env.EMAIL_USER,
       to: toEmail,
-      subject: '✅ Тест — KIUT Ilmiy Nashrlar',
+      subject: `Тест — ${JOURNAL_SHORT}`,
       html: `<p>Тестовое письмо отправлено успешно. Email настроен корректно.</p><p style="color:#888;font-size:12px">${new Date().toLocaleString('ru-RU')}</p>`,
     });
     return { success: true };
@@ -199,7 +206,7 @@ async function sendPasswordResetEmail(toEmail, fullName, resetLink) {
   <body>
     <div class="container">
       <div class="header">
-        <h1>KIUT Ilmiy Nashrlar</h1>
+        <h1>${JOURNAL_NAME}</h1>
         <p>Kimyo International University in Tashkent</p>
       </div>
       <div class="body">
@@ -222,9 +229,9 @@ async function sendPasswordResetEmail(toEmail, fullName, resetLink) {
   </html>`;
   try {
     await getTransporter().sendMail({
-      from: process.env.EMAIL_FROM || `KIUT Ilmiy Nashrlar <${process.env.EMAIL_USER}>`,
+      from: defaultFrom(),
       to: toEmail,
-      subject: '🔑 Parolni tiklash / Сброс пароля — KIUT Ilmiy Nashrlar',
+      subject: `Parolni tiklash / Сброс пароля — ${JOURNAL_SHORT}`,
       html,
     });
     return { success: true };

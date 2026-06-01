@@ -1,122 +1,122 @@
 ﻿<!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="icon" type="image/png" sizes="32x32" href="/img/favicon-32x32.png">
-  <link rel="icon" type="image/png" sizes="16x16" href="/img/favicon-16x16.png">
-  <link rel="apple-touch-icon" href="/img/apple-touch-icon.png">
-  <title>Регистрация</title>
-  <link rel="stylesheet" href="/css/style.css">
+ <meta charset="UTF-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1.0">
+ <link rel="icon" type="image/png" sizes="32x32" href="/img/favicon-32x32.png">
+ <link rel="icon" type="image/png" sizes="16x16" href="/img/favicon-16x16.png">
+ <link rel="apple-touch-icon" href="/img/apple-touch-icon.png">
+ <title>Регистрация</title>
+ <link rel="stylesheet" href="/css/style.css">
 </head>
 <body class="auth-page" data-i18n-doc="register">
 
 <header class="site-header">
-  <div class="header-top">
-    <a href="/" class="header-logo" style="text-decoration:none;color:inherit;">
-      <img src="/img/android-chrome-192x192.png" alt="KIUT" style="height:52px;width:auto;flex-shrink:0">
-      <div class="logo-text">
-        <h1 data-i18n="brand_title_main">Центрально-азиатский журнал STEM</h1>
-        <p data-i18n="uni_brand_line">Kimyo International University in Tashkent</p>
-      </div>
-    </a>
-    <div class="header-top-right">
-      <div class="lang-switch lang-switch--inline" data-lang-switch role="group">
-        <button type="button" class="lang-switch__btn" data-set-lang="uz">UZ</button>
-        <button type="button" class="lang-switch__btn" data-set-lang="ru">RU</button>
-        <button type="button" class="lang-switch__btn" data-set-lang="en">EN</button>
-      </div>
-      <div class="header-auth" id="header-auth">
-        <a href="/login.html" class="btn-ghost" data-i18n="nav_login">Войти</a>
-      </div>
-    </div>
-  </div>
-  <nav class="journal-nav">
-    <span class="journal-nav-label" data-i18n="journal_nav_label">Раздел:</span>
-    <a href="/archives.html" class="journal-btn"><span class="j-icon">📚</span> <span data-i18n="nav_archive">Архив</span></a>
-    <a href="/" class="journal-btn" data-i18n="nav_back_home">← На главную</a>
-  </nav>
+ <div class="header-top">
+ <a href="/" class="header-logo" style="text-decoration:none;color:inherit;">
+ <img src="/img/android-chrome-192x192.png" alt="KIUT" style="height:52px;width:auto;flex-shrink:0">
+ <div class="logo-text">
+ <h1 data-i18n="brand_title_main">Центрально-азиатский журнал STEM</h1>
+ <p data-i18n="uni_brand_line">Kimyo International University in Tashkent</p>
+ </div>
+ </a>
+ <div class="header-top-right">
+ <div class="lang-switch lang-switch--inline" data-lang-switch role="group">
+ <button type="button" class="lang-switch__btn" data-set-lang="uz">UZ</button>
+ <button type="button" class="lang-switch__btn" data-set-lang="ru">RU</button>
+ <button type="button" class="lang-switch__btn" data-set-lang="en">EN</button>
+ </div>
+ <div class="header-auth" id="header-auth">
+ <a href="/login.html" class="btn-ghost" data-i18n="nav_login">Войти</a>
+ </div>
+ </div>
+ </div>
+ <nav class="journal-nav">
+ <span class="journal-nav-label" data-i18n="journal_nav_label">Раздел:</span>
+ <a href="/archives.html" class="journal-btn"><span data-i18n="nav_archive">Архив</span></a>
+ <a href="/" class="journal-btn" data-i18n="nav_back_home">← На главную</a>
+ </nav>
 </header>
 
 <div class="auth-container">
-  <div class="auth-card">
-    <div class="auth-logo">
-      <img src="/img/android-chrome-192x192.png" alt="KIUT" style="height:52px;width:auto;flex-shrink:0">
-      <h2 data-i18n="auth_reg_h2">Регистрация автора</h2>
-      <p data-i18n="auth_reg_sub">Создайте аккаунт для подачи статей</p>
-    </div>
+ <div class="auth-card">
+ <div class="auth-logo">
+ <img src="/img/android-chrome-192x192.png" alt="KIUT" style="height:52px;width:auto;flex-shrink:0">
+ <h2 data-i18n="auth_reg_h2">Регистрация автора</h2>
+ <p data-i18n="auth_reg_sub">Создайте аккаунт для подачи статей</p>
+ </div>
 
-    <div id="alert-box"></div>
+ <div id="alert-box"></div>
 
-    <form id="register-form">
-      <div class="form-group">
-        <label class="form-label"><span data-i18n="auth_full_name">ФИО</span> <span class="req-mark">*</span></label>
-        <input type="text" id="full_name" class="form-control" data-i18n-placeholder="auth_full_name_ph" placeholder="Иванов Иван Иванович" required autocomplete="name">
-      </div>
-      <div class="form-group">
-        <label class="form-label"><span data-i18n="auth_email">Email</span> <span class="req-mark">*</span></label>
-        <input type="email" id="email" class="form-control" placeholder="example@mail.com" required autocomplete="email">
-      </div>
-      <div class="form-group">
-        <label class="form-label"><span data-i18n="auth_password">Пароль</span> <span class="req-mark">*</span></label>
-        <input type="password" id="password" class="form-control" data-i18n-placeholder="auth_password_min_ph" placeholder="Минимум 6 символов" required autocomplete="new-password">
-        <div class="form-text" data-i18n="auth_password_hint">Используйте буквы и цифры</div>
-      </div>
-      <div class="form-group">
-        <label class="form-label"><span data-i18n="auth_password2">Подтвердите пароль</span> <span class="req-mark">*</span></label>
-        <input type="password" id="password2" class="form-control" data-i18n-placeholder="auth_password2_ph" placeholder="Повторите пароль" required autocomplete="new-password">
-      </div>
+ <form id="register-form">
+ <div class="form-group">
+ <label class="form-label"><span data-i18n="auth_full_name">ФИО</span> <span class="req-mark">*</span></label>
+ <input type="text" id="full_name" class="form-control" data-i18n-placeholder="auth_full_name_ph" placeholder="Иванов Иван Иванович" required autocomplete="name">
+ </div>
+ <div class="form-group">
+ <label class="form-label"><span data-i18n="auth_email">Email</span> <span class="req-mark">*</span></label>
+ <input type="email" id="email" class="form-control" placeholder="example@mail.com" required autocomplete="email">
+ </div>
+ <div class="form-group">
+ <label class="form-label"><span data-i18n="auth_password">Пароль</span> <span class="req-mark">*</span></label>
+ <input type="password" id="password" class="form-control" data-i18n-placeholder="auth_password_min_ph" placeholder="Минимум 6 символов" required autocomplete="new-password">
+ <div class="form-text" data-i18n="auth_password_hint">Используйте буквы и цифры</div>
+ </div>
+ <div class="form-group">
+ <label class="form-label"><span data-i18n="auth_password2">Подтвердите пароль</span> <span class="req-mark">*</span></label>
+ <input type="password" id="password2" class="form-control" data-i18n-placeholder="auth_password2_ph" placeholder="Повторите пароль" required autocomplete="new-password">
+ </div>
 
-      <button type="submit" class="btn btn-primary btn-block" id="submit-btn" data-i18n="auth_reg_btn">
-        Зарегистрироваться
-      </button>
-    </form>
+ <button type="submit" class="btn btn-primary btn-block" id="submit-btn" data-i18n="auth_reg_btn">
+ Зарегистрироваться
+ </button>
+ </form>
 
-    <div class="form-footer">
-      <span data-i18n="auth_has_account">Уже есть аккаунт?</span> <a href="/login.html" data-i18n="nav_login">Войти</a>
-    </div>
-  </div>
+ <div class="form-footer">
+ <span data-i18n="auth_has_account">Уже есть аккаунт?</span> <a href="/login.html" data-i18n="nav_login">Войти</a>
+ </div>
+ </div>
 </div>
 
 <script src="/js/stem-locale-site.js"></script>
 <script src="/js/i18n.js"></script>
 <script src="/js/app.js"></script>
 <script>
-  if (Auth.isLoggedIn()) {
-    window.location.href = Auth.isAdmin() ? '/admin.html' : '/dashboard.html';
-  }
+ if (Auth.isLoggedIn()) {
+ window.location.href = Auth.isAdmin()? '/admin.html': '/dashboard.html';
+ }
 
-  document.getElementById('register-form').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const alertBox = document.getElementById('alert-box');
-    const btn = document.getElementById('submit-btn');
+ document.getElementById('register-form').addEventListener('submit', async (e) => {
+ e.preventDefault();
+ const alertBox = document.getElementById('alert-box');
+ const btn = document.getElementById('submit-btn');
 
-    const full_name = document.getElementById('full_name').value.trim();
-    const email = document.getElementById('email').value.trim();
-    const password = document.getElementById('password').value;
-    const password2 = document.getElementById('password2').value;
+ const full_name = document.getElementById('full_name').value.trim();
+ const email = document.getElementById('email').value.trim();
+ const password = document.getElementById('password').value;
+ const password2 = document.getElementById('password2').value;
 
-    alertBox.innerHTML = '';
+ alertBox.innerHTML = '';
 
-    if (password !== password2) {
-      alertBox.innerHTML = `<div class="alert alert-danger">⚠️ ${i18t('auth_pwd_mismatch')}</div>`;
-      return;
-    }
+ if (password!== password2) {
+ alertBox.innerHTML = `<div class="alert alert-danger"> ${i18t('auth_pwd_mismatch')}</div>`;
+ return;
+ }
 
-    btn.innerHTML = `<span class="loader"></span> ${i18t('auth_reg_loading')}`;
-    btn.disabled = true;
+ btn.innerHTML = `<span class="loader"></span> ${i18t('auth_reg_loading')}`;
+ btn.disabled = true;
 
-    try {
-      const data = await API.post('/auth/register', { full_name, email, password });
-      Auth.setSession(data.token, data.user);
-      showToast(i18t('auth_reg_success'), 'success');
-      setTimeout(() => window.location.href = '/dashboard.html', 1000);
-    } catch (err) {
-      alertBox.innerHTML = `<div class="alert alert-danger">❌ ${err.message}</div>`;
-      btn.textContent = i18t('auth_reg_btn');
-      btn.disabled = false;
-    }
-  });
+ try {
+ const data = await API.post('/auth/register', { full_name, email, password });
+ Auth.setSession(data.token, data.user);
+ showToast(i18t('auth_reg_success'), 'success');
+ setTimeout(() => window.location.href = '/dashboard.html', 1000);
+ } catch (err) {
+ alertBox.innerHTML = `<div class="alert alert-danger"> ${err.message}</div>`;
+ btn.textContent = i18t('auth_reg_btn');
+ btn.disabled = false;
+ }
+ });
 </script>
 </body>
 </html>

@@ -1,550 +1,555 @@
 ﻿<!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="icon" type="image/png" sizes="32x32" href="/img/favicon-32x32.png">
-  <link rel="icon" type="image/png" sizes="16x16" href="/img/favicon-16x16.png">
-  <link rel="apple-touch-icon" href="/img/apple-touch-icon.png">
-  <title>Личный кабинет</title>
-  <link rel="stylesheet" href="/css/style.css">
+ <meta charset="UTF-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1.0">
+ <link rel="icon" type="image/png" sizes="32x32" href="/img/favicon-32x32.png">
+ <link rel="icon" type="image/png" sizes="16x16" href="/img/favicon-16x16.png">
+ <link rel="apple-touch-icon" href="/img/apple-touch-icon.png">
+ <title>Личный кабинет</title>
+ <link rel="stylesheet" href="/css/style.css">
 </head>
 <body data-i18n-doc="dashboard">
 
 <header class="site-header">
-  <div class="header-top">
-    <a href="/" class="header-logo" style="text-decoration:none;color:inherit;">
-      <img src="/img/android-chrome-192x192.png" alt="KIUT" style="height:52px;width:auto;flex-shrink:0">
-      <div class="logo-text">
-        <h1 data-i18n="brand_title_main">Центрально-азиатский журнал STEM</h1>
-        <p data-i18n="uni_brand_line">Kimyo International University in Tashkent</p>
-      </div>
-    </a>
-    <div class="header-top-right">
-      <div class="lang-switch lang-switch--inline" data-lang-switch role="group">
-        <button type="button" class="lang-switch__btn" data-set-lang="uz">UZ</button>
-        <button type="button" class="lang-switch__btn" data-set-lang="ru">RU</button>
-        <button type="button" class="lang-switch__btn" data-set-lang="en">EN</button>
-      </div>
-      <div class="header-auth" id="header-auth"></div>
-    </div>
-  </div>
-  <nav class="journal-nav">
-    <span class="journal-nav-label" data-i18n="journal_nav_label">Раздел:</span>
-    <a href="/#stem-current-issue" class="journal-btn"><span class="j-icon">📌</span> <span data-i18n="nav_current_issue">Текущий выпуск</span></a>
-    <a href="/archives.html" class="journal-btn"><span class="j-icon">📚</span> <span data-i18n="nav_archive">Архив</span></a>
-    <a href="/register.html" class="journal-btn"><span class="j-icon">✍️</span> <span data-i18n="nav_submit">Подать статью</span></a>
-  </nav>
+ <div class="header-top">
+ <a href="/" class="header-logo" style="text-decoration:none;color:inherit;">
+ <img src="/img/android-chrome-192x192.png" alt="KIUT" style="height:52px;width:auto;flex-shrink:0">
+ <div class="logo-text">
+ <h1 data-i18n="brand_title_main">Центрально-азиатский журнал STEM</h1>
+ <p data-i18n="uni_brand_line">Kimyo International University in Tashkent</p>
+ </div>
+ </a>
+ <div class="header-top-right">
+ <div class="lang-switch lang-switch--inline" data-lang-switch role="group">
+ <button type="button" class="lang-switch__btn" data-set-lang="uz">UZ</button>
+ <button type="button" class="lang-switch__btn" data-set-lang="ru">RU</button>
+ <button type="button" class="lang-switch__btn" data-set-lang="en">EN</button>
+ </div>
+ <div class="header-auth" id="header-auth"></div>
+ </div>
+ </div>
+ <nav class="journal-nav">
+ <span class="journal-nav-label" data-i18n="journal_nav_label">Раздел:</span>
+ <a href="/#stem-current-issue" class="journal-btn"><span data-i18n="nav_current_issue">Текущий выпуск</span></a>
+ <a href="/archives.html" class="journal-btn"><span data-i18n="nav_archive">Архив</span></a>
+ <a href="/register.html" class="journal-btn"><span data-i18n="nav_submit">Подать статью</span></a>
+ </nav>
 </header>
 
 <div class="main-content">
-  <div class="dashboard-layout">
+ <div class="dashboard-layout">
 
-    <!-- Sidebar -->
-    <aside class="sidebar">
-      <div class="sidebar-user">
-        <div class="user-avatar" id="sb-avatar">—</div>
-        <div class="name" id="sb-name">—</div>
-        <div class="email" id="sb-email">—</div>
-      </div>
-      <ul class="sidebar-nav">
-        <li><a href="#" class="active" data-tab="my-submissions" onclick="switchTab('my-submissions', this)">
-          <span class="nav-icon">📄</span> <span data-i18n="dash_my_articles">Мои статьи</span>
-        </a></li>
-        <li><a href="#" data-tab="submit" onclick="switchTab('submit', this)">
-          <span class="nav-icon">✍️</span> <span data-i18n="dash_submit">Подать статью</span>
-        </a></li>
-        <li><a href="#" data-tab="notifications" onclick="switchTab('notifications', this)">
-          <span class="nav-icon">🔔</span> <span data-i18n="dash_notifications">Уведомления</span>
-          <span class="sidebar-badge" id="notif-badge" style="display:none">0</span>
-        </a></li>
-        <li><button onclick="logout()">
-          <span class="nav-icon">🚪</span> <span data-i18n="nav_logout">Выйти</span>
-        </button></li>
-      </ul>
-    </aside>
+ <!-- Sidebar -->
+ <aside class="sidebar">
+ <div class="sidebar-user">
+ <div class="user-avatar" id="sb-avatar">—</div>
+ <div class="name" id="sb-name">—</div>
+ <div class="email" id="sb-email">—</div>
+ </div>
+ <ul class="sidebar-nav">
+ <li><a href="#" class="active" data-tab="my-submissions" onclick="switchTab('my-submissions', this)">
+ <span data-i18n="dash_my_articles">Мои статьи</span>
+ </a></li>
+ <li><a href="#" data-tab="submit" onclick="switchTab('submit', this)">
+ <span data-i18n="dash_submit">Подать статью</span>
+ </a></li>
+ <li><a href="#" data-tab="notifications" onclick="switchTab('notifications', this)">
+ <span data-i18n="dash_notifications">Уведомления</span>
+ <span class="sidebar-badge" id="notif-badge" style="display:none">0</span>
+ </a></li>
+ <li><button onclick="logout()">
+ <span data-i18n="nav_logout">Выйти</span>
+ </button></li>
+ </ul>
+ </aside>
 
-    <!-- Main area -->
-    <div class="dashboard-main">
+ <!-- Main area -->
+ <div class="dashboard-main">
 
-      <!-- My Submissions Tab -->
-      <div id="tab-my-submissions" class="tab-content">
-        <div class="page-header">
-          <h2 data-i18n="dash_my_articles">Мои статьи</h2>
-          <button class="btn btn-primary btn-sm" onclick="switchTab('submit', null)">+ <span data-i18n="dash_submit">Подать статью</span></button>
-        </div>
+ <!-- My Submissions Tab -->
+ <div id="tab-my-submissions" class="tab-content">
+ <div class="page-header">
+ <h2 data-i18n="dash_my_articles">Мои статьи</h2>
+ <button class="btn btn-primary btn-sm" onclick="switchTab('submit', null)">+ <span data-i18n="dash_submit">Подать статью</span></button>
+ </div>
 
-        <div class="stats-grid" id="my-stats">
-          <div class="stat-card"><div class="num" id="ms-total">—</div><div class="label" data-i18n="dash_stat_total">Всего подано</div></div>
-          <div class="stat-card pending"><div class="num" id="ms-pending">—</div><div class="label" data-i18n="dash_stat_progress">В процессе</div></div>
-          <div class="stat-card approved"><div class="num" id="ms-approved">—</div><div class="label" data-i18n="dash_stat_published">Опубликовано</div></div>
-          <div class="stat-card rejected"><div class="num" id="ms-rejected">—</div><div class="label" data-i18n="dash_stat_revision">На доработке</div></div>
-        </div>
+ <div class="stats-grid" id="my-stats">
+ <div class="stat-card"><div class="num" id="ms-total">—</div><div class="label" data-i18n="dash_stat_total">Всего подано</div></div>
+ <div class="stat-card pending"><div class="num" id="ms-pending">—</div><div class="label" data-i18n="dash_stat_progress">В процессе</div></div>
+ <div class="stat-card rejected"><div class="num" id="ms-rejected">—</div><div class="label" data-i18n="dash_stat_revision">На доработке</div></div>
+ <div class="stat-card approved"><div class="num" id="ms-approved">—</div><div class="label" data-i18n="dash_stat_published">Опубликовано</div></div>
+ </div>
 
-        <div class="table-container">
-          <div class="table-header">
-            <h3 data-i18n="dash_history">История подач</h3>
-          </div>
-          <div id="submissions-body">
-            <div class="empty-state">
-              <div class="loader loader-dark"></div>
-            </div>
-          </div>
-        </div>
-      </div>
+ <div class="table-container">
+ <div class="table-header">
+ <h3 data-i18n="dash_history">История подач</h3>
+ </div>
+ <div id="submissions-body">
+ <div class="empty-state">
+ <div class="loader loader-dark"></div>
+ </div>
+ </div>
+ </div>
+ </div>
 
-      <!-- Submit Tab -->
-      <div id="tab-submit" class="tab-content" style="display:none">
-        <div class="page-header">
-          <h2 data-i18n="dash_submit">Подать статью</h2>
-        </div>
-        <div class="card" style="max-width:680px">
-          <div id="submit-alert"></div>
-          <form id="submit-form" enctype="multipart/form-data">
-            <div class="form-group">
-              <label class="form-label"><span data-i18n="dash_title_label">Название статьи</span> <span class="req-mark">*</span></label>
-              <input type="text" name="title" class="form-control" data-i18n-placeholder="dash_title_ph" placeholder="Введите полное название" required>
-            </div>
-            <div class="form-group">
-              <label class="form-label"><span data-i18n="dash_authors_label">Авторы</span> <span class="req-mark">*</span></label>
-              <input type="text" name="authors" class="form-control" data-i18n-placeholder="dash_authors_ph" placeholder="Иванов И.И., Петров П.П." required>
-              <div class="form-text" data-i18n="dash_authors_hint">Перечислите всех авторов через запятую (не более 5 человек).</div>
-            </div>
-            <div class="form-group">
-              <label class="form-label"><span data-i18n="dash_journal_label">Журнал</span> <span class="req-mark">*</span></label>
-              <select name="journal" id="submit-journal" class="form-control" required>
-                <option value="" data-i18n="dash_journal_ph">— Выберите журнал —</option>
-                <option value="stem" data-i18n="brand_title_main">Центрально-азиатский журнал STEM</option>
-              </select>
-            </div>
-            <div class="form-group" id="issue-field-wrap" style="display:none">
-              <label class="form-label"><span data-i18n="dash_issue_label">Выпуск (том и номер)</span> <span class="req-mark">*</span></label>
-              <select id="issue-select" class="form-control" aria-required="true">
-                <option value="" data-i18n="dash_issue_ph">— Выберите выпуск —</option>
-              </select>
-              <div class="form-text" data-i18n="dash_issue_hint">Выберите выпуск из списка — как том/номер в журнале. Список ведёт администратор.</div>
-            </div>
-            <div class="form-group">
-              <label class="form-label"><span data-i18n="dash_date_label">Дата</span> <span class="req-mark">*</span></label>
-              <input type="date" name="author_date" class="form-control" required>
-              <div class="form-text" data-i18n="dash_date_hint">Укажите дату сами — например, дата отправки редакции или готовности рукописи.</div>
-            </div>
-            <div class="form-group">
-              <label class="form-label" data-i18n="dash_abstract_label">Аннотация</label>
-              <textarea name="abstract" class="form-control" rows="4" data-i18n-placeholder="dash_abstract_ph" placeholder="Краткое описание статьи (рекомендуется 150–250 слов)"></textarea>
-            </div>
-            <div class="form-group">
-              <label class="form-label" data-i18n="dash_file_label">Файл статьи</label>
-              <div class="file-upload" id="drop-zone">
-                <input type="file" id="file-input" name="file" accept=".pdf,.doc,.docx">
-                <div class="file-icon">📄</div>
-                <p data-i18n="dash_file_drop">Перетащите файл сюда или нажмите для выбора</p>
-                <div class="selected-file" id="file-label" data-i18n="dash_file_types">Поддерживаются PDF, DOC, DOCX (до 20 МБ)</div>
-              </div>
-            </div>
-            <button type="submit" class="btn btn-primary" id="submit-btn" data-i18n="dash_send_btn">
-              📤 Отправить на рассмотрение
-            </button>
-          </form>
-        </div>
-      </div>
+ <!-- Submit Tab -->
+ <div id="tab-submit" class="tab-content" style="display:none">
+ <div class="page-header">
+ <h2 data-i18n="dash_submit">Подать статью</h2>
+ </div>
+ <div class="card" style="max-width:680px">
+ <div id="submit-alert"></div>
+ <form id="submit-form" enctype="multipart/form-data">
+ <div class="form-group">
+ <label class="form-label"><span data-i18n="dash_title_label">Название статьи</span> <span class="req-mark">*</span></label>
+ <input type="text" name="title" class="form-control" data-i18n-placeholder="dash_title_ph" placeholder="Введите полное название" required>
+ </div>
+ <div class="form-group">
+ <label class="form-label"><span data-i18n="dash_authors_label">Авторы</span> <span class="req-mark">*</span></label>
+ <input type="text" name="authors" class="form-control" data-i18n-placeholder="dash_authors_ph" placeholder="Иванов И.И., Петров П.П." required>
+ <div class="form-text" data-i18n="dash_authors_hint">Перечислите всех авторов через запятую (не более 5 человек).</div>
+ </div>
+ <input type="hidden" name="journal" value="stem">
+ <input type="hidden" name="issue_id" id="submit-issue-id" value="">
+ <div class="form-group">
+ <label class="form-label"><span data-i18n="dash_date_label">Дата</span> <span class="req-mark">*</span></label>
+ <input type="date" name="author_date" class="form-control" required>
+ <div class="form-text" data-i18n="dash_date_hint">Укажите дату сами — например, дата отправки редакции или готовности рукописи.</div>
+ </div>
+ <div class="form-group">
+ <label class="form-label" data-i18n="dash_abstract_label">Аннотация</label>
+ <textarea name="abstract" class="form-control" rows="4" data-i18n-placeholder="dash_abstract_ph" placeholder="Краткое описание статьи (рекомендуется 150–250 слов)"></textarea>
+ </div>
+ <div class="form-group">
+ <label class="form-label" data-i18n="dash_file_label">Файл статьи</label>
+ <div class="file-upload" id="drop-zone">
+ <input type="file" id="file-input" name="file" accept=".doc,.docx,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document">
+ <div class="file-icon"></div>
+ <p data-i18n="dash_file_drop">Перетащите файл сюда или нажмите для выбора</p>
+ <div class="selected-file" id="file-label" data-i18n="dash_file_types">Поддерживаются DOC и DOCX (до 20 МБ). PDF не принимается.</div>
+ </div>
+ </div>
+ <button type="submit" class="btn btn-primary" id="submit-btn" data-i18n="dash_send_btn">
+ Отправить на рассмотрение
+ </button>
+ </form>
+ </div>
+ </div>
 
-      <!-- Notifications Tab -->
-      <div id="tab-notifications" class="tab-content" style="display:none">
-        <div class="page-header">
-          <h2 data-i18n="dash_notifications">Уведомления</h2>
-        </div>
-        <div class="table-container">
-          <div id="notif-body">
-            <div class="empty-state"><div class="loader loader-dark"></div></div>
-          </div>
-        </div>
-      </div>
+ <!-- Notifications Tab -->
+ <div id="tab-notifications" class="tab-content" style="display:none">
+ <div class="page-header">
+ <h2 data-i18n="dash_notifications">Уведомления</h2>
+ </div>
+ <div class="table-container">
+ <div id="notif-body">
+ <div class="empty-state"><div class="loader loader-dark"></div></div>
+ </div>
+ </div>
+ </div>
 
-    </div>
-  </div>
+ </div>
+ </div>
 </div>
 
 <!-- Submission Detail Modal -->
 <div class="modal-overlay" id="detail-modal">
-  <div class="modal">
-    <div class="modal-header">
-      <h3 data-i18n="dash_modal_title">Детали статьи</h3>
-      <button class="modal-close" onclick="closeModal('detail-modal')">✕</button>
-    </div>
-    <div class="modal-body" id="detail-body"></div>
-    <div class="modal-footer">
-      <button class="btn btn-secondary btn-sm" onclick="closeModal('detail-modal')" data-i18n="dash_close">Закрыть</button>
-    </div>
-  </div>
+ <div class="modal">
+ <div class="modal-header">
+ <h3 data-i18n="dash_modal_title">Детали статьи</h3>
+ <button class="modal-close" onclick="closeModal('detail-modal')"></button>
+ </div>
+ <div class="modal-body" id="detail-body"></div>
+ <div class="modal-footer">
+ <button class="btn btn-secondary btn-sm" onclick="closeModal('detail-modal')" data-i18n="dash_close">Закрыть</button>
+ </div>
+ </div>
 </div>
 
 <script src="/js/stem-locale-site.js"></script>
 <script src="/js/i18n.js"></script>
 <script src="/js/app.js"></script>
 <script>
-  // Auth guard
-  if (!Auth.isLoggedIn()) window.location.href = '/login.html';
-  if (Auth.isAdmin()) window.location.href = '/admin.html';
-  const _role = Auth.getUser()?.role;
-  if (_role === 'tech_expert' || _role === 'editorial_expert') window.location.href = '/expert.html';
+ // Auth guard
+ if (!Auth.isLoggedIn()) window.location.href = '/login.html';
+ if (Auth.isAdmin()) window.location.href = '/admin.html';
+ const _role = Auth.getUser()?.role;
+ if (_role === 'tech_expert' || _role === 'editorial_expert') window.location.href = '/expert.html';
 
-  const user = Auth.getUser();
+ const user = Auth.getUser();
 
-  // Sidebar user info
-  if (user) {
-    const initials = user.full_name.split(' ').map(w => w[0]).join('').substring(0, 2).toUpperCase();
-    document.getElementById('sb-avatar').textContent = initials;
-    document.getElementById('sb-name').textContent = user.full_name;
-    document.getElementById('sb-email').textContent = user.email;
-  }
+ // Sidebar user info
+ if (user) {
+ const initials = user.full_name.split(' ').map(w => w[0]).join('').substring(0, 2).toUpperCase();
+ document.getElementById('sb-avatar').textContent = initials;
+ document.getElementById('sb-name').textContent = user.full_name;
+ document.getElementById('sb-email').textContent = user.email;
+ }
 
-  function switchTab(tab, el) {
-    if (el) {
-      document.querySelectorAll('.sidebar-nav a').forEach(a => a.classList.remove('active'));
-      el.classList.add('active');
-    }
-    document.querySelectorAll('.tab-content').forEach(t => t.style.display = 'none');
-    document.getElementById('tab-' + tab).style.display = 'block';
-    if (tab === 'my-submissions') loadSubmissions();
-    if (tab === 'notifications') loadNotifications();
-    if (tab === 'submit') refreshIssueOptions();
-    return false;
-  }
+ function switchTab(tab, el) {
+ if (el) {
+ document.querySelectorAll('.sidebar-nav a').forEach(a => a.classList.remove('active'));
+ el.classList.add('active');
+ }
+ document.querySelectorAll('.tab-content').forEach(t => t.style.display = 'none');
+ document.getElementById('tab-' + tab).style.display = 'block';
+ if (tab === 'my-submissions') loadSubmissions();
+ if (tab === 'notifications') loadNotifications();
+ if (tab === 'submit') loadCurrentSubmitTarget();
+ return false;
+ }
 
-  function formatIsoDateRu(iso) {
-    if (!iso) return '—';
-    const p = String(iso).slice(0, 10).split('-');
-    if (p.length !== 3) return String(iso);
-    return `${p[2]}.${p[1]}.${p[0]}`;
-  }
+ function formatIsoDateRu(iso) {
+ if (!iso) return '—';
+ const p = String(iso).slice(0, 10).split('-');
+ if (p.length!== 3) return String(iso);
+ return `${p[2]}.${p[1]}.${p[0]}`;
+ }
 
-  function dashEscapeText(t) {
-    const d = document.createElement('div');
-    d.textContent = t;
-    return d.innerHTML;
-  }
+ function dashEscapeText(t) {
+ const d = document.createElement('div');
+ d.textContent = t;
+ return d.innerHTML;
+ }
 
-  async function refreshIssueOptions() {
-    const sel = document.getElementById('issue-select');
-    const wrap = document.getElementById('issue-field-wrap');
-    const hint = document.getElementById('issue-non-stem-hint');
-    const jSel = document.getElementById('submit-journal');
-    if (!sel || !wrap || !jSel) return;
-    const j = jSel.value;
-    if (j !== 'stem') {
-      wrap.style.display = 'none';
-      if (hint) hint.style.display = j ? 'block' : 'none';
-      sel.disabled = true;
-      sel.removeAttribute('name');
-      sel.removeAttribute('required');
-      sel.innerHTML = '';
-      return;
-    }
-    if (hint) hint.style.display = 'none';
-    wrap.style.display = 'block';
-    sel.disabled = false;
-    sel.setAttribute('name', 'issue_id');
-    sel.setAttribute('required', 'required');
-    sel.innerHTML = '<option value="">' + i18t('dash_issue_loading') + '</option>';
-    try {
-      const list = await fetch('/api/issues/open?journal=stem').then(r => r.json());
-      if (!list.length) {
-        sel.innerHTML = '<option value="">' + i18t('dash_issue_none') + '</option>';
-        return;
-      }
-      sel.innerHTML = '<option value="">' + i18t('dash_issue_ph') + '</option>' +
-        list.map(i => `<option value="${i.id}">${dashEscapeText(i.title)}</option>`).join('');
-    } catch {
-      sel.innerHTML = '<option value="">' + i18t('dash_issue_error') + '</option>';
-    }
-  }
+ async function loadCurrentSubmitTarget() {
+ const issueInput = document.getElementById('submit-issue-id');
+ const submitBtn = document.getElementById('submit-btn');
+ const alertBox = document.getElementById('submit-alert');
+ if (!issueInput || !submitBtn) return;
 
-  document.getElementById('submit-journal').addEventListener('change', refreshIssueOptions);
+ issueInput.value = '';
+ submitBtn.disabled = true;
 
-  function stageTracker(status) {
-    const stages = [
-      { key: 'pending',            label: i18t('dash_stage_tech'),   icon: '🔧' },
-      { key: 'tech_approved',      label: i18t('dash_stage_edit'),   icon: '📝' },
-      { key: 'editorial_approved', label: i18t('dash_stage_pub'),    icon: '📬' },
-      { key: 'published',          label: i18t('dash_stage_done'),   icon: '🌐' },
-    ];
-    const order = ['pending','tech_approved','editorial_approved','published'];
-    const isRejected = status === 'rejected';
-    const currentIdx = order.indexOf(status);
+ try {
+ const list = await fetch('/api/issues/open?journal=stem').then(r => r.json());
+ if (!list.length) {
+ if (alertBox) {
+ alertBox.innerHTML = '<div class="alert alert-warning">' + i18t('dash_issue_none') + '</div>';
+ }
+ return;
+ }
+ issueInput.value = String(list[0].id);
+ submitBtn.disabled = false;
+ if (alertBox) alertBox.innerHTML = '';
+ } catch {
+ if (alertBox) {
+ alertBox.innerHTML = '<div class="alert alert-danger">' + i18t('dash_issue_error') + '</div>';
+ }
+ }
+ }
 
-    return `<div style="display:flex;align-items:center;gap:0;margin:10px 0 4px;flex-wrap:wrap">` +
-      stages.map((s, i) => {
-        let stateStyle, dotColor;
-        if (isRejected) {
-          stateStyle = 'color:#94a3b8'; dotColor = '#e2e8f0';
-        } else if (i < currentIdx) {
-          stateStyle = 'color:#059669'; dotColor = '#059669';
-        } else if (i === currentIdx) {
-          stateStyle = 'color:#1a3a6b;font-weight:700'; dotColor = '#1a3a6b';
-        } else {
-          stateStyle = 'color:#cbd5e1'; dotColor = '#e2e8f0';
-        }
-        const arrow = i < stages.length - 1
-          ? `<span style="color:#cbd5e1;margin:0 4px;font-size:12px">→</span>`
-          : '';
-        return `<span style="display:flex;align-items:center;gap:4px;font-size:11px;${stateStyle}">
-          <span style="width:8px;height:8px;border-radius:50%;background:${dotColor};display:inline-block;flex-shrink:0"></span>
-          ${s.icon} ${s.label}
-        </span>${arrow}`;
-      }).join('') + `</div>`;
-  }
+ function stageTracker(sub) {
+ const status = typeof sub === 'string' ? sub : sub.status;
+ const rejectionStage = typeof sub === 'object' ? sub.rejection_stage : null;
+ const stages = [
+ { key: 'pending', label: i18t('dash_stage_tech'), icon: '' },
+ { key: 'tech_approved', label: i18t('dash_stage_edit'), icon: '' },
+ { key: 'editorial_approved', label: i18t('dash_stage_pub'), icon: '' },
+ { key: 'published', label: i18t('dash_stage_done'), icon: '' },
+ ];
+ const order = ['pending','tech_approved','editorial_approved','published'];
+ const isRejected = status === 'rejected';
+ const currentIdx = order.indexOf(status);
 
-  // ===== Load Submissions =====
-  async function loadSubmissions() {
-    try {
-      const data = await API.get('/submissions/my');
-      const total    = data.length;
-      const inReview = data.filter(s => ['pending','tech_approved','editorial_approved'].includes(s.status)).length;
-      const published = data.filter(s => s.status === 'published').length;
-      const rejected = data.filter(s => s.status === 'rejected').length;
+ function failStageIndex() {
+ if (!isRejected) return -1;
+ if (rejectionStage === 'tech') return 0;
+ if (rejectionStage === 'editorial') return 1;
+ if (rejectionStage === 'admin') return 2;
+ return 0;
+ }
+ const failIdx = failStageIndex();
 
-      document.getElementById('ms-total').textContent   = total;
-      document.getElementById('ms-pending').textContent = inReview;
-      document.getElementById('ms-approved').textContent= published;
-      document.getElementById('ms-rejected').textContent= rejected;
+ function rejectionHint() {
+ if (!isRejected) return '';
+ if (rejectionStage === 'tech') return i18t('dash_rejection_tech');
+ if (rejectionStage === 'editorial') return i18t('dash_rejection_editorial');
+ if (rejectionStage === 'admin') return i18t('dash_rejection_admin');
+ return i18t('dash_rejection_tech');
+ }
 
-      const body = document.getElementById('submissions-body');
-      if (!data.length) {
-        body.innerHTML = `
-          <div class="empty-state">
-            <div class="icon">📭</div>
-            <h3>${i18t('dash_empty_title')}</h3>
-            <p>${i18t('dash_empty_p')}</p>
-            <button class="btn btn-primary btn-sm" onclick="switchTab('submit', null)">${i18t('dash_empty_btn')}</button>
-          </div>`;
-        return;
-      }
+ return `<div style="display:flex;align-items:center;gap:0;margin:10px 0 4px;flex-wrap:wrap">` +
+ stages.map((s, i) => {
+ let stateStyle, dotColor;
+ if (isRejected) {
+ if (i < failIdx) {
+ stateStyle = 'color:#059669'; dotColor = '#059669';
+ } else if (i === failIdx) {
+ stateStyle = 'color:#dc2626;font-weight:700'; dotColor = '#dc2626';
+ } else {
+ stateStyle = 'color:#94a3b8'; dotColor = '#e2e8f0';
+ }
+ } else if (i < currentIdx) {
+ stateStyle = 'color:#059669'; dotColor = '#059669';
+ } else if (i === currentIdx) {
+ stateStyle = 'color:#1a3a6b;font-weight:700'; dotColor = '#1a3a6b';
+ } else {
+ stateStyle = 'color:#cbd5e1'; dotColor = '#e2e8f0';
+ }
+ const arrow = i < stages.length - 1
+? `<span style="color:#cbd5e1;margin:0 4px;font-size:12px">→</span>`
+: '';
+ return `<span style="display:flex;align-items:center;gap:4px;font-size:11px;${stateStyle}" title="${isRejected && i === failIdx ? rejectionHint() : ''}">
+ <span style="width:8px;height:8px;border-radius:50%;background:${dotColor};display:inline-block;flex-shrink:0"></span>
+ ${s.icon} ${s.label}
+ </span>${arrow}`;
+ }).join('') +
+ (isRejected ? `<div style="width:100%;margin-top:6px;font-size:11px;color:#dc2626;font-weight:600">${rejectionHint()}</div>` : '') +
+ `</div>`;
+ }
 
-      body.innerHTML = `
-        <table>
-          <thead>
-            <tr>
-              <th>#</th>
-              <th>${i18t('dash_col_title')}</th>
-              <th>${i18t('dash_col_journal')}</th>
-              <th>${i18t('dash_col_date')}</th>
-              <th>${i18t('dash_col_status')}</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody>
-            ${data.map((s, i) => `
-              <tr>
-                <td style="color:var(--text-muted)">${i + 1}</td>
-                <td><strong>${dashEscapeText(s.title)}</strong><br>
-                  <span style="font-size:11px;color:var(--text-muted)">${dashEscapeText(s.authors)}</span>
-                </td>
-                <td style="font-size:12px">${journalName(s.journal)}</td>
-                <td style="font-size:13px">${formatDate(s.submitted_at)}</td>
-                <td>
-                  ${statusBadge(s.status)}
-                  ${stageTracker(s.status)}
-                  ${s.status === 'rejected' && s.rejection_reason
-                    ? `<div style="margin-top:6px;font-size:11px;background:#fef2f2;border:1px solid #fecaca;border-radius:6px;padding:6px 10px;color:#b91c1c">
-                        <strong>${i18t('dash_remark')}</strong> ${dashEscapeText(s.rejection_reason)}
-                       </div>`
-                    : ''}
-                </td>
-                <td><button class="btn btn-secondary btn-sm" onclick="showDetail(${s.id})">${i18t('dash_detail_btn')}</button></td>
-              </tr>
-            `).join('')}
-          </tbody>
-        </table>`;
-    } catch (err) {
-      document.getElementById('submissions-body').innerHTML = `<div class="alert alert-danger" style="margin:16px">${err.message}</div>`;
-    }
-  }
+ // ===== Load Submissions =====
+ async function loadSubmissions() {
+ try {
+ const data = await API.get('/submissions/my');
+ const total = data.length;
+ const inReview = data.filter(s => ['pending','tech_approved','editorial_approved'].includes(s.status)).length;
+ const published = data.filter(s => s.status === 'published').length;
+ const rejected = data.filter(s => s.status === 'rejected').length;
 
-  // ===== Show detail =====
-  async function showDetail(id) {
-    openModal('detail-modal');
-    document.getElementById('detail-body').innerHTML = '<div class="empty-state"><div class="loader loader-dark"></div></div>';
+ document.getElementById('ms-total').textContent = total;
+ document.getElementById('ms-pending').textContent = inReview;
+ document.getElementById('ms-approved').textContent= published;
+ document.getElementById('ms-rejected').textContent= rejected;
 
-    try {
-      const subs = await API.get('/submissions/my');
-      const s = subs.find(x => x.id === id);
-      if (!s) throw new Error(i18t('dash_err_not_found'));
+ const body = document.getElementById('submissions-body');
+ if (!data.length) {
+ body.innerHTML = `
+ <div class="empty-state">
+ <div class="icon"></div>
+ <h3>${i18t('dash_empty_title')}</h3>
+ <p>${i18t('dash_empty_p')}</p>
+ <button class="btn btn-primary btn-sm" onclick="switchTab('submit', null)">${i18t('dash_empty_btn')}</button>
+ </div>`;
+ return;
+ }
 
-      document.getElementById('detail-body').innerHTML = `
-        <div class="detail-grid">
-          <div class="detail-item" style="grid-column:1/-1">
-            <label>${i18t('dash_detail_l_title')}</label>
-            <p><strong>${dashEscapeText(s.title)}</strong></p>
-          </div>
-          <div class="detail-item">
-            <label>${i18t('dash_detail_l_authors')}</label>
-            <p>${dashEscapeText(s.authors)}</p>
-          </div>
-          <div class="detail-item">
-            <label>${i18t('dash_detail_l_journal')}</label>
-            <p>${journalName(s.journal)}</p>
-          </div>
-          <div class="detail-item">
-            <label>${i18t('dash_detail_l_issue')}</label>
-            <p>${s.issue_title ? dashEscapeText(s.issue_title) : '—'}</p>
-          </div>
-          <div class="detail-item">
-            <label>${i18t('dash_detail_l_author_date')}</label>
-            <p>${formatIsoDateRu(s.author_date)}</p>
-          </div>
-          <div class="detail-item">
-            <label>${i18t('dash_detail_l_submitted')}</label>
-            <p>${formatDate(s.submitted_at)}</p>
-          </div>
-          <div class="detail-item" style="grid-column:1/-1">
-            <label>${i18t('dash_detail_l_status')}</label>
-            <div style="margin-top:4px">${statusBadge(s.status)}</div>
-            ${stageTracker(s.status)}
-          </div>
-          ${s.status === 'rejected' && s.rejection_reason ? `
-          <div class="detail-item" style="grid-column:1/-1">
-            <label>${i18t('dash_detail_l_expert')}</label>
-            <div class="alert alert-danger" style="margin:0">${dashEscapeText(s.rejection_reason)}</div>
-          </div>` : ''}
-          ${s.abstract ? `<div class="detail-item" style="grid-column:1/-1"><label>${i18t('dash_abstract_label')}</label><p>${s.abstract}</p></div>` : ''}
-          ${s.admin_note ? `<div class="detail-item" style="grid-column:1/-1">
-            <label>${i18t('dash_detail_l_editor')}</label>
-            <div class="alert alert-info" style="margin:0">${dashEscapeText(s.admin_note)}</div>
-          </div>` : ''}
-          ${s.reviewed_at ? `<div class="detail-item"><label>${i18t('dash_detail_l_review_date')}</label><p>${formatDate(s.reviewed_at)}</p></div>` : ''}
-          ${s.published_at ? `<div class="detail-item"><label>${i18t('dash_detail_l_pub_date')}</label><p>${formatDate(s.published_at)}</p></div>` : ''}
-        </div>`;
-    } catch (err) {
-      document.getElementById('detail-body').innerHTML = `<div class="alert alert-danger">${err.message}</div>`;
-    }
-  }
+ body.innerHTML = `
+ <table>
+ <thead>
+ <tr>
+ <th>#</th>
+ <th>${i18t('dash_col_title')}</th>
+ <th>${i18t('dash_col_journal')}</th>
+ <th>${i18t('dash_col_date')}</th>
+ <th>${i18t('dash_col_status')}</th>
+ <th></th>
+ </tr>
+ </thead>
+ <tbody>
+ ${data.map((s, i) => `
+ <tr>
+ <td style="color:var(--text-muted)">${i + 1}</td>
+ <td><strong>${dashEscapeText(s.title)}</strong><br>
+ <span style="font-size:11px;color:var(--text-muted)">${dashEscapeText(s.authors)}</span>
+ </td>
+ <td style="font-size:12px">${journalName(s.journal)}</td>
+ <td style="font-size:13px">${formatDate(s.submitted_at)}</td>
+ <td>
+ ${statusBadge(s.status)}
+ ${stageTracker(s)}
+ ${s.status === 'rejected' && s.rejection_reason
+? `<div style="margin-top:6px;font-size:11px;background:#fef2f2;border:1px solid #fecaca;border-radius:6px;padding:6px 10px;color:#b91c1c">
+ <strong>${i18t('dash_remark')}</strong> ${dashEscapeText(s.rejection_reason)}
+ </div>`
+: ''}
+ </td>
+ <td><button class="btn btn-secondary btn-sm" onclick="showDetail(${s.id})">${i18t('dash_detail_btn')}</button></td>
+ </tr>
+ `).join('')}
+ </tbody>
+ </table>`;
+ } catch (err) {
+ document.getElementById('submissions-body').innerHTML = `<div class="alert alert-danger" style="margin:16px">${err.message}</div>`;
+ }
+ }
 
-  // ===== Load Notifications =====
-  async function loadNotifications() {
-    try {
-      const data = await API.get('/submissions/notifications');
-      const body = document.getElementById('notif-body');
+ // ===== Show detail =====
+ async function showDetail(id) {
+ openModal('detail-modal');
+ document.getElementById('detail-body').innerHTML = '<div class="empty-state"><div class="loader loader-dark"></div></div>';
 
-      if (!data.length) {
-        body.innerHTML = `<div class="empty-state"><div class="icon">🔔</div><h3>${i18t('dash_notif_none')}</h3></div>`;
-        return;
-      }
+ try {
+ const subs = await API.get('/submissions/my');
+ const s = subs.find(x => x.id === id);
+ if (!s) throw new Error(i18t('dash_err_not_found'));
 
-      const icons = { submitted: '📤', approved: '✅', rejected: '✖' };
+ document.getElementById('detail-body').innerHTML = `
+ <div class="detail-grid">
+ <div class="detail-item" style="grid-column:1/-1">
+ <label>${i18t('dash_detail_l_title')}</label>
+ <p><strong>${dashEscapeText(s.title)}</strong></p>
+ </div>
+ <div class="detail-item">
+ <label>${i18t('dash_detail_l_authors')}</label>
+ <p>${dashEscapeText(s.authors)}</p>
+ </div>
+ <div class="detail-item">
+ <label>${i18t('dash_detail_l_journal')}</label>
+ <p>${journalName(s.journal)}</p>
+ </div>
+ <div class="detail-item">
+ <label>${i18t('dash_detail_l_issue')}</label>
+ <p>${s.issue_title? dashEscapeText(s.issue_title): '—'}</p>
+ </div>
+ <div class="detail-item">
+ <label>${i18t('dash_detail_l_author_date')}</label>
+ <p>${formatIsoDateRu(s.author_date)}</p>
+ </div>
+ <div class="detail-item">
+ <label>${i18t('dash_detail_l_submitted')}</label>
+ <p>${formatDate(s.submitted_at)}</p>
+ </div>
+ <div class="detail-item" style="grid-column:1/-1">
+ <label>${i18t('dash_detail_l_status')}</label>
+ <div style="margin-top:4px">${statusBadge(s.status)}</div>
+ ${stageTracker(s)}
+ </div>
+ ${s.status === 'rejected' && s.rejection_reason? `
+ <div class="detail-item" style="grid-column:1/-1">
+ <label>${i18t('dash_detail_l_expert')}</label>
+ <div style="font-size:12px;color:#dc2626;font-weight:600;margin-bottom:6px">${s.rejection_stage === 'editorial' ? i18t('dash_rejection_editorial') : s.rejection_stage === 'admin' ? i18t('dash_rejection_admin') : i18t('dash_rejection_tech')}</div>
+ <div class="alert alert-danger" style="margin:0">${dashEscapeText(s.rejection_reason)}</div>
+ </div>`: ''}
+ ${s.abstract? `<div class="detail-item" style="grid-column:1/-1"><label>${i18t('dash_abstract_label')}</label><p>${s.abstract}</p></div>`: ''}
+ ${s.admin_note? `<div class="detail-item" style="grid-column:1/-1">
+ <label>${i18t('dash_detail_l_editor')}</label>
+ <div class="alert alert-info" style="margin:0">${dashEscapeText(s.admin_note)}</div>
+ </div>`: ''}
+ ${s.reviewed_at? `<div class="detail-item"><label>${i18t('dash_detail_l_review_date')}</label><p>${formatDate(s.reviewed_at)}</p></div>`: ''}
+ ${s.published_at? `<div class="detail-item"><label>${i18t('dash_detail_l_pub_date')}</label><p>${formatDate(s.published_at)}</p></div>`: ''}
+ </div>`;
+ } catch (err) {
+ document.getElementById('detail-body').innerHTML = `<div class="alert alert-danger">${err.message}</div>`;
+ }
+ }
 
-      body.innerHTML = data.map(n => `
-        <div class="notif-item ${n.is_read ? '' : 'unread'}" onclick="markRead(${n.id}, this)">
-          <div class="notif-dot ${n.is_read ? 'read' : 'unread'}"></div>
-          <div class="notif-content">
-            <div>${icons[n.type] || '🔔'} ${n.message}</div>
-            <div class="time">${formatDate(n.sent_at)}</div>
-          </div>
-        </div>
-      `).join('');
-    } catch (err) {
-      document.getElementById('notif-body').innerHTML = `<div class="alert alert-danger" style="margin:16px">${err.message}</div>`;
-    }
-  }
+ // ===== Load Notifications =====
+ async function loadNotifications() {
+ try {
+ const data = await API.get('/submissions/notifications');
+ const body = document.getElementById('notif-body');
 
-  async function markRead(id, el) {
-    try {
-      await API.put(`/submissions/notifications/${id}/read`);
-      el.classList.remove('unread');
-      el.querySelector('.notif-dot').className = 'notif-dot read';
-      updateNotifBadge();
-    } catch {}
-  }
+ if (!data.length) {
+ body.innerHTML = `<div class="empty-state"><div class="icon"></div><h3>${i18t('dash_notif_none')}</h3></div>`;
+ return;
+ }
 
-  async function updateNotifBadge() {
-    try {
-      const data = await API.get('/submissions/notifications');
-      const unread = data.filter(n => !n.is_read).length;
-      const badge = document.getElementById('notif-badge');
-      badge.style.display = unread > 0 ? 'inline' : 'none';
-      badge.textContent = unread;
-    } catch {}
-  }
+ const icons = { submitted: '', approved: '', rejected: '' };
 
-  // ===== Submit form =====
-  initFileUpload('drop-zone', 'file-input', 'file-label');
+ body.innerHTML = data.map(n => `
+ <div class="notif-item ${n.is_read? '': 'unread'}" onclick="markRead(${n.id}, this)">
+ <div class="notif-dot ${n.is_read? 'read': 'unread'}"></div>
+ <div class="notif-content">
+ <div>${icons[n.type] || ''} ${n.message}</div>
+ <div class="time">${formatDate(n.sent_at)}</div>
+ </div>
+ </div>
+ `).join('');
+ } catch (err) {
+ document.getElementById('notif-body').innerHTML = `<div class="alert alert-danger" style="margin:16px">${err.message}</div>`;
+ }
+ }
 
-  document.getElementById('submit-form').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const btn = document.getElementById('submit-btn');
-    const alertBox = document.getElementById('submit-alert');
-    const form = e.target;
+ async function markRead(id, el) {
+ try {
+ await API.put(`/submissions/notifications/${id}/read`);
+ el.classList.remove('unread');
+ el.querySelector('.notif-dot').className = 'notif-dot read';
+ updateNotifBadge();
+ } catch {}
+ }
 
-    alertBox.innerHTML = '';
-    btn.innerHTML = `<span class="loader"></span> ${i18t('dash_submit_loading')}`;
-    btn.disabled = true;
+ async function updateNotifBadge() {
+ try {
+ const data = await API.get('/submissions/notifications');
+ const unread = data.filter(n =>!n.is_read).length;
+ const badge = document.getElementById('notif-badge');
+ badge.style.display = unread > 0? 'inline': 'none';
+ badge.textContent = unread;
+ } catch {}
+ }
 
-    const authorField = form.authors?.value ?? '';
-    const authorCount = authorField
-      .split(/[,;]/g)
-      .map((s) => s.trim())
-      .filter(Boolean).length;
-    if (authorCount < 1) {
-      alertBox.innerHTML = '<div class="alert alert-danger">❌ ' + i18t('dash_err_authors') + '</div>';
-      btn.textContent = i18t('dash_send_btn');
-      btn.disabled = false;
-      return;
-    }
-    if (authorCount > 5) {
-      alertBox.innerHTML = '<div class="alert alert-danger">❌ ' + i18t('dash_err_max_authors', { n: authorCount }) + '</div>';
-      btn.textContent = i18t('dash_send_btn');
-      btn.disabled = false;
-      return;
-    }
+ // ===== Submit form =====
+ initFileUpload('drop-zone', 'file-input', 'file-label');
 
-    const jVal = document.getElementById('submit-journal').value;
-    if (jVal === 'stem') {
-      const issueEl = document.getElementById('issue-select');
-      if (!issueEl || !issueEl.value) {
-        alertBox.innerHTML = '<div class="alert alert-danger">❌ ' + i18t('dash_err_issue') + '</div>';
-        btn.textContent = i18t('dash_send_btn');
-        btn.disabled = false;
-        return;
-      }
-    }
+ document.getElementById('submit-form').addEventListener('submit', async (e) => {
+ e.preventDefault();
+ const btn = document.getElementById('submit-btn');
+ const alertBox = document.getElementById('submit-alert');
+ const form = e.target;
 
-    const formData = new FormData(form);
-    const token = Auth.getToken();
+ alertBox.innerHTML = '';
+ btn.innerHTML = `<span class="loader"></span> ${i18t('dash_submit_loading')}`;
+ btn.disabled = true;
 
-    try {
-      const res = await fetch('/api/submissions', {
-        method: 'POST',
-        headers: { 'Authorization': `Bearer ${token}` },
-        body: formData,
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error);
+ const authorField = form.authors?.value?? '';
+ const authorCount = authorField
+.split(/[,;]/g)
+.map((s) => s.trim())
+.filter(Boolean).length;
+ if (authorCount < 1) {
+ alertBox.innerHTML = '<div class="alert alert-danger"> ' + i18t('dash_err_authors') + '</div>';
+ btn.textContent = i18t('dash_send_btn');
+ btn.disabled = false;
+ return;
+ }
+ if (authorCount > 5) {
+ alertBox.innerHTML = '<div class="alert alert-danger"> ' + i18t('dash_err_max_authors', { n: authorCount }) + '</div>';
+ btn.textContent = i18t('dash_send_btn');
+ btn.disabled = false;
+ return;
+ }
 
-      showToast(i18t('dash_submit_ok'), 'success');
-      form.reset();
-      document.getElementById('file-label').textContent = i18t('dash_file_types');
-      setTimeout(() => {
-        switchTab('my-submissions', document.querySelector('[data-tab="my-submissions"]'));
-      }, 1200);
-    } catch (err) {
-      alertBox.innerHTML = `<div class="alert alert-danger">❌ ${err.message}</div>`;
-    } finally {
-      btn.textContent = i18t('dash_send_btn');
-      btn.disabled = false;
-    }
-  });
+ const jVal = document.getElementById('submit-issue-id')?.value;
+ if (!jVal) {
+ alertBox.innerHTML = '<div class="alert alert-danger"> ' + i18t('dash_err_issue') + '</div>';
+ btn.textContent = i18t('dash_send_btn');
+ btn.disabled = false;
+ return;
+ }
 
-  document.addEventListener('kiut:langchange', () => {
-    const active = document.querySelector('.sidebar-nav a.active');
-    const tab = active?.getAttribute('data-tab') || 'my-submissions';
-    if (tab === 'my-submissions') loadSubmissions();
-    if (tab === 'notifications') loadNotifications();
-    if (tab === 'submit') refreshIssueOptions();
-  });
+ const formData = new FormData(form);
+ const token = Auth.getToken();
 
-  // Init
-  loadSubmissions();
-  updateNotifBadge();
+ try {
+ const res = await fetch('/api/submissions', {
+ method: 'POST',
+ headers: { 'Authorization': `Bearer ${token}` },
+ body: formData,
+ });
+ const data = await res.json();
+ if (!res.ok) throw new Error(data.error);
+
+ showToast(i18t('dash_submit_ok'), 'success');
+ form.reset();
+ document.getElementById('file-label').textContent = i18t('dash_file_types');
+ loadCurrentSubmitTarget();
+ setTimeout(() => {
+ switchTab('my-submissions', document.querySelector('[data-tab="my-submissions"]'));
+ }, 1200);
+ } catch (err) {
+ alertBox.innerHTML = `<div class="alert alert-danger"> ${err.message}</div>`;
+ } finally {
+ btn.textContent = i18t('dash_send_btn');
+ btn.disabled = false;
+ }
+ });
+
+ document.addEventListener('kiut:langchange', () => {
+ const active = document.querySelector('.sidebar-nav a.active');
+ const tab = active?.getAttribute('data-tab') || 'my-submissions';
+ if (tab === 'my-submissions') loadSubmissions();
+ if (tab === 'notifications') loadNotifications();
+ if (tab === 'submit') loadCurrentSubmitTarget();
+ });
+
+ // Init
+ loadSubmissions();
+ updateNotifBadge();
+ loadCurrentSubmitTarget();
 </script>
 </body>
 </html>

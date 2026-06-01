@@ -1,10 +1,11 @@
 const express = require('express');
 const router = express.Router();
 const path = require('path');
-const { db } = require('../db/database');
+const { db, dbPath } = require('../db/database');
 const { sendApprovalEmail, sendRejectionEmail, sendTestEmail } = require('../utils/mailer');
 const { requireAdmin } = require('./adminAuth');
 const { auditLog } = require('../middleware/security');
+const { publishSubmissionToArchive, syncPublishedToArchive } = require('../lib/publishSubmission');
 
 // Dashboard stats
 router.get('/stats', requireAdmin, (req, res) => {
@@ -57,7 +58,7 @@ router.get('/submissions/:id', requireAdmin, (req, res) => {
   res.json(row);
 });
 
-// Approve submission
+// Approve submission — только после экспертизы (legacy: editorial_approved → publish через /publish)
 router.post('/submissions/:id/approve', requireAdmin, async (req, res) => {
   const { note } = req.body;
   const sub = db.prepare(`
@@ -67,6 +68,23 @@ router.post('/submissions/:id/approve', requireAdmin, async (req, res) => {
   `).get(req.params.id);
 
   if (!sub) return res.status(404).json({ error: 'Не найдено' });
+
+  if (sub.status === 'pending' || sub.status === 'tech_approved') {
+    return res.status(400).json({
+      error: 'Статья проходит экспертизу. Дождитесь решения тех. и ред. экспертов или верните на доработку.',
+    });
+  }
+  if (sub.status === 'editorial_approved') {
+    return res.status(400).json({
+      error: 'Статья уже одобрена экспертами. Опубликуйте её во вкладке «К публикации».',
+    });
+  }
+  if (sub.status === 'published') {
+    return res.status(400).json({ error: 'Статья уже опубликована' });
+  }
+  if (sub.status !== 'approved') {
+    return res.status(400).json({ error: 'Нельзя одобрить статью в текущем статусе' });
+  }
 
   db.prepare(`
     UPDATE submissions SET status = 'approved', admin_note = ?, reviewed_at = CURRENT_TIMESTAMP
@@ -84,7 +102,7 @@ router.post('/submissions/:id/approve', requireAdmin, async (req, res) => {
   res.json({ success: true, emailSent: emailResult.success, stub: emailResult.stub });
 });
 
-// Reject submission
+// Reject submission (admin may return to author at any pre-publish stage)
 router.post('/submissions/:id/reject', requireAdmin, async (req, res) => {
   const { note } = req.body;
   const sub = db.prepare(`
@@ -94,11 +112,20 @@ router.post('/submissions/:id/reject', requireAdmin, async (req, res) => {
   `).get(req.params.id);
 
   if (!sub) return res.status(404).json({ error: 'Не найдено' });
+  if (sub.status === 'published') {
+    return res.status(400).json({ error: 'Нельзя отклонить опубликованную статью' });
+  }
 
   db.prepare(`
-    UPDATE submissions SET status = 'rejected', admin_note = ?, reviewed_at = CURRENT_TIMESTAMP
+    UPDATE submissions
+    SET status = 'rejected',
+        admin_note = ?,
+        assigned_editorial_id = NULL,
+        rejection_stage = 'admin',
+        rejection_reason = ?,
+        reviewed_at = CURRENT_TIMESTAMP
     WHERE id = ?
-  `).run(note || null, req.params.id);
+  `).run(note || null, note || 'Возвращено администратором', req.params.id);
 
   db.prepare(`
     INSERT INTO notifications (user_id, submission_id, type, message)
@@ -112,7 +139,7 @@ router.post('/submissions/:id/reject', requireAdmin, async (req, res) => {
 });
 
 // ── Publish submission (admin publishes editorial_approved) ───────────────────
-router.post('/submissions/:id/publish', requireAdmin, (req, res) => {
+router.post('/submissions/:id/publish', requireAdmin, async (req, res) => {
   const { note } = req.body;
   const sub = db.prepare(`
     SELECT s.*, u.full_name, u.email
@@ -125,6 +152,11 @@ router.post('/submissions/:id/publish', requireAdmin, (req, res) => {
     return res.status(400).json({ error: 'Статья не в очереди на публикацию' });
   }
 
+  const archiveResult = await publishSubmissionToArchive(sub.id, db);
+  if (!archiveResult.ok) {
+    return res.status(400).json({ error: archiveResult.error });
+  }
+
   db.prepare(`
     UPDATE submissions
     SET status = 'published', admin_note = ?, published_at = CURRENT_TIMESTAMP, reviewed_at = CURRENT_TIMESTAMP
@@ -133,10 +165,25 @@ router.post('/submissions/:id/publish', requireAdmin, (req, res) => {
 
   db.prepare(`INSERT INTO notifications (user_id, submission_id, type, message) VALUES (?, ?, 'approved', ?)`)
     .run(sub.user_id, sub.id,
-      `🎉 Ваша статья «${sub.title}» опубликована! Она доступна на сайте журнала.`);
+      `Ваша статья «${sub.title}» опубликована! Она доступна в архиве на сайте журнала.`);
 
   auditLog(req.user.id, 'publish_submission', 'submission', sub.id, sub.title);
-  res.json({ success: true });
+  res.json({
+    success: true,
+    archiveFolder: archiveResult.folder,
+    archiveFile: archiveResult.archiveFile,
+  });
+});
+
+// ── Backfill: опубликованные статьи → файловый архив ────────────────────────
+router.post('/archive/sync-published', requireAdmin, async (_req, res) => {
+  try {
+    const result = await syncPublishedToArchive(db);
+    res.json({ success: true, ...result });
+  } catch (e) {
+    console.error('[admin sync-published]', e);
+    res.status(500).json({ error: 'Не удалось синхронизировать архив' });
+  }
 });
 
 // ── Export submissions as CSV ─────────────────────────────────────────────────
@@ -188,12 +235,13 @@ router.get('/submissions/export', requireAdmin, (req, res) => {
 router.post('/submissions/bulk', requireAdmin, async (req, res) => {
   const { ids, action, note } = req.body;
   if (!Array.isArray(ids) || !ids.length) return res.status(400).json({ error: 'Укажите статьи' });
-  if (!['approve', 'reject'].includes(action)) return res.status(400).json({ error: 'Неверное действие' });
+  if (action !== 'reject') {
+    return res.status(400).json({ error: 'Массовое одобрение отключено — статьи проходят экспертизу' });
+  }
 
   const cleanIds = ids.map(id => parseInt(id, 10)).filter(id => !Number.isNaN(id));
   if (!cleanIds.length) return res.status(400).json({ error: 'Некорректные ID' });
 
-  const newStatus = action === 'approve' ? 'approved' : 'rejected';
   let processed = 0;
 
   for (const id of cleanIds) {
@@ -201,19 +249,24 @@ router.post('/submissions/bulk', requireAdmin, async (req, res) => {
       SELECT s.*, u.full_name, u.email FROM submissions s
       JOIN users u ON s.user_id = u.id WHERE s.id = ?
     `).get(id);
-    if (!sub) continue;
+    if (!sub || sub.status === 'published') continue;
 
-    db.prepare(`UPDATE submissions SET status = ?, admin_note = ?, reviewed_at = CURRENT_TIMESTAMP WHERE id = ?`)
-      .run(newStatus, note || null, id);
+    db.prepare(`
+      UPDATE submissions
+      SET status = 'rejected',
+          admin_note = ?,
+          assigned_editorial_id = NULL,
+          rejection_stage = 'admin',
+          rejection_reason = ?,
+          reviewed_at = CURRENT_TIMESTAMP
+      WHERE id = ?
+    `).run(note || null, note || 'Возвращено администратором', id);
 
-    const msgType = action === 'approve' ? 'approved' : 'rejected';
-    const msg = action === 'approve'
-      ? `Ваша статья "${sub.title}" одобрена к публикации!`
-      : `Ваша статья "${sub.title}" возвращена на доработку.${note ? ' Примечание: ' + note : ''}`;
-    db.prepare(`INSERT INTO notifications (user_id, submission_id, type, message) VALUES (?, ?, ?, ?)`)
-      .run(sub.user_id, id, msgType, msg);
+    const msg = `Ваша статья "${sub.title}" возвращена на доработку.${note ? ' Примечание: ' + note : ''}`;
+    db.prepare(`INSERT INTO notifications (user_id, submission_id, type, message) VALUES (?, ?, 'rejected', ?)`)
+      .run(sub.user_id, id, msg);
 
-    auditLog(req.user.id, `bulk_${action}`, 'submission', id, sub.title);
+    auditLog(req.user.id, 'bulk_reject', 'submission', id, sub.title);
     processed++;
   }
 
@@ -255,8 +308,7 @@ router.post('/test-email', requireAdmin, async (req, res) => {
 
 // ── Database backup ───────────────────────────────────────────────────────────
 router.get('/backup', requireAdmin, (req, res) => {
-  const dbPath = path.join(__dirname, '../db/kiut_nashrlar.db');
-  const filename = `kiut_backup_${new Date().toISOString().slice(0,10)}.db`;
+  const filename = `stem_backup_${new Date().toISOString().slice(0, 10)}.db`;
   auditLog(req.user.id, 'download_backup', null, null, filename);
   res.download(dbPath, filename);
 });
@@ -307,14 +359,14 @@ router.get('/users', requireAdmin, (req, res) => {
   res.json(rows);
 });
 
-// Change user role
-const ALLOWED_ROLES = ['author', 'tech_expert', 'editorial_expert', 'admin'];
+// Change user role (admin role cannot be assigned — only one admin exists in the system)
+const ASSIGNABLE_ROLES = ['author', 'tech_expert', 'editorial_expert'];
 
 router.put('/users/:id/role', requireAdmin, (req, res) => {
   const id = parseInt(req.params.id, 10);
   const { role } = req.body;
 
-  if (!ALLOWED_ROLES.includes(role)) {
+  if (!ASSIGNABLE_ROLES.includes(role)) {
     return res.status(400).json({ error: 'Недопустимая роль' });
   }
   if (id === req.user.id) {
@@ -323,6 +375,9 @@ router.put('/users/:id/role', requireAdmin, (req, res) => {
 
   const user = db.prepare('SELECT id, full_name, role FROM users WHERE id = ?').get(id);
   if (!user) return res.status(404).json({ error: 'Пользователь не найден' });
+  if (user.role === 'admin') {
+    return res.status(400).json({ error: 'Роль администратора нельзя изменить' });
+  }
 
   db.prepare('UPDATE users SET role = ? WHERE id = ?').run(role, id);
   auditLog(req.user.id, 'change_role', 'user', id, `${user.role} → ${role}`);
