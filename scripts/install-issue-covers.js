@@ -4,13 +4,13 @@
  */
 const fs = require('fs');
 const path = require('path');
-const { parseStemFolderMeta } = require('../lib/sortArchiveFolders');
+const { parseMuarrixFolderMeta } = require('../lib/sortArchiveFolders');
 
 const ASSETS_DIR = path.join(
   process.env.USERPROFILE || '',
   '.cursor',
   'projects',
-  'c-Users-Dirty-Desktop-STEM',
+  'c-Users-Dirty-Desktop-Muarrix.kiut.uz',
   'assets'
 );
 const ARCHIVES_ROOT = path.join(__dirname, '..', 'public', 'archives');
@@ -29,8 +29,8 @@ function listArchiveFolders() {
     .filter((d) => d.isDirectory())
     .map((d) => d.name)
     .sort((a, b) => {
-      const ma = parseStemFolderMeta(a);
-      const mb = parseStemFolderMeta(b);
+      const ma = parseMuarrixFolderMeta(a);
+      const mb = parseMuarrixFolderMeta(b);
       if (ma.year !== mb.year) return ma.year - mb.year;
       if (ma.tom !== mb.tom) return ma.tom - mb.tom;
       if (ma.num !== mb.num) return ma.num - mb.num;
@@ -64,7 +64,7 @@ function main() {
     copyFile(asset, archiveCover);
     copyFile(asset, publicCover);
 
-    const meta = parseStemFolderMeta(folder);
+    const meta = parseMuarrixFolderMeta(folder);
     const sortOrder = meta.year * 10 + meta.tom;
     const accepting = meta.tom === 6 && meta.num === 2 ? 1 : 0;
     const issuedAt = meta.year > 0 ? `${meta.year}-06-01` : null;

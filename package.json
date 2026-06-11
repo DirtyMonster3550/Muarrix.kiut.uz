@@ -1,7 +1,7 @@
 {
-  "name": "stem",
+  "name": "muarrix.kiut.uz",
   "version": "1.0.0",
-  "description": "Central Asian Journal of STEM — web platform",
+  "description": "Muarrix.kiut.uz — web platform",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",

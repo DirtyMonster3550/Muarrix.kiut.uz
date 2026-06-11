@@ -1,11 +1,11 @@
-"""Sync STEM issue covers into SQLite (no native Node modules required)."""
+"""Sync Muarrix.kiut.uz issue covers into SQLite (no native Node modules required)."""
 import os
 import re
 import sqlite3
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-DB = ROOT / "db" / "stem.db"
+DB = ROOT / "db" / "muarrix.db"
 ARCHIVES = ROOT / "public" / "archives"
 COVERS = ROOT / "public" / "covers" / "issues"
 
@@ -86,7 +86,7 @@ def main():
                 INSERT INTO issues
                 (journal, title, description, sort_order, accepting_submissions,
                  issued_at, archive_folder, cover_image)
-                VALUES ('stem', ?, NULL, ?, ?, ?, ?, ?)
+                VALUES ('muarrix', ?, NULL, ?, ?, ?, ?, ?)
                 """,
                 (folder, sort_order, accepting, issued_at, folder, cover_path),
             )
@@ -95,13 +95,13 @@ def main():
     cur.execute(
         """
         UPDATE issues SET accepting_submissions = 0
-        WHERE journal = 'stem' AND (archive_folder IS NULL OR archive_folder NOT LIKE '%Том 6 № 2%')
+        WHERE journal = 'muarrix' AND (archive_folder IS NULL OR archive_folder NOT LIKE '%Том 6 № 2%')
         """
     )
     cur.execute(
         """
         UPDATE issues SET accepting_submissions = 1
-        WHERE journal = 'stem' AND archive_folder LIKE '%Том 6 № 2%'
+        WHERE journal = 'muarrix' AND archive_folder LIKE '%Том 6 № 2%'
         """
     )
 

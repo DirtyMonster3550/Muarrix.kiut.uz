@@ -1,10 +1,11 @@
-const jwt = require('jsonwebtoken');
+const { verifyToken } = require('../lib/jwtAuth');
+const { getSessionToken } = require('../middleware/hardening');
 
 function requireAdmin(req, res, next) {
-  const token = req.headers.authorization?.split(' ')[1];
+  const token = getSessionToken(req);
   if (!token) return res.status(401).json({ error: 'Не авторизован' });
   try {
-    const payload = jwt.verify(token, process.env.JWT_SECRET || 'secret');
+    const payload = verifyToken(token);
     if (payload.role !== 'admin') return res.status(403).json({ error: 'Доступ запрещён' });
     req.user = payload;
     next();

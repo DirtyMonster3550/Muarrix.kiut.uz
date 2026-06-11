@@ -1,6 +1,6 @@
 @echo off
 chcp 65001 >nul
-title STEM — server
+title Muarrix.kiut.uz — server
 cd /d "%~dp0"
 
 set "NODE=C:\Program Files\nodejs\node.exe"
@@ -8,7 +8,7 @@ if not exist "%NODE%" set "NODE=node"
 
 for /f "tokens=5" %%a in ('netstat -ano ^| findstr :3000 ^| findstr LISTENING') do (
   echo.
-  echo  Сервер STEM уже запущен на порту 3000.
+  echo  Сервер Muarrix.kiut.uz уже запущен на порту 3000.
   echo  Откройте: http://localhost:3000
   echo.
   echo  Чтобы перезапустить — закройте старый терминал ^(Ctrl+C^)
@@ -19,7 +19,7 @@ for /f "tokens=5" %%a in ('netstat -ano ^| findstr :3000 ^| findstr LISTENING') 
 )
 
 echo.
-echo  STEM — Central Asian Journal of STEM
+echo  Muarrix.kiut.uz — Muarrix.kiut.uz
 echo  http://localhost:3000
 echo.
 echo  Ctrl+C — остановить

@@ -13,29 +13,29 @@
  dashboard: { ru: 'title_dashboard', uz: 'title_dashboard', en: 'title_dashboard' },
  expert: { ru: 'title_expert', uz: 'title_expert', en: 'title_expert' },
  how: {
- ru: 'Как опубликовать статью — Центрально-азиатский журнал STEM',
- uz: 'Maqola chop etish — Markaziy Osiyo STEM jurnali',
- en: 'How to publish — Central Asian Journal of STEM',
+ ru: 'Как опубликовать статью — Muarrix.kiut.uz',
+ uz: 'Maqola chop etish — Muarrix.kiut.uz',
+ en: 'How to publish — Muarrix.kiut.uz',
  },
  rules: {
- ru: 'Правила для авторов — Центрально-азиатский журнал STEM',
- uz: 'Mualliflar uchun qoidalar — Markaziy Osiyo STEM jurnali',
- en: 'Author guidelines — Central Asian Journal of STEM',
+ ru: 'Правила для авторов — Muarrix.kiut.uz',
+ uz: 'Mualliflar uchun qoidalar — Muarrix.kiut.uz',
+ en: 'Author guidelines — Muarrix.kiut.uz',
  },
  faq: {
- ru: 'Вопрос — ответ — Центрально-азиатский журнал STEM',
- uz: 'Savol-javob — Markaziy Osiyo STEM jurnali',
- en: 'FAQ — Central Asian Journal of STEM',
+ ru: 'Вопрос — ответ — Muarrix.kiut.uz',
+ uz: 'Savol-javob — Muarrix.kiut.uz',
+ en: 'FAQ — Muarrix.kiut.uz',
  },
  about: {
- ru: 'О журнале — Центрально-азиатский журнал STEM',
- uz: 'Jurnal haqida — Markaziy Osiyo STEM jurnali',
- en: 'About the journal — Central Asian Journal of STEM',
+ ru: 'О журнале — Muarrix.kiut.uz',
+ uz: 'Jurnal haqida — Muarrix.kiut.uz',
+ en: 'About the journal — Muarrix.kiut.uz',
  },
  editorial: {
- ru: 'Редакционный совет — Центрально-азиатский журнал STEM',
- uz: 'Tahririy kengash — Markaziy Osiyo STEM jurnali',
- en: 'Editorial board — Central Asian Journal of STEM',
+ ru: 'Редакционный совет — Muarrix.kiut.uz',
+ uz: 'Tahririy kengash — Muarrix.kiut.uz',
+ en: 'Editorial board — Muarrix.kiut.uz',
  },
  };
 
@@ -43,8 +43,8 @@
  const STRINGS_BASE = {
  ru: {
  breadcrumb_home: 'Главная',
- bc_parent: 'Центрально-азиатский журнал STEM',
- brand_title_main: 'Центрально-азиатский журнал STEM',
+ bc_parent: 'Muarrix.kiut.uz',
+ brand_title_main: 'Muarrix.kiut.uz',
  journal_nav_label: 'Раздел:',
  uni_brand_line: 'Kimyo International University in Tashkent',
  hero_lead:
@@ -63,7 +63,7 @@
  footer_kiut: 'www.kiut.uz',
  footer_copy_suffix: 'Kimyo International University in Tashkent · ул. Шота Руставели, 156, Ташкент',
  lang_switch_aria: 'Язык интерфейса',
- breadcrumb_hub_name: 'STEM',
+ breadcrumb_hub_name: 'Muarrix.kiut.uz',
  breadcrumb_how: 'Как опубликовать статью',
  breadcrumb_rules: 'Правила для авторов',
  breadcrumb_faq: 'Вопрос — ответ',
@@ -72,7 +72,7 @@
  card_cta_journal: 'Сайт журнала {j} →',
  card_cta_conf: 'Сайт конференций →',
  card_desc_finecs: 'Международный журнал финансов и экономической стабильности, включенный в список журналов, рекомендованных ВАК РУз',
- card_desc_stem: 'Центральноазиатский STEM-журнал, включенный в список журналов, рекомендованных ВАК РУз',
+ card_desc_stem: 'Центральноазиатский Muarrix.kiut.uz-журнал, включенный в список журналов, рекомендованных ВАК РУз',
  card_title_conf: 'Сборник конференции',
  card_desc_conf: 'KIUT Conferences — материалы и тезисы',
  card_desc_muarrix: 'Исторический научный журнал, включенный в перечень журналов, рекомендованных ВАК РУз',
@@ -81,13 +81,13 @@
  card_cta_med: 'Сайт Journal of digital medicine →',
  how_h1: ' Как опубликовать статью',
  how_lead_start: 'Публикация в ',
- how_lead_strong: 'Центрально-азиатском журнале STEM',
+ how_lead_strong: 'Muarrix.kiut.uz',
  how_lead_end:
  ' оформляется на этой платформе. Регистрация и подача рукописи — через личный кабинет автора на этом сайте.',
  how_steps_title: 'Пошаговая инструкция',
  how_s1t: 'Зарегистрируйтесь на платформе',
  how_s1p:
- 'Создайте аккаунт автора: «Подать статью» или «Регистрация». Журнал — Центрально-азиатский журнал STEM (ISSN 2181-2934).',
+ 'Создайте аккаунт автора: «Подать статью» или «Регистрация». Журнал — Muarrix.kiut.uz (ISSN 2181-2934).',
  how_s2t: 'Ознакомьтесь с правилами оформления',
  how_s2p_before: 'Подготовьте рукопись согласно ',
  how_s2p_link: 'правилам для авторов',
@@ -97,7 +97,7 @@
  'Убедитесь, что уровень оригинальности текста не менее 75%. Рекомендуем использовать Antiplagiat.ru или iThenticate.',
  how_s4t: 'Подайте материал через личный кабинет',
  how_s4p:
- 'Рукопись в форматах DOC или DOCX; PDF не принимается. В кабинете выберите актуальный выпуск STEM и загрузите файл.',
+ 'Рукопись в форматах DOC или DOCX; PDF не принимается. В кабинете выберите актуальный выпуск Muarrix.kiut.uz и загрузите файл.',
  how_s5t: 'Ожидайте решения редакции',
  how_s5p:
  'Обычно рассмотрение занимает 7–14 рабочих дней. Уведомление придёт на email и в личный кабинет на этом сайте.',
@@ -105,10 +105,10 @@
  how_s6p:
  'Если редакция запросила доработку — исправьте замечания в личном кабинете и отправьте обновлённую версию.',
  how_help_html:
- ' <strong>Нужна помощь?</strong> Напишите редакции STEM: <a href="mailto:g.isamova@kiut.uz">g.isamova@kiut.uz</a> или позвоните <strong>+998 78 129 40 40 (121)</strong>',
+ ' <strong>Нужна помощь?</strong> Напишите редакции Muarrix.kiut.uz: <a href="mailto:g.isamova@kiut.uz">g.isamova@kiut.uz</a> или позвоните <strong>+998 78 129 40 40 (121)</strong>',
  rules_h1: ' Правила для авторов',
  rules_lead_before: 'Статьи в ',
- rules_lead_strong: 'Центрально-азиатском журнале STEM',
+ rules_lead_strong: 'Muarrix.kiut.uz',
  rules_lead_after:
  ' оформляются по международному стандарту IMRAD и должны соответствовать техническим требованиям ниже.',
  faq_h1: ' Часто задаваемые вопросы',
@@ -116,9 +116,9 @@
  'Здесь собраны ответы на самые популярные вопросы авторов. Если вы не нашли ответ — напишите нам напрямую.',
  about_h1: 'О журнале',
  about_body_html:
- '<p>«Центральноазиатский журнал STEM» — полугодовое научное издание, выходящее в электронном виде на английском, узбекском и русском языках. «Центральноазиатский журнал STEM» ориентирован на преподавателей, исследователей и специалистов высших учебных заведений и является профессиональным научно-аналитическим изданием, ориентированным на широкий круг специалистов.</p>'
+ '<p>«Muarrix.kiut.uz» — полугодовое научное издание, выходящее в электронном виде на английском, узбекском и русском языках. «Muarrix.kiut.uz» ориентирован на преподавателей, исследователей и специалистов высших учебных заведений и является профессиональным научно-аналитическим изданием, ориентированным на широкий круг специалистов.</p>'
  + '<p>Научно-исследовательская работа быстро развивается во всех областях науки. Появляются новые решения, мнения и подходы к различным проблемам. Этот процесс характерен для научного сообщества. Необходимы публикации в научных журналах по результатам исследований.</p>'
- + '<p>В «Центральноазиатский журнал STEM» публикуются статьи как теоретического, так и эмпирического характера, которые могут представлять интерес для широкого круга специалистов во всех областях науки и техники. Журнал является средством выражения работ в области техники, науки и технологий и представляет в основном статьи о научных исследованиях и технологических разработках, статьи с оригинальными размышлениями о конкретной проблеме или теме, обзорные статьи, которые дают общее представление о состоянии конкретной области науки и техники. Приветствуются междисциплинарные выводы и экономические исследования с использованием методов других наук – физики, математики и т.д.</p>'
+ + '<p>В «Muarrix.kiut.uz» публикуются статьи как теоретического, так и эмпирического характера, которые могут представлять интерес для широкого круга специалистов во всех областях науки и техники. Журнал является средством выражения работ в области техники, науки и технологий и представляет в основном статьи о научных исследованиях и технологических разработках, статьи с оригинальными размышлениями о конкретной проблеме или теме, обзорные статьи, которые дают общее представление о состоянии конкретной области науки и техники. Приветствуются междисциплинарные выводы и экономические исследования с использованием методов других наук – физики, математики и т.д.</p>'
  + '<p>Особое внимание уделяется анализу процессов, происходящих в экономике Узбекистана. Этот тип публикаций является источником информации и средством взаимодействия для ученых всего мира.</p>'
  + '<h2>Разделы журнала</h2>'
  + '<ul class="about-sections">'
@@ -138,7 +138,7 @@
  + '</ul>'
  + '<p>Заявка на публикацию оставляется на странице посредством <a href="/register.html">специальной формы</a>, которая будет рассмотрена в кратчайшие сроки. Периодические издания оформляются в соответствии с требованиями редакционно-издательского процесса. Статьи рассматриваются рецензентами и решение о публикации принимается на заседании редколлегии перед выходом нового номера журнала.</p>',
  editorial_h1: 'Редакционный совет',
- editorial_lead: 'Редакция Central Asian Journal of STEM.',
+ editorial_lead: 'Редакция Muarrix.kiut.uz.',
  editorial_body_html:
  '<h2>Главный редактор</h2>'
  + '<p class="editorial-member"><strong>Конгратбай Шарипов</strong>, доктор технических наук, профессор, Ташкентский Международный Университет Кимё</p>'
@@ -166,8 +166,8 @@
  },
  uz: {
  breadcrumb_home: 'Bosh sahifa',
- bc_parent: 'Markaziy Osiyo STEM jurnali',
- brand_title_main: 'Markaziy Osiyo STEM jurnali',
+ bc_parent: 'Muarrix.kiut.uz',
+ brand_title_main: 'Muarrix.kiut.uz',
  journal_nav_label: 'Bo‘lim:',
  uni_brand_line: 'Kimyo International University in Tashkent',
  hero_lead:
@@ -187,14 +187,14 @@
  footer_copy_suffix:
  'Kimyo International University in Tashkent · Shota Rustaveli ko‘chasi, 156, Toshkent',
  lang_switch_aria: 'Interfeys tili',
- breadcrumb_hub_name: 'STEM',
+ breadcrumb_hub_name: 'Muarrix.kiut.uz',
  breadcrumb_how: 'Maqola chop etish',
  breadcrumb_rules: 'Mualliflar uchun qoidalar',
  breadcrumb_faq: 'Savol-javob',
  card_cta_journal: '{j} jurnal sayti →',
  card_cta_conf: 'Ilmiy amaliy anjumanlar sayti →',
  card_desc_finecs: 'O‘zR OAK tavsiya etgan jurnal ro‘yhatiga kiritilgan Xalqaro moliya va iqtisodiy barqarorlik jurnali',
- card_desc_stem: 'O‘zR OAK tavsiya etgan jurnal ro‘yhatiga kiritilgan Markaziy Osiyo STEM jurnali',
+ card_desc_stem: 'O‘zR OAK tavsiya etgan jurnal ro‘yhatiga kiritilgan Muarrix.kiut.uz',
  card_title_conf: 'Ilmiy amaliy anjumanlar',
  card_desc_conf: 'Ilmiy amaliy anjumanlar malumotlari (to‘plamlar)',
  card_desc_muarrix: 'O‘zR OAK tavsiya etgan jurnal ro‘yhatiga kiritilgan Tarix ilmiy jurnali',
@@ -203,13 +203,13 @@
  card_cta_med: 'Journal of digital medicine sayti →',
  how_h1: ' Maqola chop etish',
  how_lead_start: 'Chop etish ',
- how_lead_strong: 'Markaziy Osiyo STEM jurnalida',
+ how_lead_strong: 'Muarrix.kiut.uzda',
  how_lead_end:
  ' ushbu platformada rasmiylashtiriladi. Ro‘yxatdan o‘tish va topshirish — shu saytdagi shaxsiy kabinet orqali.',
  how_steps_title: 'Qadam-baqadam yo‘riqnoma',
  how_s1t: 'Platformada ro‘yxatdan o‘ting',
  how_s1p:
- 'Muallif akkauntini yarating. Jurnal — Markaziy Osiyo STEM jurnali (ISSN 2181-2934).',
+ 'Muallif akkauntini yarating. Jurnal — Muarrix.kiut.uz (ISSN 2181-2934).',
  how_s2t: 'Rasmiylashtirish qoidalari bilan tanishing',
  how_s2p_before: 'Qo‘lyozmani ',
  how_s2p_link: 'mualliflar uchun qoidalar',
@@ -220,7 +220,7 @@
  'Matn originalligi kamida 75% bo‘lishini tasdiqlang. Antiplagiat.ru yoki iThenticate dan foydalanishni tavsiya qilamiz.',
  how_s4t: 'Shaxsiy kabinet orqali topshiring',
  how_s4p:
- 'Qo‘lyozma DOC yoki DOCX; PDF qabul qilinmaydi. Kabinetda joriy STEM sonini tanlang va faylni yuklang.',
+ 'Qo‘lyozma DOC yoki DOCX; PDF qabul qilinmaydi. Kabinetda joriy Muarrix.kiut.uz sonini tanlang va faylni yuklang.',
  how_s5t: 'Tahririyat qarorini kuting',
  how_s5p:
  'Odatda 7–14 ish kuni. Xabar email va ushbu saytdagi shaxsiy kabinetga keladi.',
@@ -231,7 +231,7 @@
  ' <strong>Yordam kerakmi?</strong> <a href="mailto:g.isamova@kiut.uz">g.isamova@kiut.uz</a> yoki <strong>+998 78 129 40 40 (121)</strong>',
  rules_h1: ' Mualliflar uchun qoidalar',
  rules_lead_before: 'Maqolalar ',
- rules_lead_strong: 'Markaziy Osiyo STEM jurnalida',
+ rules_lead_strong: 'Muarrix.kiut.uzda',
  rules_lead_after:
  ' xalqaro IMRAD standarti va quyidagi texnik talablarga muvofiq rasmiylashtiriladi.',
  faq_h1: ' Ko‘p beriladigan savollar',
@@ -244,8 +244,8 @@
  },
  en: {
  breadcrumb_home: 'Home',
- bc_parent: 'Central Asian Journal of STEM',
- brand_title_main: 'Central Asian Journal of STEM',
+ bc_parent: 'Muarrix.kiut.uz',
+ brand_title_main: 'Muarrix.kiut.uz',
  journal_nav_label: 'Section:',
  uni_brand_line: 'Kimyo International University in Tashkent',
  hero_lead:
@@ -265,14 +265,14 @@
  footer_copy_suffix:
  'Kimyo International University in Tashkent · 156 Shota Rustaveli Street, Tashkent',
  lang_switch_aria: 'Interface language',
- breadcrumb_hub_name: 'STEM',
+ breadcrumb_hub_name: 'Muarrix.kiut.uz',
  breadcrumb_how: 'How to publish',
  breadcrumb_rules: 'Author guidelines',
  breadcrumb_faq: 'FAQ',
  card_cta_journal: '{j} — journal website →',
  card_cta_conf: 'Conference website →',
  card_desc_finecs: 'International Journal of Finance and Economic Stability, included in the list of journals recommended by the HAC of the Republic of Uzbekistan',
- card_desc_stem: 'Central Asian STEM journal included in the list of journals recommended by the HAC of the Republic of Uzbekistan',
+ card_desc_stem: 'Muarrix.kiut.uz journal included in the list of journals recommended by the HAC of the Republic of Uzbekistan',
  card_title_conf: 'Conference proceedings',
  card_desc_conf: 'KIUT Conferences — papers and abstracts',
  card_desc_muarrix: 'Historical scientific journal included in the list of journals recommended by the Higher Attestation Commission of the Republic of Uzbekistan',
@@ -281,13 +281,13 @@
  card_cta_med: 'Journal of digital medicine — website →',
  how_h1: ' How to publish',
  how_lead_start: 'Publishing in the ',
- how_lead_strong: 'Central Asian Journal of STEM',
+ how_lead_strong: 'Muarrix.kiut.uz',
  how_lead_end:
  ' is handled on this platform. Registration and submission are through your author account on this site.',
  how_steps_title: 'Step-by-step guide',
  how_s1t: 'Register on the platform',
  how_s1p:
- 'Create an author account. The journal is the Central Asian Journal of STEM (ISSN 2181-2934).',
+ 'Create an author account. The journal is the Muarrix.kiut.uz (ISSN 2181-2934).',
  how_s2t: 'Read the formatting rules',
  how_s2p_before: 'Prepare your manuscript according to the ',
  how_s2p_link: 'author guidelines',
@@ -297,7 +297,7 @@
  'Ensure originality is at least 75%. We recommend Antiplagiat.ru or iThenticate.',
  how_s4t: 'Submit via your author account',
  how_s4p:
- 'Manuscript in DOC or DOCX; PDF is not accepted. In your account, select the current STEM issue and upload the file.',
+ 'Manuscript in DOC or DOCX; PDF is not accepted. In your account, select the current Muarrix.kiut.uz issue and upload the file.',
  how_s5t: 'Await the editorial decision',
  how_s5p:
  'Review usually takes 7–14 business days. You will be notified by email and in your account on this site.',
@@ -308,7 +308,7 @@
  ' <strong>Need help?</strong> Email <a href="mailto:g.isamova@kiut.uz">g.isamova@kiut.uz</a> or call <strong>+998 78 129 40 40 (121)</strong>',
  rules_h1: ' Author guidelines',
  rules_lead_before: 'Articles in the ',
- rules_lead_strong: 'Central Asian Journal of STEM',
+ rules_lead_strong: 'Muarrix.kiut.uz',
  rules_lead_after:
  ' must follow the international IMRAD standard and meet the technical requirements below.',
  faq_h1: ' Frequently asked questions',
@@ -327,13 +327,13 @@
 : { ru: {}, uz: {}, en: {} };
 
  const SITE =
- typeof window!== 'undefined' && window.__STEM_SITE_PACK
-? window.__STEM_SITE_PACK
+typeof window!== 'undefined' && window.__MUARRIX_SITE_PACK
+? window.__MUARRIX_SITE_PACK
 : { ru: {}, uz: {}, en: {} };
 
  const AE =
- typeof window!== 'undefined' && window.__STEM_ABOUT_EDITORIAL_PACK
-? window.__STEM_ABOUT_EDITORIAL_PACK
+typeof window!== 'undefined' && window.__MUARRIX_ABOUT_EDITORIAL_PACK
+? window.__MUARRIX_ABOUT_EDITORIAL_PACK
 : { ru: {}, uz: {}, en: {} };
 
  const STRINGS = {

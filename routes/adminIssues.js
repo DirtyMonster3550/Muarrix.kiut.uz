@@ -16,7 +16,7 @@ const {
   deleteCoverFileIfLocal,
 } = require('../lib/issueCovers');
 
-const ALLOWED_JOURNALS = ['stem', 'finecs', 'conference'];
+const ALLOWED_JOURNALS = ['muarrix', 'finecs', 'conference'];
 const COVER_EXTS = new Set(['.jpg', '.jpeg', '.png', '.webp']);
 
 ensureCoversDir().catch((e) => console.error('[covers]', e));

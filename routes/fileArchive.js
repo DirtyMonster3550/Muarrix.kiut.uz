@@ -10,7 +10,8 @@ const {
   groupIssuesByYearTom,
 } = require('../lib/archiveStructure');
 const { getArticleMetadata, loadFolderArticleIndex } = require('../lib/articleMetadata');
-const { buildArchiveIndex, searchArchive } = require('../lib/archiveSearch');
+const { buildArchiveIndex } = require('../lib/archiveSearch');
+const { smartSearch, findSimilarArticles } = require('../lib/archiveSmartSearch');
 const { buildDbCoverMap, resolveCoverUrl } = require('../lib/issueCovers');
 const { mergeDbIssuesIntoArchive } = require('../lib/archiveDbMerge');
 const { db } = require('../db/database');
@@ -83,7 +84,7 @@ router.get('/search', async (req, res) => {
     const year = typeof req.query.year === 'string' ? req.query.year : '';
     const num = typeof req.query.num === 'string' ? req.query.num : '';
 
-    const results = searchArchive(articles, { q, year, num }).map((a) => ({
+    const results = smartSearch(articles, { q, year, num }).map((a) => ({
       title: a.title,
       authors: a.authors,
       file: a.file,
@@ -93,9 +94,11 @@ router.get('/search', async (req, res) => {
       tom: a.tom,
       num: a.num,
       issueLabel: formatIssueLabel(a),
+      relevance: a.relevance || 0,
+      tags: a.tags || [],
     }));
 
-    res.json({ q, year, num, years, count: results.length, results });
+    res.json({ q, year, num, years, count: results.length, smart: true, results });
   } catch (e) {
     console.error('[file-archive search]', e);
     res.status(500).json({ error: 'Ошибка поиска по архиву' });
@@ -109,6 +112,39 @@ function formatIssueLabel(a) {
   if (a.num > 0) parts.push(`№ ${a.num}`);
   return parts.join(' · ') || a.folder;
 }
+
+router.get('/similar', async (req, res) => {
+  const folder = typeof req.query.folder === 'string' ? req.query.folder : '';
+  const file = typeof req.query.file === 'string' ? req.query.file : '';
+  if (!folder.trim() || !file.trim()) {
+    return res.status(400).json({ error: 'Укажите folder и file' });
+  }
+
+  try {
+    const { articles } = await buildArchiveIndex(ARCHIVES_ROOT);
+    const target = articles.find((a) => a.folder === folder && a.file === file);
+    if (!target) return res.status(404).json({ error: 'Статья не найдена в архиве' });
+
+    const similar = findSimilarArticles(articles, target, 5).map((a) => ({
+      title: a.title,
+      authors: a.authors,
+      file: a.file,
+      ext: a.ext,
+      folder: a.folder,
+      year: a.year,
+      tom: a.tom,
+      num: a.num,
+      issueLabel: formatIssueLabel(a),
+      similarity: a.similarity,
+      tags: a.tags || [],
+    }));
+
+    res.json({ source: { title: target.title, folder, file }, similar });
+  } catch (e) {
+    console.error('[file-archive similar]', e);
+    res.status(500).json({ error: 'Ошибка поиска похожих статей' });
+  }
+});
 
 router.get('/issue', async (req, res) => {
   const folder = typeof req.query.folder === 'string' ? req.query.folder : '';

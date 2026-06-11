@@ -6,7 +6,7 @@
  <link rel="icon" type="image/png" sizes="32x32" href="/img/favicon-32x32.png">
  <link rel="icon" type="image/png" sizes="16x16" href="/img/favicon-16x16.png">
  <link rel="apple-touch-icon" href="/img/apple-touch-icon.png">
- <title>Архив выпусков — Центрально-азиатский журнал STEM</title>
+ <title>Архив выпусков — Muarrix.kiut.uz</title>
  <link rel="stylesheet" href="/css/style.css">
  <style>
 .archive-search {
@@ -90,6 +90,38 @@
  color: var(--primary);
  font-weight: 600;
  }
+.search-result-tags {
+ display: flex;
+ flex-wrap: wrap;
+ gap: 6px;
+ margin-top: 8px;
+ }
+.search-tag {
+ font-size: 13px;
+ padding: 4px 10px;
+ border-radius: 999px;
+ background: #eef2ff;
+ color: #3730a3;
+ font-weight: 600;
+ }
+.search-relevance {
+ font-size: 13px;
+ color: var(--text-muted);
+ margin-top: 6px;
+ }
+.search-similar-wrap {
+ margin-top: 10px;
+ padding-top: 10px;
+ border-top: 1px dashed var(--border);
+ }
+.search-similar-link {
+ display: block;
+ font-size: 14px;
+ color: var(--primary);
+ margin-top: 4px;
+ text-decoration: none;
+ }
+.search-similar-link:hover { text-decoration: underline; }
 .archive-page-header h2 {
  font-size: clamp(1.75rem, 3vw, 2.125rem);
  margin-bottom: 10px;
@@ -174,7 +206,7 @@
  <a href="/" class="header-logo" style="text-decoration:none;color:inherit;">
  <img src="/img/android-chrome-192x192.png" alt="KIUT" style="height:52px;width:auto;flex-shrink:0">
  <div class="logo-text">
- <h1 data-i18n="brand_title_main">Центрально-азиатский журнал STEM</h1>
+ <h1 data-i18n="brand_title_main">Muarrix.kiut.uz</h1>
  <p data-i18n="header_archive_sub">Архив выпусков</p>
  </div>
  </a>
@@ -189,7 +221,7 @@
  </div>
  <nav class="journal-nav">
  <span class="journal-nav-label" data-i18n="journal_nav_label">Раздел:</span>
- <a href="/#stem-current-issue" class="journal-btn"><span data-i18n="nav_current_issue">Текущий выпуск</span></a>
+ <a href="/#muarrix-current-issue" class="journal-btn"><span data-i18n="nav_current_issue">Текущий выпуск</span></a>
  <a href="/archives.html" class="journal-btn"><span data-i18n="nav_archive">Архив</span></a>
  <a href="/" class="journal-btn" data-i18n="nav_back_home">← На главную</a>
  <a href="/register.html" class="journal-btn"><span data-i18n="nav_submit">Подать статью</span></a>
@@ -199,14 +231,14 @@
 
 <div class="main-content" style="max-width:1120px;margin:0 auto;padding:0 20px 48px">
  <div class="page-header archive-page-header" style="padding-top:8px;margin-bottom:20px">
- <h2 data-i18n="archives_h2">Архив журнала STEM</h2>
+ <h2 data-i18n="archives_h2">Архив журнала Muarrix.kiut.uz</h2>
  <p class="archive-page-desc" data-i18n="archives_desc">
- Поиск по названию и авторам или просмотр по годам.
+ Умный поиск по теме, названию и авторам — или просмотр по годам.
  </p>
  </div>
 
  <form class="archive-search" id="archive-search-form" role="search">
- <input type="search" id="archive-q" name="q" data-i18n-placeholder="archives_search_ph" placeholder="Название или автор…" autocomplete="off" data-i18n-aria="archives_search_aria" aria-label="Поиск по названию или автору">
+ <input type="search" id="archive-q" name="q" placeholder="Тема, название или автор…" autocomplete="off" aria-label="Умный поиск по архиву">
  <select id="archive-year" name="year" data-i18n-aria="archives_year_aria" aria-label="Год выпуска">
  <option value="" data-i18n="archives_year_all">Все годы</option>
  </select>
@@ -229,7 +261,7 @@
  </div>
 </div>
 
-<script src="/js/stem-locale-site.js"></script>
+<script src="/js/muarrix-locale-site.js"></script>
 <script src="/js/i18n.js"></script>
 <script src="/js/app.js"></script>
 <script>
@@ -296,15 +328,50 @@
  </section>`;
  }
 
- function renderSearchResult(item) {
+ function renderSearchResult(item, index) {
  const href = buildFileUrl(item.folder, item.file);
  const authors = (item.authors && item.authors.length)? item.authors.join(', '): '';
+ const tags = (item.tags || []).map((t) => `<span class="search-tag">${esc(t)}</span>`).join('');
+ const rel = item.relevance > 0 ? `<div class="search-relevance">Релевантность: ${item.relevance}</div>` : '';
+ const simId = `similar-${index}`;
  return `
- <a href="${esc(href)}" target="_blank" rel="noopener noreferrer" class="search-result">
+ <div class="search-result" style="cursor:default">
+ <a href="${esc(href)}" target="_blank" rel="noopener noreferrer" style="text-decoration:none;color:inherit">
  <div class="search-result-title">${esc(item.title)}</div>
  ${authors? `<div class="search-result-authors">${esc(authors)}</div>`: ''}
  <div class="search-result-meta">${esc(item.issueLabel)} · ${esc(item.ext.replace('.', '').toUpperCase())}</div>
- </a>`;
+ ${rel}
+ ${tags ? `<div class="search-result-tags">${tags}</div>` : ''}
+ </a>
+ <div class="search-similar-wrap">
+ <button type="button" class="archive-search-reset" style="padding:8px 12px;font-size:14px" data-folder="${esc(item.folder)}" data-file="${esc(item.file)}" data-target="${simId}" onclick="loadSimilarFromBtn(this)">Похожие статьи</button>
+ <div id="${simId}"></div>
+ </div>
+ </div>`;
+ }
+
+ function loadSimilarFromBtn(btn) {
+ loadSimilar(btn.dataset.folder, btn.dataset.file, btn.dataset.target);
+ }
+
+ async function loadSimilar(folder, file, targetId) {
+ const box = document.getElementById(targetId);
+ if (!box) return;
+ box.innerHTML = '<span style="font-size:14px;color:var(--text-muted)">Ищем…</span>';
+ try {
+ const params = new URLSearchParams({ folder, file });
+ const data = await fetch('/api/file-archive/similar?' + params.toString()).then((r) => r.json());
+ if (!data.similar?.length) {
+ box.innerHTML = '<span style="font-size:14px;color:var(--text-muted)">Похожих статей не найдено</span>';
+ return;
+ }
+ box.innerHTML = data.similar.map((s) => {
+ const href = buildFileUrl(s.folder, s.file);
+ return `<a class="search-similar-link" href="${esc(href)}" target="_blank" rel="noopener">${esc(s.title)} (${s.similarity}% · ${esc(s.issueLabel)})</a>`;
+ }).join('');
+ } catch {
+ box.innerHTML = '<span style="font-size:14px;color:#b91c1c">Ошибка загрузки</span>';
+ }
  }
 
  let searchTimer = null;
@@ -390,7 +457,7 @@
  }
 
  header.textContent = i18t('archives_found', { n: data.count, word: resWord(data.count) });
- list.innerHTML = data.results.map(renderSearchResult).join('');
+ list.innerHTML = data.results.map((item, i) => renderSearchResult(item, i)).join('');
  })
 .catch(() => {
  document.getElementById('search-results-header').textContent = i18t('archives_search_error');

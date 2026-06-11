@@ -1,10 +1,10 @@
-# STEM — Central Asian Journal of STEM
+# Muarrix.kiut.uz
 
-Веб-платформа журнала **Central Asian Journal of STEM** (KIUT).
+Веб-платформа журнала **Muarrix.kiut.uz** (KIUT).
 
 ## Возможности
 - Регистрация и авторизация авторов
-- Подача статей в журналы KIUT (STEM, FINECS, Conferences)
+- Подача статей в журналы KIUT (Muarrix.kiut.uz, FINECS, Conferences)
 - Панель администратора для рецензирования статей
 - Email-уведомления при одобрении/отклонении статьи
 - Уведомления в личном кабинете
@@ -36,7 +36,7 @@ EMAIL_HOST=smtp.gmail.com
 EMAIL_PORT=587
 EMAIL_USER=your_email@gmail.com
 EMAIL_PASS=your_app_password   # Пароль приложения Gmail (не основной пароль!)
-EMAIL_FROM=STEM Journal <your_email@gmail.com>
+EMAIL_FROM=Muarrix.kiut.uz Journal <your_email@gmail.com>
 ```
 
 ### Как получить пароль приложения Gmail:

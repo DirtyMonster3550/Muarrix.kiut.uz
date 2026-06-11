@@ -46,7 +46,7 @@
  '<strong>PDF не принимается.</strong> Рукописи принимаются только в форматах <strong>DOC</strong> или <strong>DOCX</strong>. Подача в PDF не допускается.',
  rules_freq_h2: 'Периодичность выхода',
  rules_freq_p_html:
- 'Центрально-азиатский журнал STEM выходит <strong>два раза в год</strong> (ISSN 2181-2934). Актуальные сроки приёма и выхода номеров смотрите на главной странице и в разделе «Оплата и сроки».',
+ 'Muarrix.kiut.uz выходит <strong>два раза в год</strong> (ISSN 2181-2934). Актуальные сроки приёма и выхода номеров смотрите на главной странице и в разделе «Оплата и сроки».',
  rules_lit_h2: 'Список литературы',
  rules_lit_p_html:
  'Оформляется по стилю <strong>APA 7-го издания</strong> в алфавитном порядке. Ссылки в тексте — в квадратных скобках [1], [2, с. 15].',
@@ -58,14 +58,14 @@
  rules_ethics_warn_html:
  ' Статьи с плагиатом, дублирующие уже опубликованные работы или поданные одновременно в несколько журналов — отклоняются автоматически.',
  rules_editor_box_title: 'Вопросы к редакции',
- rules_editor_box_sub: 'Контакты редакции STEM и порядок подачи — на этой платформе',
+ rules_editor_box_sub: 'Контакты редакции Muarrix.kiut.uz и порядок подачи — на этой платформе',
 
  faq_cat_submission_h2: 'Подача статьи',
  faq_review_h2: 'Рецензирование и решение',
  faq_publication_h2: 'Публикация',
  faq_q1_q: 'Могу ли я подать статью, если я не из KIUT?',
  faq_q1_a_html:
- 'Да. Центрально-азиатский журнал STEM принимает статьи от авторов из любых организаций и университетов Узбекистана и других стран. Принадлежность к KIUT не является обязательным условием.',
+ 'Да. Muarrix.kiut.uz принимает статьи от авторов из любых организаций и университетов Узбекистана и других стран. Принадлежность к KIUT не является обязательным условием.',
  faq_q2_q: 'Сколько авторов может быть у одной статьи?',
  faq_q2_a_html:
  'Не более <strong>пяти соавторов</strong>. Все авторы (первый автор и соавторы) должны быть указаны в форме подачи и в тексте статьи с указанием организаций и email-адресов.',
@@ -92,7 +92,7 @@
  'Нет. Рецензирование проводится экспертами журнала; имена рецензентов автору не сообщаются.',
  faq_q10_q: 'Когда выйдет журнал с моей статьёй?',
  faq_q10_a_html:
- 'Статья включается в ближайший выпуск после окончательного одобрения редакцией. Журнал STEM выходит <strong>два раза в год</strong>. Конкретные даты выпусков уточняйте в редакции или в разделе «Оплата и сроки».',
+ 'Статья включается в ближайший выпуск после окончательного одобрения редакцией. Журнал Muarrix.kiut.uz выходит <strong>два раза в год</strong>. Конкретные даты выпусков уточняйте в редакции или в разделе «Оплата и сроки».',
  faq_contact_h: 'Не нашли ответ?',
  faq_contact_p: 'Напишите нам напрямую — мы ответим в течение рабочего дня.',
  });
@@ -129,7 +129,7 @@
  '<strong>PDF is not accepted.</strong> Submissions are accepted only as <strong>DOC</strong> or <strong>DOCX</strong>.',
  rules_freq_h2: 'Publication frequency',
  rules_freq_p_html:
- 'The Central Asian Journal of STEM is published <strong>twice a year</strong> (ISSN 2181-2934). See the home page and “Payment & deadlines” for current submission and issue dates.',
+ 'The Muarrix.kiut.uz is published <strong>twice a year</strong> (ISSN 2181-2934). See the home page and “Payment & deadlines” for current submission and issue dates.',
  rules_lit_h2: 'Reference list',
  rules_lit_p_html:
  'Use <strong>APA 7th edition</strong> in alphabetical order. In-text citations in square brackets [1], [2, p. 15].',
@@ -141,14 +141,14 @@
  rules_ethics_warn_html:
  ' Articles with plagiarism, duplication of published work or simultaneous submission to several journals will be rejected automatically.',
  rules_editor_box_title: 'Editorial enquiries',
- rules_editor_box_sub: 'STEM editorial contacts and submission workflow — on this platform',
+ rules_editor_box_sub: 'Muarrix.kiut.uz editorial contacts and submission workflow — on this platform',
 
  faq_cat_submission_h2: 'Submitting a manuscript',
  faq_review_h2: 'Peer review and decision',
  faq_publication_h2: 'Publication',
  faq_q1_q: 'Can I submit if I am not affiliated with KIUT?',
  faq_q1_a_html:
- 'Yes. The Central Asian Journal of STEM accepts authors from Uzbekistan and other countries. Being affiliated with KIUT is not required.',
+ 'Yes. The Muarrix.kiut.uz accepts authors from Uzbekistan and other countries. Being affiliated with KIUT is not required.',
  faq_q2_q: 'How many authors can a manuscript have?',
  faq_q2_a_html:
  'No more than <strong>five co-authors</strong>. Everyone must be listed in the submission form and in the manuscript with affiliation and email addresses.',
@@ -175,7 +175,7 @@
  'No. We use double-blind peer review: authors and reviewers do not know each other’s identities.',
  faq_q10_q: 'When will the issue with my article appear?',
  faq_q10_a_html:
- 'Your article is scheduled for the next issue after final acceptance. The STEM journal is published <strong>twice a year</strong>. See “Payment & deadlines” or contact the editorial office for exact dates.',
+ 'Your article is scheduled for the next issue after final acceptance. The Muarrix.kiut.uz journal is published <strong>twice a year</strong>. See “Payment & deadlines” or contact the editorial office for exact dates.',
  faq_contact_h: 'Still have a question?',
  faq_contact_p: 'Write to us — we usually reply within one business day.',
  });
@@ -212,7 +212,7 @@
  '<strong>PDF qabul qilinmaydi.</strong> Faqat <strong>DOC</strong> yoki <strong>DOCX</strong> formatida topshiriladi.',
  rules_freq_h2: 'Chiqish davriyligi',
  rules_freq_p_html:
- 'Markaziy Osiyo STEM jurnali <strong>yiliga ikki marta</strong> chiqadi (ISSN 2181-2934). Joriy qabul va chiqish muddatlari — bosh sahifada va «To‘lov va muddatlar» bo‘limida.',
+ 'Muarrix.kiut.uz <strong>yiliga ikki marta</strong> chiqadi (ISSN 2181-2934). Joriy qabul va chiqish muddatlari — bosh sahifada va «To‘lov va muddatlar» bo‘limida.',
  rules_lit_h2: 'Adabiyotlar roʻyxati',
  rules_lit_p_html:
  'Alifbo tartibida <strong>APA 7-nashr</strong> boʻyicha rasmiylashtiriladi. Matndagi havolalar — kvadrat qavslarda [1], [2, b. 15].',
@@ -224,14 +224,14 @@
  rules_ethics_warn_html:
  ' Plagiatlangan, boshqa joyda chiqgan yoki bir vaqtning oʻzida bir necha jurnalga yuborilgan maqolar avtomatik rad etiladi.',
  rules_editor_box_title: 'Tahririyatga savollar',
- rules_editor_box_sub: 'STEM tahririyati aloqasi va topshirish tartibi — ushbu platformada',
+ rules_editor_box_sub: 'Muarrix.kiut.uz tahririyati aloqasi va topshirish tartibi — ushbu platformada',
 
  faq_cat_submission_h2: 'Maqola topshirish',
  faq_review_h2: 'Tavsiya va qaror',
  faq_publication_h2: 'Chop etish',
  faq_q1_q: 'KIUT dan bo‘lmasam ham maqola topshira olamanmi?',
  faq_q1_a_html:
- 'Ha. Markaziy Osiyo STEM jurnali O‘zbekiston va boshqa mamlakatlar mualliflarini qabul qiladi. KIUT da ishlash shart emas.',
+ 'Ha. Muarrix.kiut.uz O‘zbekiston va boshqa mamlakatlar mualliflarini qabul qiladi. KIUT da ishlash shart emas.',
  faq_q2_q: 'Bitta maqolada nechta muallif bo‘lishi mumkin?',
  faq_q2_a_html:
  'Ko‘pchilik talablarida <strong>beshta muallifgacha</strong> (asosiy muallif + ham mualliflar). Barcha mualliflar topshiruv shaklida va maqola matnida — tashkilot hamda elektron pochta bilan ko‘rsatiladi.',
@@ -258,7 +258,7 @@
  'Yo‘q. Ikki tomonlama koʻr-koʻrsatmas (double-blind) taqriz qo‘llaniladi: mualliflar va tavsiya qiluvchilar bir-birini bilmasligi kerak.',
  faq_q10_q: 'Maqolam chiqqan jurnal qachon chiqadi?',
  faq_q10_a_html:
- 'Tahririyat yakuniy qabul qilgach, maqola navbatdagi son qatoriga qo‘yiladi. STEM jurnali <strong>yiliga ikki marta</strong> chiqadi. Aniq sanalar — «To‘lov va muddatlar» bo‘limida yoki tahririyatda.',
+ 'Tahririyat yakuniy qabul qilgach, maqola navbatdagi son qatoriga qo‘yiladi. Muarrix.kiut.uz jurnali <strong>yiliga ikki marta</strong> chiqadi. Aniq sanalar — «To‘lov va muddatlar» bo‘limida yoki tahririyatda.',
  faq_contact_h: 'Javob topilmadimi?',
  faq_contact_p: 'To‘g‘ridan-to‘g‘ri yozing — odatda bir ish kuni ichida javob beramiz.',
  });

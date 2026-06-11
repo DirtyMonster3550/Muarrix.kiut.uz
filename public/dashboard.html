@@ -16,7 +16,7 @@
  <a href="/" class="header-logo" style="text-decoration:none;color:inherit;">
  <img src="/img/android-chrome-192x192.png" alt="KIUT" style="height:52px;width:auto;flex-shrink:0">
  <div class="logo-text">
- <h1 data-i18n="brand_title_main">Центрально-азиатский журнал STEM</h1>
+ <h1 data-i18n="brand_title_main">Muarrix.kiut.uz</h1>
  <p data-i18n="uni_brand_line">Kimyo International University in Tashkent</p>
  </div>
  </a>
@@ -31,7 +31,7 @@
  </div>
  <nav class="journal-nav">
  <span class="journal-nav-label" data-i18n="journal_nav_label">Раздел:</span>
- <a href="/#stem-current-issue" class="journal-btn"><span data-i18n="nav_current_issue">Текущий выпуск</span></a>
+ <a href="/#muarrix-current-issue" class="journal-btn"><span data-i18n="nav_current_issue">Текущий выпуск</span></a>
  <a href="/archives.html" class="journal-btn"><span data-i18n="nav_archive">Архив</span></a>
  <a href="/register.html" class="journal-btn"><span data-i18n="nav_submit">Подать статью</span></a>
  </nav>
@@ -100,6 +100,7 @@
  </div>
  <div class="card" style="max-width:680px">
  <div id="submit-alert"></div>
+ <div id="precheck-report" style="display:none;margin-bottom:16px"></div>
  <form id="submit-form" enctype="multipart/form-data">
  <div class="form-group">
  <label class="form-label"><span data-i18n="dash_title_label">Название статьи</span> <span class="req-mark">*</span></label>
@@ -110,7 +111,7 @@
  <input type="text" name="authors" class="form-control" data-i18n-placeholder="dash_authors_ph" placeholder="Иванов И.И., Петров П.П." required>
  <div class="form-text" data-i18n="dash_authors_hint">Перечислите всех авторов через запятую (не более 5 человек).</div>
  </div>
- <input type="hidden" name="journal" value="stem">
+ <input type="hidden" name="journal" value="muarrix">
  <input type="hidden" name="issue_id" id="submit-issue-id" value="">
  <div class="form-group">
  <label class="form-label"><span data-i18n="dash_date_label">Дата</span> <span class="req-mark">*</span></label>
@@ -130,9 +131,12 @@
  <div class="selected-file" id="file-label" data-i18n="dash_file_types">Поддерживаются DOC и DOCX (до 20 МБ). PDF не принимается.</div>
  </div>
  </div>
+ <div style="display:flex;flex-wrap:wrap;gap:10px;margin-top:8px">
+ <button type="button" class="btn btn-secondary" id="precheck-btn">Проверить перед отправкой</button>
  <button type="submit" class="btn btn-primary" id="submit-btn" data-i18n="dash_send_btn">
  Отправить на рассмотрение
  </button>
+ </div>
  </form>
  </div>
  </div>
@@ -167,7 +171,7 @@
  </div>
 </div>
 
-<script src="/js/stem-locale-site.js"></script>
+<script src="/js/muarrix-locale-site.js"></script>
 <script src="/js/i18n.js"></script>
 <script src="/js/app.js"></script>
 <script>
@@ -223,7 +227,7 @@
  submitBtn.disabled = true;
 
  try {
- const list = await fetch('/api/issues/open?journal=stem').then(r => r.json());
+ const list = await fetch('/api/issues/open?journal=muarrix').then(r => r.json());
  if (!list.length) {
  if (alertBox) {
  alertBox.innerHTML = '<div class="alert alert-warning">' + i18t('dash_issue_none') + '</div>';
@@ -289,14 +293,14 @@
  stateStyle = 'color:#cbd5e1'; dotColor = '#e2e8f0';
  }
  const arrow = i < stages.length - 1
-? `<span style="color:#cbd5e1;margin:0 4px;font-size:12px">→</span>`
+? `<span style="color:#cbd5e1;margin:0 5px;font-size:15px">→</span>`
 : '';
- return `<span style="display:flex;align-items:center;gap:4px;font-size:11px;${stateStyle}" title="${isRejected && i === failIdx ? rejectionHint() : ''}">
- <span style="width:8px;height:8px;border-radius:50%;background:${dotColor};display:inline-block;flex-shrink:0"></span>
+ return `<span style="display:flex;align-items:center;gap:5px;font-size:15px;${stateStyle}" title="${isRejected && i === failIdx ? rejectionHint() : ''}">
+ <span style="width:10px;height:10px;border-radius:50%;background:${dotColor};display:inline-block;flex-shrink:0"></span>
  ${s.icon} ${s.label}
  </span>${arrow}`;
  }).join('') +
- (isRejected ? `<div style="width:100%;margin-top:6px;font-size:11px;color:#dc2626;font-weight:600">${rejectionHint()}</div>` : '') +
+(isRejected ? `<div style="width:100%;margin-top:6px;font-size:15px;color:#dc2626;font-weight:600">${rejectionHint()}</div>` : '') +
  `</div>`;
  }
 
@@ -343,15 +347,15 @@
  <tr>
  <td style="color:var(--text-muted)">${i + 1}</td>
  <td><strong>${dashEscapeText(s.title)}</strong><br>
- <span style="font-size:11px;color:var(--text-muted)">${dashEscapeText(s.authors)}</span>
+ <span style="font-size:15px;color:var(--text-muted)">${dashEscapeText(s.authors)}</span>
  </td>
- <td style="font-size:12px">${journalName(s.journal)}</td>
- <td style="font-size:13px">${formatDate(s.submitted_at)}</td>
+ <td style="font-size:15px">${journalName(s.journal)}</td>
+ <td style="font-size:15px">${formatDate(s.submitted_at)}</td>
  <td>
  ${statusBadge(s.status)}
  ${stageTracker(s)}
  ${s.status === 'rejected' && s.rejection_reason
-? `<div style="margin-top:6px;font-size:11px;background:#fef2f2;border:1px solid #fecaca;border-radius:6px;padding:6px 10px;color:#b91c1c">
+? `<div style="margin-top:6px;font-size:15px;background:#fef2f2;border:1px solid #fecaca;border-radius:6px;padding:7px 11px;color:#b91c1c">
  <strong>${i18t('dash_remark')}</strong> ${dashEscapeText(s.rejection_reason)}
  </div>`
 : ''}
@@ -410,7 +414,7 @@
  ${s.status === 'rejected' && s.rejection_reason? `
  <div class="detail-item" style="grid-column:1/-1">
  <label>${i18t('dash_detail_l_expert')}</label>
- <div style="font-size:12px;color:#dc2626;font-weight:600;margin-bottom:6px">${s.rejection_stage === 'editorial' ? i18t('dash_rejection_editorial') : s.rejection_stage === 'admin' ? i18t('dash_rejection_admin') : i18t('dash_rejection_tech')}</div>
+ <div style="font-size:15px;color:#dc2626;font-weight:600;margin-bottom:6px">${s.rejection_stage === 'editorial' ? i18t('dash_rejection_editorial') : s.rejection_stage === 'admin' ? i18t('dash_rejection_admin') : i18t('dash_rejection_tech')}</div>
  <div class="alert alert-danger" style="margin:0">${dashEscapeText(s.rejection_reason)}</div>
  </div>`: ''}
  ${s.abstract? `<div class="detail-item" style="grid-column:1/-1"><label>${i18t('dash_abstract_label')}</label><p>${s.abstract}</p></div>`: ''}
@@ -472,8 +476,63 @@
  } catch {}
  }
 
+ function renderPrecheckReport(data) {
+ const box = document.getElementById('precheck-report');
+ if (!box) return;
+ const levelStyle = {
+ ok: 'background:#ecfdf5;border:1px solid #a7f3d0;color:#065f46',
+ warn: 'background:#fffbeb;border:1px solid #fde68a;color:#92400e',
+ error: 'background:#fef2f2;border:1px solid #fecaca;color:#991b1b',
+ };
+ box.style.display = 'block';
+ box.innerHTML = `
+ <div style="padding:14px 16px;border-radius:10px;border:1px solid var(--border);background:#f8fafc">
+ <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:10px">
+ <strong style="font-size:16px">Умная проверка рукописи</strong>
+ <span style="font-weight:700;color:var(--primary)">Готовность: ${data.score}%</span>
+ </div>
+ <p style="margin:0 0 12px;font-size:15px;color:var(--text-muted)">${dashEscapeText(data.summary)}</p>
+ <div style="display:grid;gap:8px">
+ ${(data.checks || []).map((c) => `
+ <div style="padding:10px 12px;border-radius:8px;font-size:14px;${levelStyle[c.level] || ''}">
+ <strong>${c.level === 'ok' ? '✓' : c.level === 'warn' ? '!' : '✕'}</strong>
+ ${dashEscapeText(c.message)}${c.hint ? `<div style="opacity:.85;margin-top:4px;font-size:13px">${dashEscapeText(c.hint)}</div>` : ''}
+ </div>`).join('')}
+ </div>
+ </div>`;
+ }
+
+ async function runPrecheck() {
+ const form = document.getElementById('submit-form');
+ const btn = document.getElementById('precheck-btn');
+ const alertBox = document.getElementById('submit-alert');
+ const token = Auth.getToken();
+ alertBox.innerHTML = '';
+ btn.disabled = true;
+ btn.textContent = 'Проверяем…';
+
+ const formData = new FormData(form);
+ try {
+ const res = await fetch('/api/submissions/precheck', {
+ method: 'POST',
+ headers: { Authorization: `Bearer ${token}` },
+ credentials: 'same-origin',
+ body: formData,
+ });
+ const data = await res.json();
+ if (!res.ok) throw new Error(data.error || 'Ошибка проверки');
+ renderPrecheckReport(data);
+ } catch (err) {
+ alertBox.innerHTML = `<div class="alert alert-danger">${err.message}</div>`;
+ } finally {
+ btn.disabled = false;
+ btn.textContent = 'Проверить перед отправкой';
+ }
+ }
+
  // ===== Submit form =====
  initFileUpload('drop-zone', 'file-input', 'file-label');
+ document.getElementById('precheck-btn')?.addEventListener('click', runPrecheck);
 
  document.getElementById('submit-form').addEventListener('submit', async (e) => {
  e.preventDefault();
@@ -518,6 +577,7 @@
  const res = await fetch('/api/submissions', {
  method: 'POST',
  headers: { 'Authorization': `Bearer ${token}` },
+ credentials: 'same-origin',
  body: formData,
  });
  const data = await res.json();

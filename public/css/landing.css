@@ -1,16 +1,17 @@
-/* STEM journal — landing */
+/* Muarrix.kiut.uz journal — landing */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@500;600;700&family=Montserrat:wght@400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap');
 
 .home-page {
   font-family: 'Montserrat', system-ui, sans-serif;
   --landing-pad: clamp(24px, 4vw, 48px);
   --landing-max: 1400px;
-  /* слева светлее синий → справа почти чёрный */
-  --landing-blue-left: #1a4f8f;
-  --landing-blue-mid: #0c2f5c;
-  --landing-dark-right: #050a12;
-  --landing-black-right: #020408;
-  background: var(--landing-black-right);
+  --brand-blue: #163f8c;
+  --brand-green: #18a957;
+  --landing-blue-left: #f5fbff;
+  --landing-blue-mid: #e9f4ff;
+  --landing-dark-right: #d9edff;
+  --landing-black-right: #f8fcff;
+  background: #f8fcff;
 }
 
 /* Одна левая линия — герой */
@@ -35,23 +36,20 @@
 }
 
 .home-page .announce-bar {
-  background: linear-gradient(90deg, var(--landing-blue-mid) 0%, var(--landing-dark-right) 100%);
-  border-bottom: 1px solid rgba(255,255,255,0.06);
+  background: linear-gradient(90deg, #f6fbff 0%, #eaf4ff 100%);
+  border-bottom: 1px solid #d7e9fb;
 }
 
 /* ---- Меню: слева синее, справа темнее ---- */
 .landing-header {
-  position: relative;
-  z-index: 50;
-  background: linear-gradient(
-    90deg,
-    var(--landing-blue-left) 0%,
-    var(--landing-blue-mid) 42%,
-    var(--landing-dark-right) 78%,
-    var(--landing-black-right) 100%
-  );
-  border-bottom: 1px solid rgba(0, 0, 0, 0.25);
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.2);
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 60;
+  background: transparent;
+  border-bottom: none;
+  box-shadow: none;
 }
 
 .landing-nav-inner {
@@ -63,6 +61,7 @@
   gap: 24px;
   flex-wrap: nowrap;
   width: 100%;
+  background: transparent;
 }
 
 .landing-brand {
@@ -70,10 +69,31 @@
   align-items: center;
   gap: 14px;
   text-decoration: none;
-  color: #fff;
+  color: var(--brand-blue);
 }
 
-.landing-brand:hover { text-decoration: none; color: #fff; }
+.landing-brand-logos {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.landing-brand-logo-kiut {
+  height: 60px;
+  width: auto;
+  display: block;
+  filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.25));
+}
+
+.landing-brand-logo-muarrix {
+  height: 60px;
+  width: auto;
+  display: block;
+  object-fit: contain;
+  filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.25));
+}
+
+.landing-brand:hover { text-decoration: none; color: var(--brand-blue); }
 
 .landing-brand-mark {
   width: 52px;
@@ -92,7 +112,7 @@
 }
 
 .landing-brand-text { display: flex; flex-direction: column; gap: 0; line-height: 1.15; }
-.landing-brand-sm { font-size: 12px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(255,255,255,0.65); }
+.landing-brand-sm { font-size: 12px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--brand-blue); }
 .landing-brand-lg { font-size: 19px; font-weight: 800; letter-spacing: -0.02em; }
 
 .landing-menu {
@@ -116,7 +136,7 @@
 }
 
 .landing-menu > a {
-  color: rgba(255,255,255,0.95);
+  color: var(--brand-blue);
   text-decoration: none;
   padding: 13px 20px;
   white-space: nowrap;
@@ -125,8 +145,8 @@
 }
 
 .landing-menu > a:hover {
-  background: rgba(255,255,255,0.08);
-  color: #fff;
+  background: #dff0ff;
+  color: var(--brand-blue);
   text-decoration: none;
 }
 
@@ -137,7 +157,7 @@
 .landing-dropdown > button {
   background: transparent;
   border: none;
-  color: rgba(255,255,255,0.95);
+  color: var(--brand-blue);
   padding: 13px 20px;
   white-space: nowrap;
   border-radius: 8px;
@@ -148,7 +168,7 @@
   transition: background 0.15s;
 }
 
-.landing-dropdown > button:hover { background: rgba(255,255,255,0.08); color: #fff; }
+.landing-dropdown > button:hover { background: #dff0ff; color: var(--brand-blue); }
 
 .landing-dropdown-panel {
   position: absolute;
@@ -205,7 +225,7 @@
 }
 
 .landing-link-login {
-  color: rgba(255,255,255,0.9);
+  color: var(--brand-blue);
   font-size: 16px;
   font-weight: 600;
   text-decoration: none;
@@ -213,7 +233,7 @@
   white-space: nowrap;
 }
 
-.landing-link-login:hover { color: #fff; text-decoration: underline; }
+.landing-link-login:hover { color: var(--brand-blue); text-decoration: underline; }
 
 .landing-cta-orange {
   display: inline-flex;
@@ -298,19 +318,17 @@
 /* ---- Hero: слева светлее синий → справа почти чёрный ---- */
 .landing-hero {
   position: relative;
-  background: linear-gradient(
-    90deg,
-    #1e5a9e 0%,
-    var(--landing-blue-left) 18%,
-    var(--landing-blue-mid) 45%,
-    var(--landing-dark-right) 72%,
-    var(--landing-black-right) 100%
-  );
-  color: #fff;
+  background-image: url('/img/muarrix-hero-bg.png');
+  background-position: center 45px;
+  background-repeat: no-repeat;
+  background-size: 45% auto;
+  background-color: #f1f5fc;
+  color: #2f3c4d;
   overflow: hidden;
-  min-height: min(520px, 85vh);
+  height: clamp(420px, 52vw, 620px);
+  min-height: 0;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   margin-bottom: 0;
 }
 
@@ -334,47 +352,22 @@
   content: '';
   position: absolute;
   inset: 0;
-  background: linear-gradient(
-    90deg,
-    rgba(255, 255, 255, 0.04) 0%,
-    transparent 35%,
-    rgba(0, 0, 0, 0.15) 65%,
-    rgba(0, 0, 0, 0.35) 100%
-  );
+  background: rgba(0, 0, 0, 0.01);
   pointer-events: none;
   z-index: 1;
 }
 
-.landing-hero-grid {
-  position: absolute;
-  inset: 0;
-  background-image:
-    linear-gradient(rgba(255,255,255,0.05) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255,255,255,0.05) 1px, transparent 1px);
-  background-size: 56px 56px;
-  pointer-events: none;
-  z-index: 0;
-  mask-image: linear-gradient(90deg, rgba(0,0,0,0.75) 0%, rgba(0,0,0,0.45) 55%, rgba(0,0,0,0.2) 100%);
-}
-
-/* Лёгкое свечение слева (синее) */
-.landing-hero-glow {
-  position: absolute;
-  width: 55%;
-  height: 90%;
-  left: -8%;
-  top: 5%;
-  right: auto;
-  background: radial-gradient(ellipse at 30% 50%, rgba(80, 150, 230, 0.18) 0%, transparent 65%);
-  pointer-events: none;
-  z-index: 0;
+.landing-hero-grid,
+.landing-hero-glow,
+.landing-hero-art {
+  display: none !important;
 }
 
 .landing-hero-inner {
   position: relative;
   z-index: 2;
   overflow: visible;
-  padding-top: 48px;
+  padding-top: 145px;
   padding-bottom: 56px;
   display: grid;
   grid-template-columns: minmax(280px, 1fr) auto;
@@ -388,13 +381,14 @@
   line-height: 1.1;
   letter-spacing: -0.03em;
   margin-bottom: 22px;
-  text-shadow: 0 2px 32px rgba(0,0,0,0.25);
+  color: var(--brand-blue);
+  text-shadow: none;
 }
 
 .landing-hero-copy .sub {
   font-size: clamp(1.12rem, 2.2vw, 1.38rem);
   font-weight: 500;
-  color: rgba(255,255,255,0.85);
+  color: var(--brand-blue);
   line-height: 1.6;
   max-width: 640px;
   margin-bottom: 34px;
@@ -417,19 +411,20 @@
   align-items: center;
   padding: 16px 28px;
   border-radius: 999px;
-  border: 2px solid rgba(255,255,255,0.35);
-  color: #fff;
+  border: 2px solid rgba(90, 100, 120, 0.45);
+  color: var(--brand-blue);
   font-weight: 600;
   font-size: 17px;
   text-decoration: none;
   transition: background 0.15s, border-color 0.15s;
+  background: rgba(255, 255, 255, 0.45);
 }
 
 .landing-hero-ghost:hover {
-  background: rgba(255,255,255,0.1);
-  border-color: rgba(255,255,255,0.55);
+  background: rgba(255,255,255,0.75);
+  border-color: rgba(90, 100, 120, 0.62);
   text-decoration: none;
-  color: #fff;
+  color: var(--brand-blue);
 }
 
 /* Технологическая голограмма — правая часть героя */
@@ -785,6 +780,11 @@
   .city-stroke { stroke-dashoffset: 0; }
 }
 
+/* По требованию: на лендинге ничего не двигается */
+.home-page * {
+  animation: none !important;
+}
+
 /* Journal strip under hero */
 .landing-journals-wrap {
   background: #fff;
@@ -814,13 +814,13 @@
 .landing-journals .journal-btn {
   background: #f4f7fb;
   border: 1px solid #dce3ed;
-  color: #0c3d82;
+  color: #4f79a3;
 }
 
 .landing-journals .journal-btn:hover {
   background: #e8f0fd;
-  border-color: #0c3d82;
-  color: #0c3d82;
+  border-color: #7eb5e4;
+  color: #4f79a3;
 }
 
 .home-page .sub-nav {
@@ -862,7 +862,7 @@
 }
 
 /* Карточка журнала — центр, аккуратная типографика */
-.home-page .stem-journal-card {
+.home-page .muarrix-journal-card {
   max-width: 920px;
   width: 100%;
   margin-bottom: 0;
@@ -875,21 +875,21 @@
   background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
 }
 
-.home-page .stem-journal-card:hover {
+.home-page .muarrix-journal-card:hover {
   box-shadow:
     0 8px 12px rgba(12, 61, 130, 0.06),
     0 28px 56px rgba(12, 61, 130, 0.16);
 }
 
-.stem-journal-card__cover {
+.muarrix-journal-card__cover {
   width: 296px;
   min-height: 360px;
-  background: #0d2b2b;
+  background: #dff0ff;
   position: relative;
   flex-shrink: 0;
 }
 
-.stem-journal-card__cover-img {
+.muarrix-journal-card__cover-img {
   width: 100%;
   height: 100%;
   min-height: 360px;
@@ -900,7 +900,7 @@
   left: 0;
 }
 
-.stem-journal-card__body {
+.muarrix-journal-card__body {
   padding: 40px 44px 44px;
   display: flex;
   flex-direction: column;
@@ -908,14 +908,14 @@
   flex: 1;
 }
 
-.stem-journal-card__head {
+.muarrix-journal-card__head {
   position: relative;
   margin: 0 -44px 28px;
   padding: 0 44px 26px 62px;
   border-bottom: 2px solid #d0dae6;
 }
 
-.stem-journal-card__head::before {
+.muarrix-journal-card__head::before {
   content: '';
   position: absolute;
   left: 44px;
@@ -923,10 +923,10 @@
   bottom: 26px;
   width: 4px;
   border-radius: 2px;
-  background: linear-gradient(180deg, #0c3d82 0%, #1a5a9e 100%);
+  background: linear-gradient(180deg, #6ea3d3 0%, #8fc2eb 100%);
 }
 
-.stem-journal-card__eyebrow {
+.muarrix-journal-card__eyebrow {
   font-family: 'Montserrat', system-ui, sans-serif;
   font-size: 13px;
   font-weight: 700;
@@ -936,17 +936,17 @@
   margin: 0 0 14px;
 }
 
-.stem-journal-card__title {
+.muarrix-journal-card__title {
   font-family: 'Plus Jakarta Sans', 'Montserrat', system-ui, sans-serif;
   font-size: clamp(1.85rem, 3vw, 2.5rem);
   font-weight: 800;
   line-height: 1.1;
-  color: #072d5c;
+  color: var(--brand-blue);
   margin: 0 0 12px;
   letter-spacing: -0.035em;
 }
 
-.stem-journal-card__meta {
+.muarrix-journal-card__meta {
   font-family: 'Montserrat', system-ui, sans-serif;
   font-size: 17px;
   font-weight: 600;
@@ -955,14 +955,14 @@
   margin: 0;
 }
 
-.stem-journal-card__pricing {
+.muarrix-journal-card__pricing {
   display: flex;
   flex-wrap: wrap;
   gap: 36px 48px;
   padding-top: 4px;
 }
 
-.stem-journal-card__price-label {
+.muarrix-journal-card__price-label {
   display: block;
   font-size: 13px;
   font-weight: 700;
@@ -972,56 +972,56 @@
   margin-bottom: 8px;
 }
 
-.stem-journal-card__price-value {
+.muarrix-journal-card__price-value {
   display: block;
   font-family: 'Plus Jakarta Sans', 'Montserrat', system-ui, sans-serif;
   font-size: 28px;
   font-weight: 800;
-  color: #0c3d82;
+  color: var(--brand-blue);
   line-height: 1.1;
   letter-spacing: -0.02em;
 }
 
-.stem-journal-card__price-value--free {
-  color: #1a8a57;
+.muarrix-journal-card__price-value--free {
+  color: var(--brand-green);
 }
 
-.stem-journal-card__price-note {
+.muarrix-journal-card__price-note {
   display: block;
   font-size: 15px;
   color: #8896a8;
   margin-top: 6px;
 }
 
-.stem-journal-card__btn {
+.muarrix-journal-card__btn {
   font-size: 17px;
   padding: 14px 36px;
   border-radius: 999px;
 }
 
 @media (max-width: 768px) {
-  .home-page .stem-journal-card {
+  .home-page .muarrix-journal-card {
     flex-direction: column;
   }
-  .stem-journal-card__cover {
+  .muarrix-journal-card__cover {
     width: 100%;
     min-height: 280px;
   }
-  .stem-journal-card__body {
+  .muarrix-journal-card__body {
     padding: 28px 24px 32px;
   }
-  .stem-journal-card__head {
+  .muarrix-journal-card__head {
     margin: 0 -24px 24px;
     padding: 0 24px 22px 42px;
   }
-  .stem-journal-card__head::before {
+  .muarrix-journal-card__head::before {
     left: 24px;
     bottom: 22px;
   }
 }
 
 .home-page .section-title {
-  color: #0c3d82;
+  color: var(--brand-blue);
 }
 
 .landing-menu > a.landing-nav-highlight {
@@ -1036,7 +1036,13 @@
 }
 
 @media (max-width: 960px) {
-  .landing-hero-inner { grid-template-columns: 1fr; text-align: center; }
+  .landing-hero {
+    background-position: center 26px;
+    background-size: 96% auto;
+    height: clamp(300px, 56vw, 500px);
+    min-height: 0;
+  }
+  .landing-hero-inner { grid-template-columns: 1fr; text-align: center; padding-top: 170px; }
   .landing-hero-copy .sub { margin-left: auto; margin-right: auto; }
   .landing-hero-cta-row { justify-content: center; }
   .landing-hero-art {

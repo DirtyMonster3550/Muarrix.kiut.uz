@@ -1,11 +1,12 @@
 const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
 const { db } = require('../db/database');
 const { logEvent, autobanIfNeeded, clientIp } = require('../middleware/security');
 const { sendPasswordResetEmail } = require('../utils/mailer');
+const { signToken, verifyToken } = require('../lib/jwtAuth');
+const { setSessionCookie, clearSessionCookie, getSessionToken } = require('../middleware/hardening');
 
 // ── Simple email format check ─────────────────────────────────────────────────
 const EMAIL_RE = /^[^\s@]{1,64}@[^\s@]{1,253}\.[^\s@]{2,}$/;
@@ -47,11 +48,8 @@ router.post('/register', (req, res) => {
     'INSERT INTO users (full_name, email, password) VALUES (?, ?, ?)'
   ).run(full_name, email, hash);
 
-  const token = jwt.sign(
-    { id: result.lastInsertRowid, role: 'author' },
-    process.env.JWT_SECRET || 'secret',
-    { expiresIn: '7d' }
-  );
+  const token = signToken({ id: result.lastInsertRowid, role: 'author' });
+  setSessionCookie(res, token);
 
   res.json({
     success: true,
@@ -86,17 +84,33 @@ router.post('/login', (req, res) => {
     return res.status(403).json({ error: 'Ваш аккаунт заблокирован. Обратитесь к администратору.' });
   }
 
-  const token = jwt.sign(
-    { id: user.id, role: user.role },
-    process.env.JWT_SECRET || 'secret',
-    { expiresIn: '7d' }
-  );
+  const token = signToken({ id: user.id, role: user.role });
+  setSessionCookie(res, token);
 
   res.json({
     success: true,
     token,
     user: { id: user.id, full_name: user.full_name, email: user.email, role: user.role },
   });
+});
+
+// Logout — clear httpOnly session cookie
+router.post('/logout', (req, res) => {
+  clearSessionCookie(res);
+  res.json({ success: true });
+});
+
+// Sync localStorage token → httpOnly cookie (для защиты HTML-страниц)
+router.post('/session-sync', (req, res) => {
+  const token = getSessionToken(req);
+  if (!token) return res.status(401).json({ error: 'Не авторизован' });
+  try {
+    verifyToken(token);
+    setSessionCookie(res, token);
+    res.json({ success: true });
+  } catch {
+    res.status(401).json({ error: 'Токен недействителен' });
+  }
 });
 
 // Forgot password — sends reset link to email
@@ -154,10 +168,10 @@ router.get('/me', requireAuth, (req, res) => {
 });
 
 function requireAuth(req, res, next) {
-  const token = req.headers.authorization?.split(' ')[1];
+  const token = getSessionToken(req);
   if (!token) return res.status(401).json({ error: 'Не авторизован' });
   try {
-    req.user = jwt.verify(token, process.env.JWT_SECRET || 'secret');
+    req.user = verifyToken(token);
     next();
   } catch {
     res.status(401).json({ error: 'Токен недействителен' });

@@ -3,25 +3,30 @@ const path = require('path');
 const fs = require('fs');
 const bcrypt = require('bcryptjs');
 
-const DB_FILE = 'stem.db';
-const LEGACY_DB_FILE = 'kiut_nashrlar.db';
+const DB_FILE = 'muarrix.db';
+const LEGACY_DB_FILES = [];
 
 function resolveDatabasePath() {
   const dir = __dirname;
   const newPath = path.join(dir, DB_FILE);
-  const legacyPath = path.join(dir, LEGACY_DB_FILE);
   if (fs.existsSync(newPath)) return newPath;
-  if (!fs.existsSync(legacyPath)) return newPath;
-  try {
-    fs.renameSync(legacyPath, newPath);
-    for (const ext of ['-wal', '-shm']) {
-      const from = legacyPath + ext;
-      const to = newPath + ext;
-      if (fs.existsSync(from)) fs.renameSync(from, to);
+
+  for (const legacyFile of LEGACY_DB_FILES) {
+    const legacyPath = path.join(dir, legacyFile);
+    if (!fs.existsSync(legacyPath)) continue;
+    try {
+      fs.renameSync(legacyPath, newPath);
+      for (const ext of ['-wal', '-shm']) {
+        const from = legacyPath + ext;
+        const to = newPath + ext;
+        if (fs.existsSync(from)) fs.renameSync(from, to);
+      }
+      return newPath;
+    } catch {
+      return legacyPath;
     }
-  } catch {
-    return legacyPath;
   }
+
   return newPath;
 }
 
@@ -78,7 +83,7 @@ function init() {
 
     CREATE TABLE IF NOT EXISTS issues (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
-      journal TEXT NOT NULL DEFAULT 'stem',
+      journal TEXT NOT NULL DEFAULT 'muarrix',
       title TEXT NOT NULL,
       description TEXT,
       sort_order INTEGER DEFAULT 0,
@@ -175,7 +180,7 @@ function init() {
 
   // Default settings
   const defaultSettings = [
-    ['announce_text', 'Приём статей открыт! Ближайший выпуск STEM — 1 июня 2026.'],
+    ['announce_text', 'Приём статей открыт! Ближайший выпуск Muarrix.kiut.uz — 1 июня 2026.'],
     ['announce_enabled', '1'],
     ['announce_cta', 'Подать статью →'],
     ['site_email', 'g.isamova@kiut.uz'],
@@ -200,38 +205,6 @@ function init() {
     UPDATE submissions SET rejection_stage = 'tech'
     WHERE status = 'rejected' AND (rejection_stage IS NULL OR TRIM(rejection_stage) = '')
   `).run();
-
-  const issueCount = db.prepare('SELECT COUNT(*) as c FROM issues').get().c;
-  if (issueCount === 0) {
-    const insert = db.prepare(`
-      INSERT INTO issues (journal, title, description, sort_order, accepting_submissions, issued_at)
-      VALUES (?, ?, ?, ?, ?, ?)
-    `);
-    insert.run(
-      'stem',
-      "Том 6 № 2 (2026): STEM 2-son to'plami",
-      'Выпуск для подачи материалов на новой платформе (пример). Редактор может переименовать или добавить выпуски в админке.',
-      20,
-      1,
-      '2026-04-28'
-    );
-    insert.run(
-      'stem',
-      'Том 5 № 1 (2025)',
-      null,
-      10,
-      0,
-      '2025-12-01'
-    );
-    insert.run(
-      'stem',
-      'Том 1 № 1 (2024)',
-      null,
-      1,
-      0,
-      '2024-06-01'
-    );
-  }
 
   try {
     const { syncArchiveIssueCovers } = require('../lib/syncIssueCovers');

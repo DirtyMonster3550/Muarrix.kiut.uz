@@ -1,7 +1,7 @@
 const nodemailer = require('nodemailer');
 
-const JOURNAL_NAME = 'Central Asian Journal of STEM';
-const JOURNAL_SHORT = 'STEM';
+const JOURNAL_NAME = 'Muarrix.kiut.uz';
+const JOURNAL_SHORT = 'Muarrix.kiut.uz';
 
 function defaultFrom() {
   return process.env.EMAIL_FROM || `${JOURNAL_SHORT} <${process.env.EMAIL_USER}>`;

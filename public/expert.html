@@ -144,6 +144,13 @@
  line-height: 1.5;
  }
  .ac-btns { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+ .assist-panel {
+   margin-top: 12px; padding: 14px 16px; border-radius: 10px;
+   background: #f0f9ff; border: 1px solid #bae6fd; font-size: 15px;
+ }
+ .assist-panel h4 { margin: 0 0 8px; color: var(--primary); font-size: 16px; }
+ .assist-panel ul { margin: 8px 0 0 18px; }
+ .assist-panel li { margin-bottom: 4px; }
  .ac-assign { display: flex; flex-direction: column; gap: 8px; min-width: 280px; flex: 1; }
  .ac-assign label { font-size: 15px; font-weight: 700; color: var(--text); }
  .ac-assign select {
@@ -211,7 +218,7 @@
  <div class="sidebar-logo">
  <div class="sidebar-logo-row">
  <div>
- <h2 data-i18n="brand_title_main">Центрально-азиатский журнал STEM</h2>
+ <h2 data-i18n="brand_title_main">Muarrix.kiut.uz</h2>
  <p data-i18n="expert_panel">Панель эксперта</p>
  </div>
  <div class="lang-switch lang-switch--inline" data-lang-switch role="group">
@@ -278,7 +285,7 @@
 
 <div id="toast-container"></div>
 
-<script src="/js/stem-locale-site.js"></script>
+<script src="/js/muarrix-locale-site.js"></script>
 <script src="/js/i18n.js"></script>
 <script src="/js/app.js"></script>
 <script>
@@ -420,9 +427,11 @@
 ? `${editorialAssignSelect(a)}
  <textarea id="note-${a.id}" data-i18n-placeholder-id="expert_note_ph" placeholder="${escHtml(i18t('expert_note_ph'))}"></textarea>
  <div class="ac-btns">
+ <button type="button" class="btn btn-secondary" onclick="loadAssist(${a.id})">Помощник рецензента</button>
  <button class="btn btn-approve" onclick="approve(${a.id})">${i18t('expert_btn_approve')}</button>
  <button class="btn btn-reject" onclick="reject(${a.id})">${i18t('expert_btn_reject')}</button>
- </div>`
+ </div>
+ <div id="assist-${a.id}"></div>`
 : `<div class="ac-watch-note">${watchNote || i18t('expert_watch_only')}</div>`;
  return `
  <div class="article-card" id="card-${a.id}">
@@ -460,6 +469,40 @@
  document.getElementById('card-' + id)?.remove();
  loadStats();
  } catch(e) { showToast(e.message, 'error'); }
+ }
+
+ async function loadAssist(id) {
+ const box = document.getElementById('assist-' + id);
+ if (!box) return;
+ box.innerHTML = '<div class="assist-panel">Загрузка…</div>';
+ try {
+ const data = await API.get(`/review/submissions/${id}/assist`);
+ box.innerHTML = `
+ <div class="assist-panel">
+ <h4>Помощник рецензента</h4>
+ <p><strong>Кратко:</strong> ${escHtml(data.summary)}</p>
+ <p style="color:var(--text-muted);margin:8px 0">${escHtml(data.focus)}</p>
+ <strong>Чек-лист:</strong>
+ <ul>${(data.checklist || []).map((i) => `<li>${escHtml(i.text)}</li>`).join('')}</ul>
+ ${data.hints?.length ? `<p><strong>Подсказки:</strong> ${data.hints.map(escHtml).join(' ')}</p>` : ''}
+ <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap">
+ <button type="button" class="btn btn-secondary btn-sm" onclick="insertDraft(${id})">Вставить черновик замечаний</button>
+ </div>
+ </div>`;
+ window.__assistDraft = window.__assistDraft || {};
+ window.__assistDraft[id] = data.draftNote || '';
+ } catch (e) {
+ box.innerHTML = `<div class="assist-panel" style="border-color:#fecaca;background:#fef2f2">${escHtml(e.message)}</div>`;
+ }
+ }
+
+ function insertDraft(id) {
+ const ta = document.getElementById('note-' + id);
+ const draft = window.__assistDraft?.[id];
+ if (!ta || !draft) return;
+ if (ta.value.trim() && !confirm('Заменить текущий текст черновиком?')) return;
+ ta.value = draft;
+ showToast('Черновик вставлен — отредактируйте под статью', 'success');
  }
 
  async function reject(id) {

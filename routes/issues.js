@@ -23,7 +23,7 @@ router.get('/', (req, res) => {
 router.get('/open', (req, res) => {
   const journal = typeof req.query.journal === 'string' && req.query.journal.trim()
     ? req.query.journal.trim()
-    : 'stem';
+    : 'muarrix';
   const rows = db.prepare(`
     SELECT id, journal, title, description, issued_at, cover_image, archive_folder
     FROM issues

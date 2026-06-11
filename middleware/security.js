@@ -1,11 +1,11 @@
 const { db } = require('../db/database');
 
 // ── Thresholds ────────────────────────────────────────────────────────────────
-// NOTE: relaxed for local development — restore before production
-const FAILED_LOGIN_LIMIT  = 100;  // auto-ban after N failed logins
-const FAILED_LOGIN_WINDOW = 15;   // minutes
-const REGISTER_LIMIT      = 50;   // auto-ban after N registrations
-const REGISTER_WINDOW     = 60;   // minutes
+const IS_PROD = process.env.NODE_ENV === 'production';
+const FAILED_LOGIN_LIMIT  = IS_PROD ? 8 : 100;
+const FAILED_LOGIN_WINDOW = 15;
+const REGISTER_LIMIT      = IS_PROD ? 5 : 50;
+const REGISTER_WINDOW     = 60;
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 function clientIp(req) {
@@ -108,12 +108,9 @@ function checkBan(req, res, next) {
     // 1. Check if requester is an authenticated admin — admins bypass IP ban
     const authHeader = req.headers.authorization;
     if (authHeader) {
-      const jwt = require('jsonwebtoken');
+      const { verifyToken } = require('../lib/jwtAuth');
       try {
-        const payload = jwt.verify(
-          authHeader.split(' ')[1],
-          process.env.JWT_SECRET || 'secret'
-        );
+        const payload = verifyToken(authHeader.split(' ')[1]);
         // Admins are never blocked by IP ban
         if (payload?.role === 'admin') return next();
 

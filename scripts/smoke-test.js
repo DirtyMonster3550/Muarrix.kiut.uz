@@ -111,7 +111,7 @@ function checkSingleAdmin() {
 
 async function checkPublicApi() {
   const endpoints = [
-    ['GET', '/api/issues?journal=stem'],
+    ['GET', '/api/issues?journal=muarrix'],
     ['GET', '/api/file-archive/issues'],
     ['GET', '/api/announce'],
   ];

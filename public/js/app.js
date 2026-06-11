@@ -40,6 +40,7 @@ const API = {
  const res = await fetch(this.base + url, {
  method,
  headers,
+ credentials: 'same-origin',
  body: body? JSON.stringify(body): undefined,
  });
  const data = await res.json();
@@ -107,7 +108,7 @@ function statusBadge(status) {
 // ===== Journal name =====
 function journalName(key) {
  const map = {
- stem: i18t('brand_title_main'),
+ muarrix: i18t('brand_title_main'),
  finecs: 'FINECS',
  conference: 'KIUT Conferences',
  };
@@ -181,12 +182,27 @@ function updateHeaderAuth() {
  }
 }
 
-function logout() {
+async function logout() {
+ try {
+ await fetch('/api/auth/logout', { method: 'POST', credentials: 'same-origin' });
+ } catch {}
  Auth.clear();
  const badge = document.getElementById('__user-float-badge');
  if (badge) badge.remove();
  showToast(i18t('toast_logout'), 'info', 2000);
  setTimeout(() => window.location.href = '/', 1000);
+}
+
+async function syncSessionCookie() {
+ const token = Auth.getToken();
+ if (!token) return;
+ try {
+ await fetch('/api/auth/session-sync', {
+ method: 'POST',
+ headers: { Authorization: `Bearer ${token}` },
+ credentials: 'same-origin',
+ });
+ } catch {}
 }
 
 // ===== Modal =====
@@ -248,6 +264,7 @@ async function loadAnnounceBar() {
 
 // Init on load
 document.addEventListener('DOMContentLoaded', () => {
+ syncSessionCookie();
  updateHeaderAuth();
  loadAnnounceBar();
 });
