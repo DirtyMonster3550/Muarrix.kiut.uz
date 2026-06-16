@@ -17,7 +17,7 @@ stages:
 variables:
   DOCKER_TLS_CERTDIR: ""
   DOCKER_BUILDKIT: "1"
-  DEPLOY_PATH: /kiut-marrix
+  DEPLOY_PATH: /home/developers/kiut-marrix/
 
 # ==============================================================================
 # CHECK — npm audit (har commit da)
