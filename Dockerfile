@@ -13,7 +13,7 @@ COPY --from=builder /app/node_modules ./node_modules
 COPY . .
 
 # Persistent dirs (mounted as volumes)
-RUN mkdir -p db uploads public/archives && chown -R node:node /app
+RUN mkdir -p data uploads public/archives && chown -R node:node /app
 
 USER node
 ENV NODE_ENV=production PORT=3000

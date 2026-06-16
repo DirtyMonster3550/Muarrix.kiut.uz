@@ -7,6 +7,8 @@ const DB_FILE = 'muarrix.db';
 const LEGACY_DB_FILES = [];
 
 function resolveDatabasePath() {
+  // In Docker: DB_PATH=/app/data/muarrix.db (separate mounted volume)
+  if (process.env.DB_PATH) return path.resolve(process.env.DB_PATH);
   const dir = __dirname;
   const newPath = path.join(dir, DB_FILE);
   if (fs.existsSync(newPath)) return newPath;
@@ -31,6 +33,7 @@ function resolveDatabasePath() {
 }
 
 const dbPath = resolveDatabasePath();
+fs.mkdirSync(path.dirname(dbPath), { recursive: true });
 const db = new Database(dbPath);
 
 db.pragma('journal_mode = WAL');
