@@ -4,7 +4,7 @@ services:
     container_name: muarrix
     restart: unless-stopped
     ports:
-      - "127.0.0.1:3001:3000"
+      - "127.0.0.1:3002:3000"
     env_file:
       - .env
     environment:
@@ -14,7 +14,7 @@ services:
       - ./uploads:/app/uploads
       - ./public/archives:/app/public/archives
     healthcheck:
-      test: ["CMD", "wget", "-qO-", "http://localhost:3000/api/health/ready"]
+      test: [ "CMD", "wget", "-qO-", "http://localhost:3000/api/health/ready" ]
       interval: 30s
       timeout: 5s
       retries: 3
