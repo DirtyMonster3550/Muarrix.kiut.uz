@@ -1,0 +1,16 @@
+node_modules
+.env
+.git
+.gitignore
+db/*.db
+db/*.db-wal
+db/*.db-shm
+uploads/*
+!uploads/.gitkeep
+.tmp-*
+.vendor-*
+docs
+scripts
+*.bat
+*.cmd
+pm2.config.js
