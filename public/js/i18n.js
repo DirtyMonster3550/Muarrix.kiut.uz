@@ -6,6 +6,7 @@
  index: { ru: 'title_index', uz: 'title_index', en: 'title_index' },
  archives: { ru: 'title_archives', uz: 'title_archives', en: 'title_archives' },
  archive_issue: { ru: 'title_archive_issue', uz: 'title_archive_issue', en: 'title_archive_issue' },
+ archive_article: { ru: 'title_archive_article', uz: 'title_archive_article', en: 'title_archive_article' },
  payment: { ru: 'title_payment', uz: 'title_payment', en: 'title_payment' },
  login: { ru: 'title_login', uz: 'title_login', en: 'title_login' },
  register: { ru: 'title_register', uz: 'title_register', en: 'title_register' },
@@ -52,7 +53,7 @@
  hub_nav_aria: 'Справочные разделы',
  hub_section_title: 'Научные журналы и конференции',
  hub_section_desc:
- 'Выберите издание — откроется официальный сайт редакции, где размещены правила и приём материалов.',
+ 'Выберите издание — откроется официальный сайт отдела научных публикаций и редакции, где размещены правила и приём материалов.',
  nav_publish: 'Как опубликовать статью',
  nav_rules: 'Правила для авторов',
  nav_faq: 'Вопрос — ответ',
@@ -87,7 +88,7 @@
  how_steps_title: 'Пошаговая инструкция',
  how_s1t: 'Зарегистрируйтесь на платформе',
  how_s1p:
- 'Создайте аккаунт автора: «Подать статью» или «Регистрация». Журнал — Muarrix.kiut.uz (ISSN 2181-2934).',
+ 'Создайте аккаунт автора: «Подать статью» или «Регистрация». Журнал — Muarrix.kiut.uz (ISSN 3060-4591).',
  how_s2t: 'Ознакомьтесь с правилами оформления',
  how_s2p_before: 'Подготовьте рукопись согласно ',
  how_s2p_link: 'правилам для авторов',
@@ -98,14 +99,14 @@
  how_s4t: 'Подайте материал через личный кабинет',
  how_s4p:
  'Рукопись в форматах DOC или DOCX; PDF не принимается. В кабинете выберите актуальный выпуск Muarrix.kiut.uz и загрузите файл.',
- how_s5t: 'Ожидайте решения редакции',
+ how_s5t: 'Ожидайте решения отдела научных публикаций и редакции',
  how_s5p:
  'Обычно рассмотрение занимает 7–14 рабочих дней. Уведомление придёт на email и в личный кабинет на этом сайте.',
  how_s6t: 'Внесите правки (если нужно)',
  how_s6p:
- 'Если редакция запросила доработку — исправьте замечания в личном кабинете и отправьте обновлённую версию.',
+ 'Если отдел научных публикаций и редакции запросил доработку — исправьте замечания в личном кабинете и отправьте обновлённую версию.',
  how_help_html:
- ' <strong>Нужна помощь?</strong> Напишите редакции Muarrix.kiut.uz: <a href="mailto:g.isamova@kiut.uz">g.isamova@kiut.uz</a> или позвоните <strong>+998 78 129 40 40 (121)</strong>',
+ ' <strong>Нужна помощь?</strong> Напишите в отдел научных публикаций и редакции Muarrix.kiut.uz: <a href="mailto:g.isamova@kiut.uz">g.isamova@kiut.uz</a> или позвоните <strong>+998 78 129 40 40 (121)</strong>',
  rules_h1: ' Правила для авторов',
  rules_lead_before: 'Статьи в ',
  rules_lead_strong: 'Muarrix.kiut.uz',
@@ -115,54 +116,7 @@
  faq_lead:
  'Здесь собраны ответы на самые популярные вопросы авторов. Если вы не нашли ответ — напишите нам напрямую.',
  about_h1: 'О журнале',
- about_body_html:
- '<p>«Muarrix.kiut.uz» — полугодовое научное издание, выходящее в электронном виде на английском, узбекском и русском языках. «Muarrix.kiut.uz» ориентирован на преподавателей, исследователей и специалистов высших учебных заведений и является профессиональным научно-аналитическим изданием, ориентированным на широкий круг специалистов.</p>'
- + '<p>Научно-исследовательская работа быстро развивается во всех областях науки. Появляются новые решения, мнения и подходы к различным проблемам. Этот процесс характерен для научного сообщества. Необходимы публикации в научных журналах по результатам исследований.</p>'
- + '<p>В «Muarrix.kiut.uz» публикуются статьи как теоретического, так и эмпирического характера, которые могут представлять интерес для широкого круга специалистов во всех областях науки и техники. Журнал является средством выражения работ в области техники, науки и технологий и представляет в основном статьи о научных исследованиях и технологических разработках, статьи с оригинальными размышлениями о конкретной проблеме или теме, обзорные статьи, которые дают общее представление о состоянии конкретной области науки и техники. Приветствуются междисциплинарные выводы и экономические исследования с использованием методов других наук – физики, математики и т.д.</p>'
- + '<p>Особое внимание уделяется анализу процессов, происходящих в экономике Узбекистана. Этот тип публикаций является источником информации и средством взаимодействия для ученых всего мира.</p>'
- + '<h2>Разделы журнала</h2>'
- + '<ul class="about-sections">'
- + '<li>01.02.00 – Механика</li>'
- + '<li>05.00.00 – Технические науки'
- + '<ul>'
- + '<li>05.01.00 – Информационные технологии, управление и компьютерная графика</li>'
- + '<li>05.02.00 – Машиностроение и машиноведение. Обработка материалов в машиностроении. Металлургия. Авиационная техника</li>'
- + '<li>05.03.00 – Приборостроение, метрология и информационно-измерительные приборы и системы</li>'
- + '<li>05.04.00 – Радиотехника и связь</li>'
- + '<li>05.05.00 – Энергетика и электротехника. Технология электрификации сельскохозяйственного производства. Электроника</li>'
- + '<li>05.07.00 – Технология механизации сельскохозяйственного производства</li>'
- + '<li>05.08.00 – Транспорт</li>'
- + '<li>05.09.00 – Строительство</li>'
- + '</ul></li>'
- + '<li>18.00.00 – Архитектура</li>'
- + '</ul>'
- + '<p>Заявка на публикацию оставляется на странице посредством <a href="/register.html">специальной формы</a>, которая будет рассмотрена в кратчайшие сроки. Периодические издания оформляются в соответствии с требованиями редакционно-издательского процесса. Статьи рассматриваются рецензентами и решение о публикации принимается на заседании редколлегии перед выходом нового номера журнала.</p>',
  editorial_h1: 'Редакционный совет',
- editorial_lead: 'Редакция Muarrix.kiut.uz.',
- editorial_body_html:
- '<h2>Главный редактор</h2>'
- + '<p class="editorial-member"><strong>Конгратбай Шарипов</strong>, доктор технических наук, профессор, Ташкентский Международный Университет Кимё</p>'
- + '<h2>Заместитель редактора</h2>'
- + '<p class="editorial-member"><strong>Акмаль Рустамов</strong>, доктор философии по техническому направлению (PhD), доцент, Ташкентский Международный Университет Кимё</p>'
- + '<h2>Редакционная коллегия</h2>'
- + '<ul class="editorial-board-list">'
- + '<li><strong>Чикахиро Минова</strong>, доктор технических наук (DSc), профессор, Ташкентский Международный Университет Кимё</li>'
- + '<li><strong>Савет Худайкулов</strong>, доктор технических наук, профессор, Ташкентский Международный Университет Кимё</li>'
- + '<li><strong>Мохинисо Хидирова</strong>, доктор технических наук, доцент, Ташкентский Международный Университет Кимё</li>'
- + '<li><strong>Иброхим Рустамов</strong>, доктор технических наук (DSc), Ташкентский Международный Университет Кимё</li>'
- + '<li><strong>Джамбул Юсупов</strong>, доктор физико-математических наук (DSc), Ташкентский Международный Университет Кимё</li>'
- + '<li><strong>Санжар Рузимов</strong>, доктор технических наук (DSc), доцент, Туринский Политехнический Университет в городе Ташкенте</li>'
- + '<li><strong>Дильбар Мирзарахметова</strong>, доктор биотехнологий, Международный университет Кимё в Ташкенте, Узбекистан</li>'
- + '<li><strong>Ханс Окснер</strong>, доктор технических наук (DSc), директор Государственного института сельскохозяйственной инженерии и биоэнергетики, Германия</li>'
- + '<li><strong>Андреас Леммер</strong>, доктор технических наук (DSc), профессор Государственного института сельскохозяйственной инженерии и биоэнергетики, Германия</li>'
- + '<li><strong>Базаров Бахтиёр Имамович</strong>, доктор технических наук (DSc), профессор, Ташкентский Государственный Транспортный Университет</li>'
- + '<li><strong>Джамшид Каниев</strong>, доктор философии по техническому направлению (PhD), Ташкентский Международный Университет Кимё</li>'
- + '<li><strong>Отабек Мухитдинов</strong>, доктор философии по техническому направлению (PhD), доцент, Ташкентский Международный Университет Кимё</li>'
- + '<li><strong>Муроджон Шербаев</strong>, доктор философии по техническому направлению (PhD), доцент, Ташкентский Международный Университет Кимё</li>'
- + '<li><strong>Сарвар Юсупов</strong>, доктор философии по техническому направлению (PhD), Ташкентский Международный Университет Кимё</li>'
- + '<li><strong>Хаммид Юсупов</strong>, доктор философии по физике, Международный университет им. Кимё в Ташкенте, Узбекистан</li>'
- + '<li><strong>Игорь Симоне Стеевано</strong>, доктор философии по техническому направлению (PhD), Politecnico di Torino, Италия</li>'
- + '</ul>',
  },
  uz: {
  breadcrumb_home: 'Bosh sahifa',
@@ -175,7 +129,7 @@
  hub_nav_aria: 'Qo‘llanma bo‘limlari',
  hub_section_title: 'Ilmiy jurnallar va konferentsiyalar',
  hub_section_desc:
- 'Nashrni tanlang — tahririyatning rasmiy sayti ochiladi: qoidalar va material qabul qilish tartibi joylashgan.',
+ 'Nashrni tanlang — ilmiy nashrlar va tahririyat bo‘limining rasmiy sayti ochiladi: qoidalar va material qabul qilish tartibi joylashgan.',
  nav_publish: 'Maqola qanday chop etish',
  nav_rules: 'Mualliflar uchun qoidalar',
  nav_faq: 'Savol-javob',
@@ -209,7 +163,7 @@
  how_steps_title: 'Qadam-baqadam yo‘riqnoma',
  how_s1t: 'Platformada ro‘yxatdan o‘ting',
  how_s1p:
- 'Muallif akkauntini yarating. Jurnal — Muarrix.kiut.uz (ISSN 2181-2934).',
+ 'Muallif akkauntini yarating. Jurnal — Muarrix.kiut.uz (ISSN 3060-4591).',
  how_s2t: 'Rasmiylashtirish qoidalari bilan tanishing',
  how_s2p_before: 'Qo‘lyozmani ',
  how_s2p_link: 'mualliflar uchun qoidalar',
@@ -221,12 +175,12 @@
  how_s4t: 'Shaxsiy kabinet orqali topshiring',
  how_s4p:
  'Qo‘lyozma DOC yoki DOCX; PDF qabul qilinmaydi. Kabinetda joriy Muarrix.kiut.uz sonini tanlang va faylni yuklang.',
- how_s5t: 'Tahririyat qarorini kuting',
+ how_s5t: 'Ilmiy nashrlar va tahririyat bo‘limi qarorini kuting',
  how_s5p:
  'Odatda 7–14 ish kuni. Xabar email va ushbu saytdagi shaxsiy kabinetga keladi.',
  how_s6t: 'Tuzatishlar kiriting (agar kerak bo‘lsa)',
  how_s6p:
- 'Tahririyat tuzatish so‘rasa — shaxsiy kabinetda tuzating va qayta yuboring.',
+ 'Ilmiy nashrlar va tahririyat bo‘limi tuzatish so‘rasa — shaxsiy kabinetda tuzating va qayta yuboring.',
  how_help_html:
  ' <strong>Yordam kerakmi?</strong> <a href="mailto:g.isamova@kiut.uz">g.isamova@kiut.uz</a> yoki <strong>+998 78 129 40 40 (121)</strong>',
  rules_h1: ' Mualliflar uchun qoidalar',
@@ -253,7 +207,7 @@
  hub_nav_aria: 'Reference sections',
  hub_section_title: 'Scientific journals and conferences',
  hub_section_desc:
- 'Choose a publication — the official editorial site opens with submission rules and guidelines.',
+ 'Choose a publication — the official site of the Department of Scientific Publications and Editorial opens with submission rules and guidelines.',
  nav_publish: 'How to publish',
  nav_rules: 'Author guidelines',
  nav_faq: 'Q&A',
@@ -287,7 +241,7 @@
  how_steps_title: 'Step-by-step guide',
  how_s1t: 'Register on the platform',
  how_s1p:
- 'Create an author account. The journal is the Muarrix.kiut.uz (ISSN 2181-2934).',
+ 'Create an author account. The journal is the Muarrix.kiut.uz (ISSN 3060-4591).',
  how_s2t: 'Read the formatting rules',
  how_s2p_before: 'Prepare your manuscript according to the ',
  how_s2p_link: 'author guidelines',
@@ -298,7 +252,7 @@
  how_s4t: 'Submit via your author account',
  how_s4p:
  'Manuscript in DOC or DOCX; PDF is not accepted. In your account, select the current Muarrix.kiut.uz issue and upload the file.',
- how_s5t: 'Await the editorial decision',
+ how_s5t: 'Await the decision of the Department of Scientific Publications and Editorial',
  how_s5p:
  'Review usually takes 7–14 business days. You will be notified by email and in your account on this site.',
  how_s6t: 'Apply revisions if requested',

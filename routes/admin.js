@@ -1,11 +1,48 @@
 const express = require('express');
 const router = express.Router();
 const path = require('path');
+const fs = require('fs');
+const crypto = require('crypto');
+const multer = require('multer');
 const { db, dbPath } = require('../db/database');
 const { sendApprovalEmail, sendRejectionEmail, sendTestEmail } = require('../utils/mailer');
 const { requireAdmin } = require('./adminAuth');
 const { auditLog } = require('../middleware/security');
 const { publishSubmissionToArchive, syncPublishedToArchive } = require('../lib/publishSubmission');
+
+const UPLOADS_DIR = path.join(__dirname, '..', 'uploads');
+
+const publishPdfUpload = multer({
+  storage: multer.diskStorage({
+    destination: (_req, _file, cb) => cb(null, UPLOADS_DIR),
+    filename: (_req, file, cb) => {
+      const rand = crypto.randomBytes(16).toString('hex');
+      cb(null, `${Date.now()}_${rand}.pdf`);
+    },
+  }),
+  limits: { fileSize: 25 * 1024 * 1024 },
+  fileFilter: (_req, file, cb) => {
+    const ext = path.extname(file.originalname || '').toLowerCase();
+    const mime = String(file.mimetype || '').toLowerCase();
+    if (ext === '.pdf' || mime === 'application/pdf') cb(null, true);
+    else cb(new Error('Для публикации принимается только PDF'));
+  },
+});
+
+function isPdfFile(filePath) {
+  try {
+    const head = Buffer.alloc(4);
+    const fd = fs.openSync(filePath, 'r');
+    try {
+      fs.readSync(fd, head, 0, 4, 0);
+    } finally {
+      fs.closeSync(fd);
+    }
+    return head[0] === 0x25 && head[1] === 0x50 && head[2] === 0x44 && head[3] === 0x46;
+  } catch {
+    return false;
+  }
+}
 
 // Dashboard stats
 router.get('/stats', requireAdmin, (req, res) => {
@@ -138,40 +175,90 @@ router.post('/submissions/:id/reject', requireAdmin, async (req, res) => {
   res.json({ success: true, emailSent: emailResult.success, stub: emailResult.stub });
 });
 
-// ── Publish submission (admin publishes editorial_approved) ───────────────────
-router.post('/submissions/:id/publish', requireAdmin, async (req, res) => {
-  const { note } = req.body;
-  const sub = db.prepare(`
-    SELECT s.*, u.full_name, u.email
-    FROM submissions s JOIN users u ON s.user_id = u.id
-    WHERE s.id = ?
-  `).get(req.params.id);
+// ── Publish submission (admin uploads PDF + publishes editorial_approved) ───────
+router.post('/submissions/:id/publish', requireAdmin, (req, res) => {
+  publishPdfUpload.single('pdf')(req, res, async (uploadErr) => {
+    if (uploadErr) {
+      return res.status(400).json({ error: uploadErr.message || 'Ошибка загрузки PDF' });
+    }
 
-  if (!sub) return res.status(404).json({ error: 'Не найдено' });
-  if (sub.status !== 'editorial_approved') {
-    return res.status(400).json({ error: 'Статья не в очереди на публикацию' });
-  }
+    const id = parseInt(req.params.id, 10);
+    if (Number.isNaN(id)) return res.status(400).json({ error: 'Некорректный id' });
 
-  const archiveResult = await publishSubmissionToArchive(sub.id, db);
-  if (!archiveResult.ok) {
-    return res.status(400).json({ error: archiveResult.error });
-  }
+    const note = req.body && req.body.note != null ? String(req.body.note).trim() : '';
+    const sub = db.prepare(`
+      SELECT s.*, u.full_name, u.email
+      FROM submissions s JOIN users u ON s.user_id = u.id
+      WHERE s.id = ?
+    `).get(id);
 
-  db.prepare(`
-    UPDATE submissions
-    SET status = 'published', admin_note = ?, published_at = CURRENT_TIMESTAMP, reviewed_at = CURRENT_TIMESTAMP
-    WHERE id = ?
-  `).run(note || null, sub.id);
+    if (!sub) {
+      if (req.file) {
+        try { fs.unlinkSync(req.file.path); } catch {}
+      }
+      return res.status(404).json({ error: 'Не найдено' });
+    }
+    if (sub.status !== 'editorial_approved') {
+      if (req.file) {
+        try { fs.unlinkSync(req.file.path); } catch {}
+      }
+      return res.status(400).json({ error: 'Статья не в очереди на публикацию' });
+    }
+    if (!req.file) {
+      return res.status(400).json({ error: 'Загрузите PDF файл для публикации в архиве' });
+    }
+    if (!isPdfFile(req.file.path)) {
+      try { fs.unlinkSync(req.file.path); } catch {}
+      return res.status(400).json({ error: 'Файл не является корректным PDF' });
+    }
 
-  db.prepare(`INSERT INTO notifications (user_id, submission_id, type, message) VALUES (?, ?, 'approved', ?)`)
-    .run(sub.user_id, sub.id,
-      `Ваша статья «${sub.title}» опубликована! Она доступна в архиве на сайте журнала.`);
+    const issueIdRaw = req.body && req.body.issue_id != null ? req.body.issue_id : sub.issue_id;
+    const issueId = parseInt(String(issueIdRaw || ''), 10);
+    if (Number.isNaN(issueId)) {
+      try { fs.unlinkSync(req.file.path); } catch {}
+      return res.status(400).json({ error: 'Выберите выпуск журнала, в который добавить статью' });
+    }
+    const issue = db.prepare('SELECT id, title, archive_folder FROM issues WHERE id = ?').get(issueId);
+    if (!issue) {
+      try { fs.unlinkSync(req.file.path); } catch {}
+      return res.status(400).json({ error: 'Выпуск журнала не найден' });
+    }
+    if (!String(issue.archive_folder || '').trim()) {
+      try { fs.unlinkSync(req.file.path); } catch {}
+      return res.status(400).json({
+        error: `У выпуска «${issue.title}» не указана «Папка в архиве». Откройте «Выпуски журналов» → Изменить → заполните папку.`,
+      });
+    }
 
-  auditLog(req.user.id, 'publish_submission', 'submission', sub.id, sub.title);
-  res.json({
-    success: true,
-    archiveFolder: archiveResult.folder,
-    archiveFile: archiveResult.archiveFile,
+    db.prepare('UPDATE submissions SET issue_id = ? WHERE id = ?').run(issueId, id);
+
+    const pdfName = path.basename(req.file.filename);
+    db.prepare('UPDATE submissions SET published_pdf_path = ? WHERE id = ?').run(pdfName, id);
+
+    const archiveResult = await publishSubmissionToArchive(id, db);
+    if (!archiveResult.ok) {
+      db.prepare('UPDATE submissions SET published_pdf_path = NULL WHERE id = ?').run(id);
+      try { fs.unlinkSync(req.file.path); } catch {}
+      return res.status(400).json({ error: archiveResult.error });
+    }
+
+    db.prepare(`
+      UPDATE submissions
+      SET status = 'published', admin_note = ?, published_at = CURRENT_TIMESTAMP, reviewed_at = CURRENT_TIMESTAMP
+      WHERE id = ?
+    `).run(note || null, id);
+
+    db.prepare(`INSERT INTO notifications (user_id, submission_id, type, message) VALUES (?, ?, 'approved', ?)`)
+      .run(sub.user_id, sub.id,
+        `Ваша статья «${sub.title}» опубликована! Она доступна в архиве на сайте журнала.`);
+
+    auditLog(req.user.id, 'publish_submission', 'submission', sub.id, sub.title);
+    res.json({
+      success: true,
+      archiveFolder: archiveResult.folder,
+      archiveFile: archiveResult.archiveFile,
+      pdfFile: pdfName,
+    });
   });
 });
 

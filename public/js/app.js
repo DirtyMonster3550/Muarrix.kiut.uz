@@ -51,6 +51,20 @@ const API = {
  post: (url, body) => API.request('POST', url, body),
  put: (url, body) => API.request('PUT', url, body),
  delete: (url) => API.request('DELETE', url),
+ async upload(url, formData) {
+  const headers = {};
+  const token = Auth.getToken();
+  if (token) headers.Authorization = `Bearer ${token}`;
+  const res = await fetch(this.base + url, {
+    method: 'POST',
+    headers,
+    credentials: 'same-origin',
+    body: formData,
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || i18t('err_server'));
+  return data;
+ },
 };
 
 // ===== Toast notifications =====
@@ -193,16 +207,49 @@ async function logout() {
  setTimeout(() => window.location.href = '/', 1000);
 }
 
-async function syncSessionCookie() {
+async function ensureServerSession() {
  const token = Auth.getToken();
- if (!token) return;
+ if (!token) return false;
  try {
- await fetch('/api/auth/session-sync', {
+ const res = await fetch('/api/auth/session-sync', {
  method: 'POST',
  headers: { Authorization: `Bearer ${token}` },
  credentials: 'same-origin',
  });
- } catch {}
+ if (!res.ok) {
+ Auth.clear();
+ return false;
+ }
+ return true;
+ } catch {
+ return false;
+ }
+}
+
+async function syncSessionCookie() {
+ await ensureServerSession();
+}
+
+/** На login/register: сначала cookie, потом редирект (иначе цикл login ↔ dashboard) */
+async function redirectIfLoggedIn() {
+ if (!Auth.isLoggedIn()) return;
+ const ok = await ensureServerSession();
+ if (!ok) return;
+
+ const user = Auth.getUser();
+ if (!user) return;
+
+ const next = new URLSearchParams(location.search).get('next');
+ const safeNext = next && next.startsWith('/') && !next.startsWith('//') ? next : null;
+ if (safeNext) {
+ window.location.replace(safeNext);
+ return;
+ }
+
+ const role = user.role;
+ if (role === 'admin') window.location.replace('/admin.html');
+ else if (role === 'tech_expert' || role === 'editorial_expert') window.location.replace('/expert.html');
+ else window.location.replace('/dashboard.html');
 }
 
 // ===== Modal =====

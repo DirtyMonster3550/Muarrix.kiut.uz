@@ -14,6 +14,7 @@ const { buildArchiveIndex } = require('../lib/archiveSearch');
 const { smartSearch, findSimilarArticles } = require('../lib/archiveSmartSearch');
 const { buildDbCoverMap, resolveCoverUrl } = require('../lib/issueCovers');
 const { mergeDbIssuesIntoArchive } = require('../lib/archiveDbMerge');
+const { getArchiveArticleDetail } = require('../lib/archiveArticleDetail');
 const { db } = require('../db/database');
 
 const ARCHIVES_ROOT = archivesDirectory();
@@ -143,6 +144,22 @@ router.get('/similar', async (req, res) => {
   } catch (e) {
     console.error('[file-archive similar]', e);
     res.status(500).json({ error: 'Ошибка поиска похожих статей' });
+  }
+});
+
+router.get('/article', async (req, res) => {
+  const folder = typeof req.query.folder === 'string' ? req.query.folder : '';
+  const file = typeof req.query.file === 'string' ? req.query.file : '';
+  if (!folder.trim() || !file.trim()) {
+    return res.status(400).json({ error: 'Укажите параметры folder и file' });
+  }
+  try {
+    const article = await getArchiveArticleDetail(db, folder, file);
+    if (!article) return res.status(404).json({ error: 'Статья не найдена' });
+    res.json(article);
+  } catch (e) {
+    console.error('[file-archive article]', e);
+    res.status(500).json({ error: 'Ошибка чтения статьи' });
   }
 });
 

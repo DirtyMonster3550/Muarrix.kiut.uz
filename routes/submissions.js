@@ -5,8 +5,6 @@ const path = require('path');
 const fs = require('fs');
 const { db } = require('../db/database');
 const { requireAuth } = require('./auth');
-const { checkSubmission } = require('../lib/submissionCheck');
-
 // ── File magic-byte signatures ────────────────────────────────────────────────
 // Проверяем первые байты файла, чтобы нельзя было подменить расширение.
 
@@ -142,42 +140,6 @@ function resolveIssueOrError(journal, issueIdRaw) {
   if (!issue.accepting_submissions) return { error: 'Приём в этот выпуск закрыт' };
   return { issue_id: issueId };
 }
-
-// ── Pre-submission smart check (no DB write) ─────────────────────────────────
-router.post('/precheck', requireAuth, upload.single('file'), (req, res) => {
-  const { title, authors, abstract, author_date } = req.body;
-  let filePath = null;
-  let fileSize = 0;
-
-  if (req.file) {
-    const check = validateWordUpload(req.file);
-    if (!check.ok) {
-      if (check.fullPath && fs.existsSync(check.fullPath)) fs.unlinkSync(check.fullPath);
-      return res.status(400).json({ error: 'Некорректный файл. Загрузите DOC или DOCX.' });
-    }
-    filePath = check.fullPath;
-    try {
-      fileSize = fs.statSync(filePath).size;
-    } catch {
-      fileSize = req.file.size || 0;
-    }
-  }
-
-  const report = checkSubmission({
-    title,
-    authors,
-    abstract,
-    author_date,
-    filePath,
-    fileSize,
-  });
-
-  if (filePath && fs.existsSync(filePath)) {
-    try { fs.unlinkSync(filePath); } catch { /* temp upload */ }
-  }
-
-  res.json(report);
-});
 
 // ── Submit article ────────────────────────────────────────────────────────────
 router.post('/', requireAuth, upload.single('file'), (req, res) => {

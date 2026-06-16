@@ -298,6 +298,10 @@
  });
  }
 
+ function buildArticleUrl(folder, fileName) {
+ return '/article.html?folder=' + encodeURIComponent(folder) + '&file=' + encodeURIComponent(fileName);
+ }
+
  function buildFileUrl(folder, fileName) {
  const parts = folder.split('/').map((p) => encodeURIComponent(p));
  return '/archives/' + parts.join('/') + '/' + encodeURIComponent(fileName);
@@ -329,14 +333,14 @@
  }
 
  function renderSearchResult(item, index) {
- const href = buildFileUrl(item.folder, item.file);
+ const href = buildArticleUrl(item.folder, item.file);
  const authors = (item.authors && item.authors.length)? item.authors.join(', '): '';
  const tags = (item.tags || []).map((t) => `<span class="search-tag">${esc(t)}</span>`).join('');
  const rel = item.relevance > 0 ? `<div class="search-relevance">Релевантность: ${item.relevance}</div>` : '';
  const simId = `similar-${index}`;
  return `
  <div class="search-result" style="cursor:default">
- <a href="${esc(href)}" target="_blank" rel="noopener noreferrer" style="text-decoration:none;color:inherit">
+ <a href="${esc(href)}" style="text-decoration:none;color:inherit">
  <div class="search-result-title">${esc(item.title)}</div>
  ${authors? `<div class="search-result-authors">${esc(authors)}</div>`: ''}
  <div class="search-result-meta">${esc(item.issueLabel)} · ${esc(item.ext.replace('.', '').toUpperCase())}</div>
@@ -366,8 +370,8 @@
  return;
  }
  box.innerHTML = data.similar.map((s) => {
- const href = buildFileUrl(s.folder, s.file);
- return `<a class="search-similar-link" href="${esc(href)}" target="_blank" rel="noopener">${esc(s.title)} (${s.similarity}% · ${esc(s.issueLabel)})</a>`;
+ const href = buildArticleUrl(s.folder, s.file);
+ return `<a class="search-similar-link" href="${esc(href)}">${esc(s.title)} (${s.similarity}% · ${esc(s.issueLabel)})</a>`;
  }).join('');
  } catch {
  box.innerHTML = '<span style="font-size:14px;color:#b91c1c">Ошибка загрузки</span>';

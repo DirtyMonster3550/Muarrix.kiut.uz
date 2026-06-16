@@ -122,6 +122,17 @@ app.use('/uploads', (req, res, next) => {
 
 // ── Public API ────────────────────────────────────────────────────────────────
 
+app.get('/api/health/startup', (_req, res) => res.json({ status: 'ok' }));
+app.get('/api/health/live',    (_req, res) => res.json({ status: 'ok' }));
+app.get('/api/health/ready',   (_req, res) => {
+  try {
+    db.prepare('SELECT 1').get();
+    res.json({ status: 'ok' });
+  } catch {
+    res.status(503).json({ status: 'unavailable' });
+  }
+});
+
 app.get('/api/announce', (req, res) => {
   const rows = db.prepare("SELECT key, value FROM settings WHERE key IN ('announce_text','announce_enabled','announce_cta','site_email','site_phone','site_address')").all();
   const obj = {};

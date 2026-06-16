@@ -158,6 +158,9 @@ function init() {
   if (!subCols.includes('published_archive_file')) {
     db.exec('ALTER TABLE submissions ADD COLUMN published_archive_file TEXT');
   }
+  if (!subCols.includes('published_pdf_path')) {
+    db.exec('ALTER TABLE submissions ADD COLUMN published_pdf_path TEXT');
+  }
 
   const issueCols = db.prepare('PRAGMA table_info(issues)').all().map((c) => c.name);
   if (!issueCols.includes('cover_image')) {
@@ -211,6 +214,23 @@ function init() {
     syncArchiveIssueCovers(db);
   } catch (e) {
     console.error('[syncIssueCovers]', e.message);
+  }
+
+  // Выпуск с открытым приёмом — без него авторы не могут подать статью
+  const openMuarrix = db.prepare(`
+    SELECT id FROM issues WHERE journal = 'muarrix' AND accepting_submissions = 1 LIMIT 1
+  `).get();
+  if (!openMuarrix) {
+    const year = new Date().getFullYear();
+    db.prepare(`
+      INSERT INTO issues (journal, title, description, sort_order, accepting_submissions, issued_at)
+      VALUES ('muarrix', ?, ?, 1, 1, ?)
+    `).run(
+      `Выпуск Muarrix.kiut.uz ${year}`,
+      'Приём статей открыт',
+      `${year}-06-01`
+    );
+    console.log('[init] Создан выпуск Muarrix с открытым приёмом статей');
   }
 
   // Create default admin if not exists

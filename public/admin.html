@@ -222,6 +222,60 @@
 .activity-dot.approved { background: var(--success); }
 .activity-dot.rejected { background: var(--danger); }
 
+.admin-guide {
+ background: #eff6ff;
+ border: 1px solid #bfdbfe;
+ border-radius: 12px;
+ padding: 16px 18px;
+ margin-bottom: 20px;
+ font-size: 14px;
+ line-height: 1.65;
+ color: #1e3a5f;
+}
+.admin-guide strong { color: var(--primary); }
+.admin-guide ol { margin: 10px 0 0; padding-left: 20px; }
+.admin-guide li { margin-bottom: 6px; }
+.publish-step {
+ background: #f8fafc;
+ border: 1px solid var(--border);
+ border-radius: 10px;
+ padding: 14px 16px;
+ margin-bottom: 12px;
+}
+.publish-step-num {
+ display: inline-block;
+ font-size: 11px;
+ font-weight: 800;
+ letter-spacing: 0.5px;
+ text-transform: uppercase;
+ color: var(--primary);
+ margin-bottom: 8px;
+}
+.publish-step label { font-size: 13px; font-weight: 700; color: var(--text); }
+.publish-step select, .publish-step input[type=file] {
+ margin-top: 8px;
+ font-size: 14px;
+ max-width: 100%;
+}
+.publish-step-hint {
+ font-size: 12px;
+ color: var(--text-muted);
+ margin-top: 8px;
+ line-height: 1.5;
+}
+.publish-step-hint.warn { color: #b45309; }
+.publish-step-actions {
+ display: flex;
+ gap: 8px;
+ flex-wrap: wrap;
+ margin-top: 10px;
+}
+.nav-step-badge {
+ font-size: 10px;
+ opacity: 0.55;
+ margin-left: 4px;
+}
+
  @media (max-width: 768px) {
 .admin-layout { flex-direction: column; }
 .admin-sidebar { width: 100%; }
@@ -263,12 +317,12 @@
  <a href="javascript:void(0)" data-tab="submissions" onclick="return switchTab('submissions',this)">
  Все статьи
  </a>
+ <a href="javascript:void(0)" data-tab="issues" onclick="return switchTab('issues',this)">
+ Выпуски журналов
+ </a>
  <a href="javascript:void(0)" data-tab="publish" onclick="return switchTab('publish',this)">
  К публикации
  <span class="admin-pending-badge" id="publish-badge" style="display:none">0</span>
- </a>
- <a href="javascript:void(0)" data-tab="issues" onclick="return switchTab('issues',this)">
- Выпуски журналов
  </a>
  <a href="javascript:void(0)" data-tab="users" onclick="return switchTab('users',this)">
  Пользователи
@@ -421,9 +475,16 @@
 
  <!-- ===== PUBLISH TAB ===== -->
  <div id="tab-publish" class="tab-content" style="display:none">
- <div class="page-header" style="margin-bottom:20px">
- <h2 style="font-size:20px;font-weight:700"> Статьи, готовые к публикации</h2>
- <p style="font-size:13px;color:var(--text-muted);margin-top:4px">Одобрены редакционным советом. Проверьте и нажмите «Опубликовать».</p>
+ <div class="page-header" style="margin-bottom:16px">
+ <h2 style="font-size:20px;font-weight:700">Публикация статей в архив</h2>
+ <p style="font-size:13px;color:var(--text-muted);margin-top:4px">Статьи уже одобрены экспертами. Вы выбираете выпуск, загружаете PDF — статья появится в разделе «Архив» на сайте.</p>
+ </div>
+ <div class="admin-guide">
+ <strong>Как опубликовать статью:</strong>
+ <ol>
+ <li><strong>Выпуски журналов</strong> — создайте номер или выберите старый. Обязательно укажите <strong>«Папка в архиве»</strong>.</li>
+ <li><strong>К публикации</strong> — выберите выпуск, скачайте Word, загрузите готовый PDF.</li>
+ </ol>
  </div>
  <div id="publish-body"><div class="empty-state"><div class="loader loader-dark"></div></div></div>
  </div>
@@ -437,12 +498,21 @@
 
  <!-- ===== ISSUES TAB ===== -->
  <div id="tab-issues" class="tab-content" style="display:none">
+ <div class="admin-guide" style="margin-bottom:24px">
+ <strong>Выпуски журналов — что это?</strong>
+ <p style="margin:8px 0 0">Каждый номер журнала (том, год) создаётся здесь. Без выпуска с заполненной <strong>«Папкой в архиве»</strong> админ не сможет опубликовать PDF в разделе «Архив».</p>
+ <ul style="margin:10px 0 0;padding-left:20px">
+ <li><strong>Новый текущий номер</strong> — создайте формой ниже, включите «Приём открыт» (авторы смогут подавать статьи).</li>
+ <li><strong>Старый номер</strong> — выберите при публикации на вкладке «К публикации».</li>
+ <li><strong>Папка в архиве</strong> — путь к папке с PDF на сервере, например: <code>2025/Том 5 № 1 (2025)</code></li>
+ </ul>
+ </div>
  <div class="settings-section" style="margin-bottom:24px">
  <div class="settings-section-header">
  <span style="font-size:20px"></span>
  <div>
- <h3 id="issue-form-heading">Новый выпуск</h3>
- <p style="font-size:12px;color:var(--text-muted);margin-top:2px">Создавайте тома и номера выпусков. Отметка «Приём открыт» — выпуск доступен авторам в форме подачи.</p>
+ <h3 id="issue-form-heading">Создать или изменить выпуск</h3>
+ <p style="font-size:12px;color:var(--text-muted);margin-top:2px">Название + папка архива + обложка. «Приём открыт» — авторы видят этот выпуск при подаче статьи.</p>
  </div>
  </div>
  <div class="settings-section-body">
@@ -457,10 +527,10 @@
  <textarea id="issue-desc" class="form-control" rows="2" placeholder="Заметка для сайта / архива"></textarea>
  </div>
  <div class="form-group">
- <label class="form-label">Папка в архиве</label>
+ <label class="form-label">Папка в архиве <span style="color:var(--danger)">*</span> <span style="font-weight:400;color:var(--text-muted)">(нужна для публикации PDF)</span></label>
  <input type="text" id="issue-archive-folder" class="form-control" list="issue-archive-folder-list" placeholder="Например: 2025/Том 5 № 1 (2025)">
  <datalist id="issue-archive-folder-list"></datalist>
- <p style="font-size:12px;color:var(--text-muted);margin:6px 0 0">Путь к папке выпуска в каталоге архива — для связи обложки с разделом «Архив».</p>
+ <p style="font-size:12px;color:var(--text-muted);margin:6px 0 0">Куда на сервере складываются PDF этого выпуска. Без этой папки публикация на вкладке «К публикации» не сработает.</p>
  </div>
  <div class="form-group">
  <label class="form-label">Обложка выпуска <span style="color:var(--danger)">*</span></label>
@@ -927,7 +997,7 @@
  <div style="font-weight:600;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escHtml(s.title)}</div>
  <div style="font-size:11px;color:var(--text-muted);margin-top:2px">${escHtml(s.full_name)} · ${formatDate(s.submitted_at)}</div>
  </div>
- <button class="btn btn-primary btn-sm" style="flex-shrink:0;background:var(--success)" onclick="publishSub(${s.id})"> Опубликовать</button>
+ <button class="btn btn-primary btn-sm" style="flex-shrink:0" onclick="switchTab('publish', document.querySelector('[data-tab=publish]'))"> К публикации</button>
  </div>`).join('');
  }
 
@@ -947,42 +1017,146 @@
  }
 
  // ===== PUBLISH QUEUE =====
+ let publishIssuesCache = [];
+
+ function defaultPublishIssueId(article, issues) {
+ if (!issues.length) return '';
+ const byArticle = issues.find((i) => i.id === article.issue_id);
+ if (byArticle && String(byArticle.archive_folder || '').trim()) return String(byArticle.id);
+ const openReady = issues.find((i) => i.accepting_submissions && String(i.archive_folder || '').trim());
+ if (openReady) return String(openReady.id);
+ const anyReady = issues.find((i) => String(i.archive_folder || '').trim());
+ return anyReady ? String(anyReady.id) : (byArticle ? String(byArticle.id) : String(issues[0].id));
+ }
+
+ function buildPublishIssueSelect(article, issues, selectedId) {
+ const ready = issues.filter((i) => String(i.archive_folder || '').trim());
+ const incomplete = issues.filter((i) => !String(i.archive_folder || '').trim());
+ let html = '<option value="">— Выберите выпуск —</option>';
+ if (ready.length) {
+ html += '<optgroup label="✓ Можно публиковать (папка архива указана)">';
+ html += ready.map((it) => {
+ const tags = [];
+ if (it.accepting_submissions) tags.push('текущий, приём открыт');
+ else tags.push('старый выпуск');
+ const tag = tags.join(', ');
+ const sel = String(it.id) === String(selectedId) ? ' selected' : '';
+ return `<option value="${it.id}"${sel}>${escHtml(it.title)} — ${escHtml(tag)}</option>`;
+ }).join('');
+ html += '</optgroup>';
+ }
+ if (incomplete.length) {
+ html += '<optgroup label="⚠ Сначала укажите папку архива">';
+ html += incomplete.map((it) => {
+ const sel = String(it.id) === String(selectedId) ? ' selected' : '';
+ return `<option value="${it.id}"${sel}>${escHtml(it.title)} — нет папки</option>`;
+ }).join('');
+ html += '</optgroup>';
+ }
+ return html;
+ }
+
+ function publishIssueHint(issueId, issues) {
+ const issue = issues.find((i) => String(i.id) === String(issueId));
+ if (!issue) return '<div class="publish-step-hint warn">Выберите выпуск журнала из списка.</div>';
+ if (!String(issue.archive_folder || '').trim()) {
+ return `<div class="publish-step-hint warn">У этого выпуска нет «Папки в архиве». Откройте <strong>Выпуски журналов</strong> → Изменить → заполните папку.</div>`;
+ }
+ return `<div class="publish-step-hint">PDF попадёт в архив: <strong>${escHtml(issue.archive_folder)}</strong></div>`;
+ }
+
+ function onPublishIssueChange(articleId) {
+ const sel = document.getElementById('pub-issue-' + articleId);
+ const hint = document.getElementById('pub-issue-hint-' + articleId);
+ if (!sel || !hint) return;
+ hint.innerHTML = publishIssueHint(sel.value, publishIssuesCache);
+ }
+
  async function loadPublishQueue() {
  const body = document.getElementById('publish-body');
  try {
- const items = await API.get('/review/queue');
+ const [items, issues] = await Promise.all([
+ API.get('/review/queue'),
+ API.get('/admin/issues'),
+ ]);
+ publishIssuesCache = issues || [];
  if (!items.length) {
  body.innerHTML = '<div class="empty-state"><div class="icon"></div><h3>Очередь пуста</h3><p>Нет статей, ожидающих публикации.</p></div>';
  return;
  }
+ if (!publishIssuesCache.length) {
+ body.innerHTML = `<div class="alert alert-danger" style="margin:16px">Нет ни одного выпуска журнала. Сначала создайте выпуск в разделе <strong>Выпуски журналов</strong>.</div>`;
+ return;
+ }
  body.innerHTML = `<div style="display:flex;flex-direction:column;gap:14px">` +
- items.map(a => `
+ items.map((a) => {
+ const defaultIssue = defaultPublishIssueId(a, publishIssuesCache);
+ return `
  <div style="background:#fff;border:1px solid var(--border);border-radius:12px;padding:20px 24px">
  <div style="font-size:16px;font-weight:700;color:var(--primary);margin-bottom:6px">${escHtml(a.title)}</div>
  <div style="font-size:12px;color:var(--text-muted);display:flex;gap:14px;flex-wrap:wrap;margin-bottom:12px">
- <span> ${escHtml(a.full_name)}</span>
- <span> ${escHtml(a.email)}</span>
- <span> ${escHtml(a.journal)}</span>
- ${a.issue_title? `<span> ${escHtml(a.issue_title)}</span>`: ''}
- <span> ${formatDate(a.submitted_at)}</span>
+ <span>👤 ${escHtml(a.full_name)}</span>
+ <span>✉ ${escHtml(a.email)}</span>
+ ${a.issue_title? `<span>📋 При подаче: ${escHtml(a.issue_title)}</span>`: ''}
+ <span>📅 ${formatDate(a.submitted_at)}</span>
  </div>
  ${a.abstract? `<div style="font-size:13px;background:#f8fafc;border-left:3px solid var(--primary-light);padding:10px 12px;border-radius:0 6px 6px 0;margin-bottom:14px;line-height:1.6">${escHtml(a.abstract)}</div>`: ''}
- <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
- ${a.file_path? `<a class="btn btn-secondary btn-sm" href="/uploads/${escHtml(a.file_path)}?token=${Auth.getToken()}" target="_blank"> Скачать файл</a>`: ''}
- <textarea id="pub-note-${a.id}" placeholder="Примечание к публикации (необязательно)…" style="flex:1;min-width:200px;padding:8px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px;font-family:inherit;resize:vertical;min-height:50px"></textarea>
- <button class="btn btn-sm" style="background:var(--success);color:#fff;font-weight:700" onclick="publishSub(${a.id})"> Опубликовать</button>
+
+ <div class="publish-step">
+ <div class="publish-step-num">В какой выпуск добавить?</div>
+ <label for="pub-issue-${a.id}">Выпуск журнала</label>
+ <select id="pub-issue-${a.id}" class="form-control" style="max-width:520px" onchange="onPublishIssueChange(${a.id})">
+ ${buildPublishIssueSelect(a, publishIssuesCache, defaultIssue)}
+ </select>
+ <div id="pub-issue-hint-${a.id}">${publishIssueHint(defaultIssue, publishIssuesCache)}</div>
+ <div class="publish-step-actions">
+ <button type="button" class="btn btn-secondary btn-sm" onclick="switchTab('issues', document.querySelector('[data-tab=issues]'))">＋ Создать новый выпуск</button>
  </div>
- </div>`).join('') + `</div>`;
+ </div>
+
+ <div class="publish-step">
+ <div class="publish-step-num">Файлы</div>
+ <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:12px">
+ ${a.file_path? `<a class="btn btn-secondary btn-sm" href="/uploads/${escHtml(a.file_path)}?token=${Auth.getToken()}" target="_blank" download>📄 Скачать Word (от автора)</a>`: '<span style="font-size:12px;color:var(--danger)">Word файл отсутствует</span>'}
+ </div>
+ <label for="pub-pdf-${a.id}" style="font-size:13px;font-weight:600">PDF для архива (обязательно)</label>
+ <input type="file" id="pub-pdf-${a.id}" accept=".pdf,application/pdf" style="display:block;margin-top:8px;max-width:320px">
+ </div>
+
+ <div class="publish-step" style="background:#fff">
+ <div class="publish-step-num">Опубликовать</div>
+ <div style="display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap">
+ <textarea id="pub-note-${a.id}" placeholder="Примечание автору (необязательно)…" style="flex:1;min-width:200px;padding:8px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px;font-family:inherit;resize:vertical;min-height:50px"></textarea>
+ <button class="btn btn-sm" style="background:var(--success);color:#fff;font-weight:700;padding:12px 20px" onclick="publishSub(${a.id})">✓ Опубликовать PDF в архив</button>
+ </div>
+ </div>
+ </div>`;
+ }).join('') + `</div>`;
  } catch(e) {
  body.innerHTML = `<div class="alert alert-danger" style="margin:16px">${escHtml(e.message)}</div>`;
  }
  }
 
  async function publishSub(id) {
+ const issueId = document.getElementById('pub-issue-' + id)?.value;
  const note = document.getElementById('pub-note-' + id)?.value || '';
+ const fileInput = document.getElementById('pub-pdf-' + id);
+ const pdfFile = fileInput?.files?.[0];
+ if (!issueId) {
+ showToast('Выберите выпуск журнала', 'error');
+ return;
+ }
+ if (!pdfFile) {
+ showToast('Выберите PDF файл', 'error');
+ return;
+ }
+ const fd = new FormData();
+ fd.append('pdf', pdfFile);
+ fd.append('issue_id', issueId);
+ if (note) fd.append('note', note);
  try {
- await API.post(`/admin/submissions/${id}/publish`, { note });
- showToast('Статья опубликована и добавлена в архив!', 'success');
+ await API.upload(`/admin/submissions/${id}/publish`, fd);
+ showToast('PDF опубликован и добавлен в архив!', 'success');
  loadPublishQueue();
  loadDashboard();
  } catch(e) { showToast(e.message, 'error'); }
@@ -1465,6 +1639,10 @@
  };
  if (!payload.title) {
  showToast('Укажите название выпуска', 'error');
+ return;
+ }
+ if (!payload.archive_folder) {
+ showToast('Укажите «Папку в архиве» — без неё нельзя публиковать PDF', 'error');
  return;
  }
  if (!id && !coverFile) {

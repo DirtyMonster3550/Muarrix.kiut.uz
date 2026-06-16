@@ -5,7 +5,6 @@ const { verifyToken } = require('../lib/jwtAuth');
 const { getSessionToken } = require('../middleware/hardening');
 const { auditLog } = require('../middleware/security');
 const { sendRejectionEmail } = require('../utils/mailer');
-const { buildReviewAssist } = require('../lib/reviewAssistant');
 
 // ── Auth middleware for reviewers ─────────────────────────────────────────────
 function requireRole(...roles) {
@@ -95,9 +94,11 @@ router.get('/queue', requireRole('tech_expert', 'editorial_expert', 'admin'), (r
   } else {
     rows = db.prepare(`
       SELECT s.id, s.title, s.authors, s.journal, s.abstract, s.status,
-             s.submitted_at, s.file_path, s.admin_note,
+             s.submitted_at, s.file_path, s.admin_note, s.issue_id,
              u.full_name, u.email,
-             i.title AS issue_title
+             i.title AS issue_title,
+             i.archive_folder AS issue_archive_folder,
+             i.accepting_submissions AS issue_accepting
       FROM submissions s
       JOIN users u ON s.user_id = u.id
       LEFT JOIN issues i ON s.issue_id = i.id
@@ -149,32 +150,6 @@ router.get('/stats', requireRole('tech_expert', 'editorial_expert'), (req, res) 
   const total = db.prepare('SELECT COUNT(*) as c FROM submissions').get().c;
 
   res.json({ inQueue, visible, approved, rejected, total });
-});
-
-// ── Reviewer assistant (checklist + draft notes) ─────────────────────────────
-router.get('/submissions/:id/assist', requireRole('tech_expert', 'editorial_expert'), (req, res) => {
-  const id = parseInt(req.params.id, 10);
-  if (Number.isNaN(id)) return res.status(400).json({ error: 'Некорректный ID' });
-
-  const row = db.prepare(`
-    SELECT s.*, i.title AS issue_title, te.full_name AS tech_reviewer_name
-    FROM submissions s
-    LEFT JOIN issues i ON s.issue_id = i.id
-    LEFT JOIN users te ON s.tech_reviewer_id = te.id
-    WHERE s.id = ?
-  `).get(id);
-
-  if (!row) return res.status(404).json({ error: 'Статья не найдена' });
-
-  if (req.user.role === 'editorial_expert') {
-    if (row.status !== 'tech_approved' || row.assigned_editorial_id !== req.user.id) {
-      return res.status(403).json({ error: 'Нет доступа к этой статье' });
-    }
-  } else if (req.user.role === 'tech_expert' && row.status !== 'pending') {
-    return res.status(403).json({ error: 'Статья уже прошла техническую экспертизу' });
-  }
-
-  res.json(buildReviewAssist(row, req.user.role));
 });
 
 // ── Approve submission ────────────────────────────────────────────────────────

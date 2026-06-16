@@ -82,9 +82,7 @@
 <script src="/js/i18n.js"></script>
 <script src="/js/app.js"></script>
 <script>
- if (Auth.isLoggedIn()) {
- window.location.href = Auth.isAdmin()? '/admin.html': '/dashboard.html';
- }
+ redirectIfLoggedIn();
 
  document.getElementById('register-form').addEventListener('submit', async (e) => {
  e.preventDefault();

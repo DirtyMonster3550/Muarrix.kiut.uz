@@ -100,7 +100,6 @@
  </div>
  <div class="card" style="max-width:680px">
  <div id="submit-alert"></div>
- <div id="precheck-report" style="display:none;margin-bottom:16px"></div>
  <form id="submit-form" enctype="multipart/form-data">
  <div class="form-group">
  <label class="form-label"><span data-i18n="dash_title_label">Название статьи</span> <span class="req-mark">*</span></label>
@@ -116,7 +115,7 @@
  <div class="form-group">
  <label class="form-label"><span data-i18n="dash_date_label">Дата</span> <span class="req-mark">*</span></label>
  <input type="date" name="author_date" class="form-control" required>
- <div class="form-text" data-i18n="dash_date_hint">Укажите дату сами — например, дата отправки редакции или готовности рукописи.</div>
+ <div class="form-text" data-i18n="dash_date_hint">Укажите дату сами — например, дата отправки в отдел научных публикаций и редакции или готовности рукописи.</div>
  </div>
  <div class="form-group">
  <label class="form-label" data-i18n="dash_abstract_label">Аннотация</label>
@@ -131,12 +130,10 @@
  <div class="selected-file" id="file-label" data-i18n="dash_file_types">Поддерживаются DOC и DOCX (до 20 МБ). PDF не принимается.</div>
  </div>
  </div>
- <div style="display:flex;flex-wrap:wrap;gap:10px;margin-top:8px">
- <button type="button" class="btn btn-secondary" id="precheck-btn">Проверить перед отправкой</button>
- <button type="submit" class="btn btn-primary" id="submit-btn" data-i18n="dash_send_btn">
+ <p id="submit-issue-hint" class="form-text" style="display:none;margin-top:12px;color:#b45309;font-weight:600"></p>
+ <button type="submit" class="btn btn-primary" id="submit-btn" data-i18n="dash_send_btn" style="margin-top:8px">
  Отправить на рассмотрение
  </button>
- </div>
  </form>
  </div>
  </div>
@@ -221,26 +218,28 @@
  const issueInput = document.getElementById('submit-issue-id');
  const submitBtn = document.getElementById('submit-btn');
  const alertBox = document.getElementById('submit-alert');
+ const issueHint = document.getElementById('submit-issue-hint');
  if (!issueInput || !submitBtn) return;
 
  issueInput.value = '';
  submitBtn.disabled = true;
+ if (issueHint) { issueHint.style.display = 'none'; issueHint.textContent = ''; }
 
  try {
  const list = await fetch('/api/issues/open?journal=muarrix').then(r => r.json());
  if (!list.length) {
- if (alertBox) {
- alertBox.innerHTML = '<div class="alert alert-warning">' + i18t('dash_issue_none') + '</div>';
- }
+ const msg = i18t('dash_issue_none');
+ if (alertBox) alertBox.innerHTML = '<div class="alert alert-warning">' + msg + '</div>';
+ if (issueHint) { issueHint.textContent = msg; issueHint.style.display = 'block'; }
  return;
  }
  issueInput.value = String(list[0].id);
  submitBtn.disabled = false;
  if (alertBox) alertBox.innerHTML = '';
  } catch {
- if (alertBox) {
- alertBox.innerHTML = '<div class="alert alert-danger">' + i18t('dash_issue_error') + '</div>';
- }
+ const msg = i18t('dash_issue_error');
+ if (alertBox) alertBox.innerHTML = '<div class="alert alert-danger">' + msg + '</div>';
+ if (issueHint) { issueHint.textContent = msg; issueHint.style.display = 'block'; }
  }
  }
 
@@ -476,63 +475,8 @@
  } catch {}
  }
 
- function renderPrecheckReport(data) {
- const box = document.getElementById('precheck-report');
- if (!box) return;
- const levelStyle = {
- ok: 'background:#ecfdf5;border:1px solid #a7f3d0;color:#065f46',
- warn: 'background:#fffbeb;border:1px solid #fde68a;color:#92400e',
- error: 'background:#fef2f2;border:1px solid #fecaca;color:#991b1b',
- };
- box.style.display = 'block';
- box.innerHTML = `
- <div style="padding:14px 16px;border-radius:10px;border:1px solid var(--border);background:#f8fafc">
- <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:10px">
- <strong style="font-size:16px">Умная проверка рукописи</strong>
- <span style="font-weight:700;color:var(--primary)">Готовность: ${data.score}%</span>
- </div>
- <p style="margin:0 0 12px;font-size:15px;color:var(--text-muted)">${dashEscapeText(data.summary)}</p>
- <div style="display:grid;gap:8px">
- ${(data.checks || []).map((c) => `
- <div style="padding:10px 12px;border-radius:8px;font-size:14px;${levelStyle[c.level] || ''}">
- <strong>${c.level === 'ok' ? '✓' : c.level === 'warn' ? '!' : '✕'}</strong>
- ${dashEscapeText(c.message)}${c.hint ? `<div style="opacity:.85;margin-top:4px;font-size:13px">${dashEscapeText(c.hint)}</div>` : ''}
- </div>`).join('')}
- </div>
- </div>`;
- }
-
- async function runPrecheck() {
- const form = document.getElementById('submit-form');
- const btn = document.getElementById('precheck-btn');
- const alertBox = document.getElementById('submit-alert');
- const token = Auth.getToken();
- alertBox.innerHTML = '';
- btn.disabled = true;
- btn.textContent = 'Проверяем…';
-
- const formData = new FormData(form);
- try {
- const res = await fetch('/api/submissions/precheck', {
- method: 'POST',
- headers: { Authorization: `Bearer ${token}` },
- credentials: 'same-origin',
- body: formData,
- });
- const data = await res.json();
- if (!res.ok) throw new Error(data.error || 'Ошибка проверки');
- renderPrecheckReport(data);
- } catch (err) {
- alertBox.innerHTML = `<div class="alert alert-danger">${err.message}</div>`;
- } finally {
- btn.disabled = false;
- btn.textContent = 'Проверить перед отправкой';
- }
- }
-
  // ===== Submit form =====
  initFileUpload('drop-zone', 'file-input', 'file-label');
- document.getElementById('precheck-btn')?.addEventListener('click', runPrecheck);
 
  document.getElementById('submit-form').addEventListener('submit', async (e) => {
  e.preventDefault();

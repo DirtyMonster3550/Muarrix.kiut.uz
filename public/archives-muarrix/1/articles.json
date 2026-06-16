@@ -1,0 +1,23 @@
+{
+  "updatedAt": "2026-06-11T07:55:23.348Z",
+  "files": {
+    "TEST TEST TEST TESTTEST TEST TEST TESTTEST TEST TEST TEST.docx": {
+      "file": "TEST TEST TEST TESTTEST TEST TEST TESTTEST TEST TEST TEST.docx",
+      "title": "TEST TEST TEST TESTTEST TEST TEST TESTTEST TEST TEST TEST",
+      "authors": [
+        "TEST TEST TEST TESTTEST TEST TEST TESTTEST TEST TEST TEST"
+      ],
+      "submissionId": 9,
+      "publishedAt": "2026-06-11T06:53:56.808Z"
+    },
+    "TETS TETSTSETETSTETEST.pdf": {
+      "file": "TETS TETSTSETETSTETEST.pdf",
+      "title": "TETS TETSTSETETSTETEST",
+      "authors": [
+        "TETS TETSTSETETSTETESTTETS TETSTSETETSTETESTTETS TETSTSETETSTETEST"
+      ],
+      "submissionId": 10,
+      "publishedAt": "2026-06-11T07:55:23.348Z"
+    }
+  }
+}

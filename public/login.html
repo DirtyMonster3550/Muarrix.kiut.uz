@@ -105,12 +105,7 @@
 <script src="/js/i18n.js"></script>
 <script src="/js/app.js"></script>
 <script>
- if (Auth.isLoggedIn()) {
- const _r = Auth.getUser()?.role;
- if (_r === 'admin') window.location.href = '/admin.html';
- else if (_r === 'tech_expert' || _r === 'editorial_expert') window.location.href = '/expert.html';
- else window.location.href = '/dashboard.html';
- }
+ redirectIfLoggedIn();
 
  document.getElementById('login-form').addEventListener('submit', async (e) => {
  e.preventDefault();

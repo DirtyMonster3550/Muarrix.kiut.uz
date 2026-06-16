@@ -9,10 +9,47 @@
  <link rel="apple-touch-icon" href="/img/apple-touch-icon.png">
  <link rel="stylesheet" href="/css/style.css">
  <style>
-.about-sections { margin: 22px 0 28px; padding-left: 24px; }
-.about-sections > li { margin-bottom: 12px; font-size: 17px; line-height: 1.75; }
-.about-sections ul { margin-top: 10px; padding-left: 24px; }
-.about-sections ul li { margin-bottom: 8px; color: var(--text); font-size: 17px; }
+.about-lead { font-size: 17px; line-height: 1.75; margin: 0 0 28px; }
+.about-section-title { font-size: 20px; margin: 0 0 18px; color: var(--primary); }
+.about-requirements { margin: 0 0 36px; }
+.about-req-intro { font-size: 17px; line-height: 1.75; margin: 0 0 22px; }
+.about-req-section { margin: 0 0 22px; padding-bottom: 22px; border-bottom: 1px solid var(--border); }
+.about-req-section:last-of-type { border-bottom: none; padding-bottom: 0; }
+.about-req-section h3 { font-size: 17px; margin: 0 0 10px; color: var(--text); font-weight: 800; }
+.about-req-section p { font-size: 16px; line-height: 1.75; margin: 0 0 10px; }
+.about-req-section ul { margin: 8px 0 0; padding-left: 22px; }
+.about-req-section li { font-size: 16px; line-height: 1.7; margin-bottom: 6px; }
+.about-req-notes { margin-top: 28px; padding: 20px 22px; background: #f8fafc; border-radius: 10px; border-left: 4px solid var(--primary-light); }
+.about-req-notes h3 { font-size: 17px; margin: 0 0 12px; color: var(--primary); font-weight: 800; }
+.about-req-notes ul { margin: 0; padding-left: 20px; }
+.about-req-notes li { font-size: 16px; line-height: 1.75; margin-bottom: 10px; }
+.about-req-notes li:last-child { margin-bottom: 0; }
+.about-fields-title { margin-top: 8px; }
+.about-fields {
+ list-style: none;
+ padding: 0;
+ margin: 0 0 32px;
+}
+.about-fields li {
+ font-size: 17px;
+ line-height: 1.75;
+ padding: 14px 0;
+ border-bottom: 1px solid var(--border);
+}
+.about-fields li:last-child { border-bottom: none; padding-bottom: 0; }
+.about-fields strong { color: var(--primary); font-weight: 800; margin-right: 8px; }
+.about-doc-buttons {
+ display: flex;
+ flex-wrap: wrap;
+ gap: 14px;
+ margin-top: 8px;
+ padding-top: 28px;
+ border-top: 1px solid var(--border);
+}
+.about-doc-buttons .btn {
+ display: inline-block;
+ text-decoration: none;
+}
  </style>
 </head>
 <body class="page-unified" data-i18n-doc="about">
@@ -75,6 +112,8 @@
 </footer>
 
 <script src="/js/muarrix-locale-site.js"></script>
+<script src="/js/muarrix-about-requirements.js"></script>
+<script src="/js/muarrix-about-nizomi.js"></script>
 <script src="/js/muarrix-locale-about-editorial.js"></script>
 <script src="/js/i18n.js"></script>
 <script src="/js/app.js"></script>

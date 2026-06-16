@@ -148,9 +148,8 @@
  return authors.join(', ');
  }
 
- function buildFileUrl(folder, fileName) {
- var parts = folder.split('/').map(function (p) { return encodeURIComponent(p); });
- return '/archives/' + parts.join('/') + '/' + encodeURIComponent(fileName);
+ function buildArticleUrl(folder, fileName) {
+ return '/article.html?folder=' + encodeURIComponent(folder) + '&file=' + encodeURIComponent(fileName);
  }
 
  var params = new URLSearchParams(location.search);
@@ -210,11 +209,11 @@
  + fileWord(files.length) + ' ' + i18t('archive_issue_files_in') + '</p>';
  html += '<div class="card" style="padding:0;overflow:hidden">';
  files.forEach(function (f, i) {
- var href = buildFileUrl(folder, f.name);
+ var href = buildArticleUrl(folder, f.name);
  var ext = f.ext.replace('.', '').toUpperCase();
  var title = f.title || f.name;
  var authorsLine = formatAuthors(f.authors);
- html += '<a href="' + esc(href) + '" target="_blank" rel="noopener noreferrer" class="article-item">'
+ html += '<a href="' + esc(href) + '" class="article-item">'
  + '<span class="article-num">' + (i + 1) + '</span>'
  + '<div class="article-body">'
  + '<div class="article-title">' + esc(title) + '</div>'
@@ -222,7 +221,7 @@
  + '</div>'
  + '<div class="article-actions">'
  + '<span class="article-ext">' + esc(ext) + '</span>'
- + '<span class="article-open">' + i18t('archive_open') + '</span>'
+ + '<span class="article-open">' + i18t('archive_view_article') + '</span>'
  + '</div>'
  + '</a>';
  });
