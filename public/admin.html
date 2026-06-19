@@ -922,9 +922,9 @@
 <script src="/js/app.js"></script>
 <script>
  (async function initAdminPage() {
- if (!Auth.isLoggedIn()) { window.location.href = '/login.html'; return; }
  await ensureServerSession();
  const user = (await refreshUserFromServer()) || Auth.getUser();
+ if (!user && !Auth.isLoggedIn()) { window.location.href = '/login.html'; return; }
  // Страницу уже пропустил сервер — не редиректим на login (иначе цикл с ?next=/admin.html)
  if (user) {
  const initials = user.full_name.split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase();

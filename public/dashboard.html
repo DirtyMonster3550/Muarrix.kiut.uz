@@ -172,21 +172,6 @@
 <script src="/js/i18n.js"></script>
 <script src="/js/app.js"></script>
 <script>
- // Auth guard
- if (!Auth.isLoggedIn()) window.location.href = '/login.html';
- if (Auth.isAdmin()) window.location.href = '/admin.html';
- const _role = Auth.getUser()?.role;
- if (_role === 'tech_expert' || _role === 'editorial_expert') window.location.href = '/expert.html';
-
- const user = Auth.getUser();
-
- // Sidebar user info
- if (user) {
- const initials = user.full_name.split(' ').map(w => w[0]).join('').substring(0, 2).toUpperCase();
- document.getElementById('sb-avatar').textContent = initials;
- document.getElementById('sb-name').textContent = user.full_name;
- document.getElementById('sb-email').textContent = user.email;
- }
 
  function switchTab(tab, el) {
  if (el) {
@@ -551,9 +536,23 @@
  });
 
  // Init
+ (async function initDashboardPage() {
+ await ensureServerSession();
+ const user = (await refreshUserFromServer()) || Auth.getUser();
+ if (!user && !Auth.isLoggedIn()) { window.location.href = '/login.html'; return; }
+ const u = user || Auth.getUser();
+ if (u?.role === 'admin') { window.location.href = '/admin.html'; return; }
+ if (u?.role === 'tech_expert' || u?.role === 'editorial_expert') { window.location.href = '/expert.html'; return; }
+ if (u) {
+ const initials = u.full_name.split(' ').map(w => w[0]).join('').substring(0, 2).toUpperCase();
+ document.getElementById('sb-avatar').textContent = initials;
+ document.getElementById('sb-name').textContent = u.full_name;
+ document.getElementById('sb-email').textContent = u.email;
+ }
  loadSubmissions();
  updateNotifBadge();
  loadCurrentSubmitTarget();
+ })();
 </script>
 </body>
 </html>

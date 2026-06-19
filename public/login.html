@@ -121,19 +121,10 @@
 
  try {
  const data = await API.post('/auth/login', { email, password });
+ sessionStorage.removeItem('kiut_auth_redirects');
  Auth.setSession(data.token, data.user);
  showToast(i18t('auth_welcome'), 'success');
  setTimeout(() => {
- const next = new URLSearchParams(location.search).get('next');
- const safeNext = next && next.startsWith('/') && !next.startsWith('//') ? next : null;
- if (safeNext) {
- if (safeNext === '/admin.html' && data.user.role !== 'admin') {
- // автор не идёт в admin
- } else {
- window.location.href = safeNext;
- return;
- }
- }
  const role = data.user.role;
  if (role === 'admin') window.location.href = '/admin.html';
  else if (role === 'tech_expert' || role === 'editorial_expert') window.location.href = '/expert.html';

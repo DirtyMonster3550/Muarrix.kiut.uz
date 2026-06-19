@@ -208,12 +208,13 @@ async function logout() {
 }
 
 async function ensureServerSession() {
- const token = Auth.getToken();
- if (!token) return false;
  try {
+ const headers = {};
+ const token = Auth.getToken();
+ if (token) headers.Authorization = `Bearer ${token}`;
  const res = await fetch('/api/auth/session-sync', {
  method: 'POST',
- headers: { Authorization: `Bearer ${token}` },
+ headers,
  credentials: 'same-origin',
  });
  if (!res.ok) {
@@ -233,46 +234,69 @@ async function syncSessionCookie() {
 }
 
 async function refreshUserFromServer() {
- const token = Auth.getToken();
- if (!token) return null;
  try {
+ const headers = {};
+ const token = Auth.getToken();
+ if (token) headers.Authorization = `Bearer ${token}`;
  const res = await fetch('/api/auth/me', {
- headers: { Authorization: `Bearer ${token}` },
+ headers,
  credentials: 'same-origin',
  });
  if (!res.ok) return null;
  const user = await res.json();
- Auth.setSession(token, user);
+ const tok = Auth.getToken();
+ if (tok) {
+ Auth.setSession(tok, user);
+ } else {
+ // /me прошёл по cookie — подтянуть token в localStorage
+ await ensureServerSession();
+ }
  return user;
  } catch {
  return null;
  }
 }
 
-/** На login/register: сначала cookie, потом редирект (иначе цикл login ↔ dashboard) */
+/** На login/register: сначала cookie, потом редирект (иначе цикл login ↔ admin) */
 async function redirectIfLoggedIn() {
- if (!Auth.isLoggedIn()) return;
- const ok = await ensureServerSession();
- if (!ok) return;
-
- const user = (await refreshUserFromServer()) || Auth.getUser();
- if (!user) return;
-
- const role = user.role;
- const next = new URLSearchParams(location.search).get('next');
- const safeNext = next && next.startsWith('/') && !next.startsWith('//') ? next : null;
- if (safeNext) {
- if (safeNext === '/admin.html' && role !== 'admin') {
- // не гонять автора в admin → бесконечный цикл
- } else {
- window.location.replace(safeNext);
+ const guardKey = 'kiut_auth_redirects';
+ const hops = parseInt(sessionStorage.getItem(guardKey) || '0', 10);
+ if (hops >= 4) {
+ sessionStorage.removeItem(guardKey);
+ Auth.clear();
+ try { await fetch('/api/auth/logout', { method: 'POST', credentials: 'same-origin' }); } catch {}
  return;
  }
+
+ // Убрать ?next=/admin.html — из-за него часто крутится цикл
+ if (location.search.includes('next=')) {
+ history.replaceState(null, '', '/login.html');
  }
 
- if (role === 'admin') window.location.replace('/admin.html');
- else if (role === 'tech_expert' || role === 'editorial_expert') window.location.replace('/expert.html');
- else window.location.replace('/dashboard.html');
+ const ok = await ensureServerSession();
+ if (!ok && !Auth.isLoggedIn()) {
+ sessionStorage.removeItem(guardKey);
+ return;
+ }
+
+ const user = (await refreshUserFromServer()) || Auth.getUser();
+ if (!user) {
+ sessionStorage.removeItem(guardKey);
+ return;
+ }
+
+ const role = user.role;
+ let dest = null;
+ if (role === 'admin') dest = '/admin.html';
+ else if (role === 'tech_expert' || role === 'editorial_expert') dest = '/expert.html';
+ else dest = '/dashboard.html';
+
+ if (dest && dest !== location.pathname) {
+ sessionStorage.setItem(guardKey, String(hops + 1));
+ window.location.replace(dest);
+ } else {
+ sessionStorage.removeItem(guardKey);
+ }
 }
 
 // ===== Modal =====

@@ -72,13 +72,12 @@ function protectHtmlPages(req, res, next) {
 
   const token = getSessionToken(req);
   if (!token) {
-    const nextUrl = encodeURIComponent(req.path);
-    return res.redirect(302, `/login.html?next=${nextUrl}`);
+    return res.redirect(302, '/login.html');
   }
 
   try {
     const user = resolveSessionUser(req);
-    if (!user) return res.redirect(302, `/login.html?next=${encodeURIComponent(req.path)}`);
+    if (!user) return res.redirect(302, '/login.html');
     const role = user.role;
     if (!allowedRoles.includes(role)) {
       if (role === 'admin') return res.redirect(302, '/admin.html');
@@ -89,7 +88,7 @@ function protectHtmlPages(req, res, next) {
     }
     return next();
   } catch {
-    return res.redirect(302, `/login.html?next=${encodeURIComponent(req.path)}`);
+    return res.redirect(302, '/login.html');
   }
 }
 

@@ -302,6 +302,12 @@
  }
 
  async function init() {
+ await ensureServerSession();
+ TOKEN = Auth.getToken();
+ if (!TOKEN) {
+ const user = await refreshUserFromServer();
+ if (user) TOKEN = Auth.getToken();
+ }
  if (!TOKEN) { location.href = '/login.html'; return; }
  try {
  const me = await API.get('/auth/me');
