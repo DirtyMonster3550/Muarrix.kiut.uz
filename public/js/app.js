@@ -152,12 +152,12 @@ function updateHeaderAuth() {
  }
 
  const initials = user.full_name.split(' ').map(w => w[0]).join('').substring(0, 2).toUpperCase();
- const dashLink = user.role === 'admin'? '/admin.html': '/dashboard.html';
+ const cabinetUrl = '/api/auth/enter';
  const cabinetLabel = i18t('nav_enter_cabinet');
 
  if (isLanding) {
  authBlock.innerHTML = `
- <a href="${dashLink}" class="landing-link-login" onclick="event.preventDefault(); navigateWithSessionCookie();">${cabinetLabel}</a>
+ <a href="${cabinetUrl}" class="landing-link-login">${cabinetLabel}</a>
  `;
 
  /* Плавающий бейдж пользователя (правый верхний угол) */
@@ -176,7 +176,7 @@ function updateHeaderAuth() {
  document.body.appendChild(badge);
  }
  badge.innerHTML = `
- <a href="${dashLink}" onclick="event.preventDefault(); navigateWithSessionCookie();" style="display:flex;align-items:center;gap:8px;text-decoration:none;color:#fff">
+ <a href="${cabinetUrl}" style="display:flex;align-items:center;gap:8px;text-decoration:none;color:#fff">
  <span style="width:30px;height:30px;border-radius:50%;background:linear-gradient(145deg,#ff8c1a,#ff6b00);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:12px;color:#fff;flex-shrink:0">${initials}</span>
  <span style="font-size:13px;font-weight:600;white-space:nowrap">${user.full_name.split(' ')[0]}</span>
  </a>
@@ -185,7 +185,7 @@ function updateHeaderAuth() {
  } else {
  authBlock.innerHTML = `
  <div class="user-menu">
- <a href="${dashLink}" onclick="event.preventDefault(); navigateWithSessionCookie();" style="display:flex;align-items:center;gap:10px;color:#fff;text-decoration:none;">
+ <a href="${cabinetUrl}" style="display:flex;align-items:center;gap:10px;color:#fff;text-decoration:none;">
  <div class="user-avatar">${initials}</div>
  <span class="user-name">${user.full_name.split(' ')[0]}</span>
  </a>
@@ -258,12 +258,16 @@ function navigateWithSessionCookie() {
  form.submit();
 }
 
-function redirectAfterLogin(user) {
+function redirectAfterLogin() {
  sessionStorage.removeItem('kiut_auth_redirects');
- goToCabinetByRole(user?.role);
+ if (Auth.getToken()) {
+ navigateWithSessionCookie();
+ } else {
+ window.location.replace('/api/auth/enter');
+ }
 }
 
-/** Только очистка битой сессии на login/register — без авторедиректа (он вызывал цикл) */
+/** login/register: подтянуть localStorage из cookie и войти в кабинет если сессия жива */
 async function prepareAuthPage() {
  if (new URLSearchParams(location.search).get('session') === 'invalid') {
  Auth.clear();
@@ -271,7 +275,25 @@ async function prepareAuthPage() {
  history.replaceState(null, '', '/login.html');
  return;
  }
+
+ // Cookie есть, localStorage пустой — типично после регистрации (см. DevTools)
+ try {
+ const meRes = await fetch('/api/auth/me', { credentials: 'same-origin' });
+ if (meRes.ok) {
+ const user = await meRes.json();
+ await ensureServerSession();
+ if (Auth.getUser() || user) {
+ window.location.replace('/api/auth/enter');
+ return;
+ }
+ }
+ } catch {}
+
  const ok = await ensureServerSession();
+ if (ok && Auth.getUser()) {
+ window.location.replace('/api/auth/enter');
+ return;
+ }
  if (!ok && Auth.isLoggedIn()) Auth.clear();
 }
 

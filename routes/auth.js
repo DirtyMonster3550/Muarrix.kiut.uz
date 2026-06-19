@@ -7,6 +7,13 @@ const { logEvent, autobanIfNeeded, clientIp } = require('../middleware/security'
 const { sendPasswordResetEmail } = require('../utils/mailer');
 const { signToken, verifyToken } = require('../lib/jwtAuth');
 const { setSessionCookie, clearSessionCookie, getSessionToken } = require('../middleware/hardening');
+const { resolveSessionUser } = require('../lib/sessionUser');
+
+function redirectToCabinet(res, role) {
+  if (role === 'admin') return res.redirect(302, '/admin.html');
+  if (role === 'tech_expert' || role === 'editorial_expert') return res.redirect(302, '/expert.html');
+  return res.redirect(302, '/dashboard.html');
+}
 
 // ── Simple email format check ─────────────────────────────────────────────────
 const EMAIL_RE = /^[^\s@]{1,64}@[^\s@]{1,253}\.[^\s@]{2,}$/;
@@ -107,6 +114,15 @@ router.post('/logout', (req, res) => {
   res.json({ success: true });
 });
 
+// Вход в кабинет по httpOnly cookie (работает даже если localStorage пустой)
+router.get('/enter', (req, res) => {
+  const user = resolveSessionUser(req);
+  if (!user) return res.redirect(302, '/login.html');
+  const fresh = signToken({ id: user.id, role: user.role });
+  setSessionCookie(res, fresh);
+  return redirectToCabinet(res, user.role);
+});
+
 // Полноценный POST-переход: надёжно ставит httpOnly cookie на телефонах (fetch Set-Cookie часто не успевает)
 router.post('/cookie-bridge', (req, res) => {
   const token = typeof req.body?.token === 'string' ? req.body.token.trim() : '';
@@ -125,11 +141,7 @@ router.post('/cookie-bridge', (req, res) => {
     const fresh = signToken({ id: user.id, role: user.role });
     setSessionCookie(res, fresh);
 
-    if (user.role === 'admin') return res.redirect(302, '/admin.html');
-    if (user.role === 'tech_expert' || user.role === 'editorial_expert') {
-      return res.redirect(302, '/expert.html');
-    }
-    return res.redirect(302, '/dashboard.html');
+    return redirectToCabinet(res, user.role);
   } catch {
     return res.redirect(302, '/login.html?session=invalid');
   }

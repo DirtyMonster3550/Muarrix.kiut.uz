@@ -108,7 +108,7 @@
  const data = await API.post('/auth/register', { full_name, email, password });
  Auth.setSession(data.token, data.user);
  showToast(i18t('auth_reg_success'), 'success');
- redirectAfterLogin(data.user);
+ redirectAfterLogin();
  } catch (err) {
  alertBox.innerHTML = `<div class="alert alert-danger"> ${err.message}</div>`;
  btn.textContent = i18t('auth_reg_btn');
