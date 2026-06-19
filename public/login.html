@@ -121,15 +121,10 @@
 
  try {
  const data = await API.post('/auth/login', { email, password });
- sessionStorage.removeItem('kiut_auth_redirects');
  Auth.setSession(data.token, data.user);
+ await ensureServerSession();
  showToast(i18t('auth_welcome'), 'success');
- setTimeout(() => {
- const role = data.user.role;
- if (role === 'admin') window.location.href = '/admin.html';
- else if (role === 'tech_expert' || role === 'editorial_expert') window.location.href = '/expert.html';
- else window.location.href = '/dashboard.html';
- }, 800);
+ redirectAfterLogin(data.user);
  } catch (err) {
  alertBox.innerHTML = `<div class="alert alert-danger"> ${err.message}</div>`;
  btn.textContent = i18t('auth_login_btn');

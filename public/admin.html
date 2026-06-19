@@ -924,8 +924,7 @@
  (async function initAdminPage() {
  await ensureServerSession();
  const user = (await refreshUserFromServer()) || Auth.getUser();
- if (!user && !Auth.isLoggedIn()) { window.location.href = '/login.html'; return; }
- // Страницу уже пропустил сервер — не редиректим на login (иначе цикл с ?next=/admin.html)
+ // HTML уже выдал сервер по cookie — не уходим на login (иначе снова цикл)
  if (user) {
  const initials = user.full_name.split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase();
  document.getElementById('sb-name').textContent = user.full_name;

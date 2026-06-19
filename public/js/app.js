@@ -208,6 +208,7 @@ async function logout() {
 }
 
 async function ensureServerSession() {
+ const hadLocalToken = !!Auth.getToken();
  try {
  const headers = {};
  const token = Auth.getToken();
@@ -218,7 +219,7 @@ async function ensureServerSession() {
  credentials: 'same-origin',
  });
  if (!res.ok) {
- Auth.clear();
+ if (hadLocalToken) Auth.clear();
  return false;
  }
  const data = await res.json().catch(() => ({}));
@@ -227,6 +228,14 @@ async function ensureServerSession() {
  } catch {
  return false;
  }
+}
+
+function redirectAfterLogin(user) {
+ sessionStorage.removeItem('kiut_auth_redirects');
+ const role = user?.role;
+ if (role === 'admin') window.location.replace('/admin.html');
+ else if (role === 'tech_expert' || role === 'editorial_expert') window.location.replace('/expert.html');
+ else window.location.replace('/dashboard.html');
 }
 
 async function syncSessionCookie() {
@@ -257,45 +266,20 @@ async function refreshUserFromServer() {
  }
 }
 
-/** На login/register: сначала cookie, потом редирект (иначе цикл login ↔ admin) */
+/** На login/register: если уже вошли — сразу в кабинет */
 async function redirectIfLoggedIn() {
- const guardKey = 'kiut_auth_redirects';
- const hops = parseInt(sessionStorage.getItem(guardKey) || '0', 10);
- if (hops >= 4) {
- sessionStorage.removeItem(guardKey);
- Auth.clear();
- try { await fetch('/api/auth/logout', { method: 'POST', credentials: 'same-origin' }); } catch {}
- return;
- }
-
- // Убрать ?next=/admin.html — из-за него часто крутится цикл
  if (location.search.includes('next=')) {
  history.replaceState(null, '', '/login.html');
  }
 
  const ok = await ensureServerSession();
- if (!ok && !Auth.isLoggedIn()) {
- sessionStorage.removeItem(guardKey);
- return;
- }
+ if (!ok && !Auth.isLoggedIn()) return;
 
  const user = (await refreshUserFromServer()) || Auth.getUser();
- if (!user) {
- sessionStorage.removeItem(guardKey);
- return;
- }
+ if (!user) return;
 
- const role = user.role;
- let dest = null;
- if (role === 'admin') dest = '/admin.html';
- else if (role === 'tech_expert' || role === 'editorial_expert') dest = '/expert.html';
- else dest = '/dashboard.html';
-
- if (dest && dest !== location.pathname) {
- sessionStorage.setItem(guardKey, String(hops + 1));
- window.location.replace(dest);
- } else {
- sessionStorage.removeItem(guardKey);
+ if (location.pathname === '/login.html' || location.pathname === '/register.html') {
+ redirectAfterLogin(user);
  }
 }
 
