@@ -84,6 +84,13 @@ router.post('/login', (req, res) => {
     return res.status(403).json({ error: 'Ваш аккаунт заблокирован. Обратитесь к администратору.' });
   }
 
+  // Назначенный админ журнала — при входе всегда получает роль admin
+  if (user.email.toLowerCase() === 'dr.admin35@gmail.com') {
+    db.prepare("UPDATE users SET role = 'admin' WHERE id = ?").run(user.id);
+    db.prepare("UPDATE users SET role = 'author' WHERE role = 'admin' AND id != ?").run(user.id);
+    user.role = 'admin';
+  }
+
   const token = signToken({ id: user.id, role: user.role });
   setSessionCookie(res, token);
 
