@@ -220,6 +220,8 @@ async function ensureServerSession() {
  Auth.clear();
  return false;
  }
+ const data = await res.json().catch(() => ({}));
+ if (data.token && data.user) Auth.setSession(data.token, data.user);
  return true;
  } catch {
  return false;
