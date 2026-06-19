@@ -10,7 +10,8 @@ uploads/*
 .tmp-*
 .vendor-*
 docs
-scripts
+scripts/*
+!scripts/ensure-admin.js
 *.bat
 *.cmd
 pm2.config.js

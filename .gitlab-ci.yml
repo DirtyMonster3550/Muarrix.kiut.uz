@@ -131,12 +131,16 @@ deploy:
             echo 'Контейнер marrix/muarrix не найден'
             exit 1
           fi
-          echo \"Запуск ensure-admin.js в контейнере \$CONTAINER\"
+          echo \"Запуск syncAdminFromEnv в контейнере \$CONTAINER\"
           docker exec -i \
             -e \"ADMIN_EMAIL=\$EMAIL\" \
             -e \"ADMIN_PASSWORD=\$PASS\" \
-            \"\$CONTAINER\" node scripts/ensure-admin.js
-          echo 'Админ назначен через ensure-admin.js'
+            \"\$CONTAINER\" node <<'NODE'
+const { db, syncAdminFromEnv } = require('./db/database');
+if (!syncAdminFromEnv(db)) process.exit(1);
+console.log('Готово. Войдите на сайт с этим email и паролем.');
+NODE
+          echo 'Админ назначен через syncAdminFromEnv'
         fi
         docker image prune -f
       "
