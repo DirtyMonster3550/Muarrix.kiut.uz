@@ -116,11 +116,16 @@ router.post('/logout', (req, res) => {
 
 // Вход в кабинет по httpOnly cookie (работает даже если localStorage пустой)
 router.get('/enter', (req, res) => {
-  const user = resolveSessionUser(req);
-  if (!user) return res.redirect(302, '/login.html');
-  const fresh = signToken({ id: user.id, role: user.role });
-  setSessionCookie(res, fresh);
-  return redirectToCabinet(res, user.role);
+  try {
+    const user = resolveSessionUser(req);
+    if (!user) return res.redirect(302, '/login.html');
+    const fresh = signToken({ id: user.id, role: user.role });
+    setSessionCookie(res, fresh);
+    return redirectToCabinet(res, user.role);
+  } catch (err) {
+    console.error('[auth/enter]', err.message);
+    return res.redirect(302, '/login.html?session=invalid');
+  }
 });
 
 // Полноценный POST-переход: надёжно ставит httpOnly cookie на телефонах (fetch Set-Cookie часто не успевает)

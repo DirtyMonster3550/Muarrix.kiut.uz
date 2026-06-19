@@ -1,4 +1,4 @@
-const path = require('path');
+const { getSessionToken } = require('../lib/sessionToken');
 const { resolveSessionUser } = require('../lib/sessionUser');
 
 const BLOCKED_EXACT = new Set([
@@ -24,24 +24,6 @@ const PROTECTED_PAGES = {
   '/expert.html': ['tech_expert', 'editorial_expert'],
   '/dashboard.html': ['author'],
 };
-
-function getCookie(req, name) {
-  const raw = req.headers.cookie;
-  if (!raw) return null;
-  const escaped = name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-  const match = raw.match(new RegExp(`(?:^|; )${escaped}=([^;]*)`));
-  return match ? decodeURIComponent(match[1]) : null;
-}
-
-function extractBearer(req) {
-  const header = req.headers.authorization;
-  if (!header || !header.startsWith('Bearer ')) return null;
-  return header.slice(7).trim() || null;
-}
-
-function getSessionToken(req) {
-  return getCookie(req, 'kiut_session') || extractBearer(req);
-}
 
 function blockSensitivePaths(req, res, next) {
   const decoded = decodeURIComponent(req.path || '');
