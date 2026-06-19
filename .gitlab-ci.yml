@@ -116,10 +116,10 @@ deploy:
       else
         echo "ADMIN_EMAIL/ADMIN_PASSWORD не заданы в CI Variables — .env на сервере не трогаем"
       fi
-    - |
       ssh -p ${SSH_PORT:-22} $SSH_USER@$SSH_HOST "
         set -e
         cd $DEPLOY_PATH
+        RECREATE=''
         if [ -n '$ADMIN_EMAIL_B64' ] && [ -n '$ADMIN_PASSWORD_B64' ]; then
           EMAIL=\$(printf '%s' '$ADMIN_EMAIL_B64' | base64 -d)
           PASS=\$(printf '%s' '$ADMIN_PASSWORD_B64' | base64 -d)
@@ -127,11 +127,12 @@ deploy:
           { grep -v '^ADMIN_EMAIL=' .env 2>/dev/null | grep -v '^ADMIN_PASSWORD=' || true; } > .env.tmp
           printf 'ADMIN_EMAIL=%s\nADMIN_PASSWORD=%s\n' \"\$EMAIL\" \"\$PASS\" >> .env.tmp
           mv .env.tmp .env
+          RECREATE='--force-recreate'
           echo 'Обновлены ADMIN_EMAIL и ADMIN_PASSWORD в .env'
         fi
         echo '$CI_REGISTRY_PASSWORD' | docker login -u '$CI_REGISTRY_USER' --password-stdin $CI_REGISTRY
         IMAGE_TAG=$CI_COMMIT_SHORT_SHA docker compose pull
-        IMAGE_TAG=$CI_COMMIT_SHORT_SHA docker compose up -d --remove-orphans
+        IMAGE_TAG=$CI_COMMIT_SHORT_SHA docker compose up -d --remove-orphans \$RECREATE
         docker image prune -f
       "
   rules:
