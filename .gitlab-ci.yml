@@ -126,10 +126,16 @@ deploy:
           EMAIL=\$(printf '%s' '$ADMIN_EMAIL_B64' | base64 -d)
           PASS=\$(printf '%s' '$ADMIN_PASSWORD_B64' | base64 -d)
           sleep 5
-          IMAGE_TAG=$CI_COMMIT_SHORT_SHA docker compose exec -T \
+          CONTAINER=\$(docker ps --format '{{.Names}}' | grep -E '^(marrix|muarrix)\$' | head -1)
+          if [ -z \"\$CONTAINER\" ]; then
+            echo 'Контейнер marrix/muarrix не найден'
+            exit 1
+          fi
+          echo \"Запуск ensure-admin.js в контейнере \$CONTAINER\"
+          docker exec -i \
             -e \"ADMIN_EMAIL=\$EMAIL\" \
             -e \"ADMIN_PASSWORD=\$PASS\" \
-            muarrix node scripts/ensure-admin.js
+            \"\$CONTAINER\" node scripts/ensure-admin.js
           echo 'Админ назначен через ensure-admin.js'
         fi
         docker image prune -f
