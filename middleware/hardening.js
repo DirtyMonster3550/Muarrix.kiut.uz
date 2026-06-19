@@ -86,7 +86,7 @@ function protectHtmlPages(req, res, next) {
       if (role === 'tech_expert' || role === 'editorial_expert') {
         return res.redirect(302, '/expert.html');
       }
-      return res.status(403).send('Доступ запрещён');
+      return res.status(403).send('Доступ запрещён. Выйдите из аккаунта и войдите снова: /login.html');
     }
     return next();
   } catch {

@@ -133,13 +133,14 @@ deploy:
           IMG=\$(docker inspect -f '{{.Config.Image}}' \"\$CONTAINER\")
           echo \"Назначение админа (остановка \$CONTAINER, одноразовый run)\"
           docker stop \"\$CONTAINER\"
+          printf 'ADMIN_EMAIL=%s\nADMIN_PASSWORD=%s\nDB_PATH=/app/data/muarrix.db\n' \"\$EMAIL\" \"\$PASS\" > /tmp/muarrix-sync.env
+          chmod 600 /tmp/muarrix-sync.env
           docker run --rm \
-            -e \"ADMIN_EMAIL=\$EMAIL\" \
-            -e \"ADMIN_PASSWORD=\$PASS\" \
-            -e DB_PATH=/app/data/muarrix.db \
+            --env-file /tmp/muarrix-sync.env \
             -v \"\$(pwd)/data:/app/data\" \
             \"\$IMG\" \
-            node -e 'const {db,syncAdminFromEnv}=require(\"./db/database\");if(!syncAdminFromEnv(db))process.exit(1);console.log(\"Готово. Войдите на сайт с этим email и паролем.\");'
+            node -e 'const {db,syncAdminFromEnv}=require(\"./db/database\");const email=process.env.ADMIN_EMAIL||\"\";if(!syncAdminFromEnv(db))process.exit(1);const u=db.prepare(\"SELECT email,role FROM users WHERE LOWER(email)=LOWER(?)\").get(email);console.log(\"ROLE_CHECK\",JSON.stringify(u));if(!u||u.role!==\"admin\")process.exit(2);console.log(\"Готово. Войдите:\",email);'
+          rm -f /tmp/muarrix-sync.env
           IMAGE_TAG=$CI_COMMIT_SHORT_SHA docker compose up -d --remove-orphans
           echo 'Админ назначен через syncAdminFromEnv'
         fi

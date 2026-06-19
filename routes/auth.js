@@ -67,7 +67,7 @@ router.post('/login', (req, res) => {
     return res.status(400).json({ error: 'Введите email и пароль' });
   }
 
-  const user = db.prepare('SELECT * FROM users WHERE email = ?').get(email);
+  const user = db.prepare('SELECT * FROM users WHERE LOWER(email) = LOWER(?)').get(email);
 
   if (!user || !bcrypt.compareSync(password, user.password)) {
     // Log failed login and auto-ban if threshold exceeded
@@ -165,6 +165,20 @@ router.get('/me', requireAuth, (req, res) => {
   const user = db.prepare('SELECT id, full_name, email, role, created_at FROM users WHERE id = ?').get(req.user.id);
   if (!user) return res.status(404).json({ error: 'Пользователь не найден' });
   res.json(user);
+});
+
+// Обновить JWT после смены роли в БД (без повторного ввода пароля)
+router.post('/refresh-session', requireAuth, (req, res) => {
+  const user = db.prepare('SELECT id, full_name, email, role, is_banned FROM users WHERE id = ?').get(req.user.id);
+  if (!user) return res.status(404).json({ error: 'Пользователь не найден' });
+  if (user.is_banned) return res.status(403).json({ error: 'Аккаунт заблокирован' });
+  const token = signToken({ id: user.id, role: user.role });
+  setSessionCookie(res, token);
+  res.json({
+    success: true,
+    token,
+    user: { id: user.id, full_name: user.full_name, email: user.email, role: user.role },
+  });
 });
 
 function requireAuth(req, res, next) {
