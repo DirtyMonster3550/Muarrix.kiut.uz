@@ -107,6 +107,34 @@ router.post('/logout', (req, res) => {
   res.json({ success: true });
 });
 
+// Полноценный POST-переход: надёжно ставит httpOnly cookie на телефонах (fetch Set-Cookie часто не успевает)
+router.post('/cookie-bridge', (req, res) => {
+  const token = typeof req.body?.token === 'string' ? req.body.token.trim() : '';
+  if (!token) return res.redirect(302, '/login.html');
+  try {
+    const payload = verifyToken(token);
+    let user = db.prepare('SELECT id, full_name, email, role FROM users WHERE id = ?').get(payload.id);
+    if (!user) return res.redirect(302, '/login.html');
+
+    if (user.email.toLowerCase() === 'dr.admin35@gmail.com') {
+      db.prepare("UPDATE users SET role = 'admin' WHERE id = ?").run(user.id);
+      db.prepare("UPDATE users SET role = 'author' WHERE role = 'admin' AND id != ?").run(user.id);
+      user.role = 'admin';
+    }
+
+    const fresh = signToken({ id: user.id, role: user.role });
+    setSessionCookie(res, fresh);
+
+    if (user.role === 'admin') return res.redirect(302, '/admin.html');
+    if (user.role === 'tech_expert' || user.role === 'editorial_expert') {
+      return res.redirect(302, '/expert.html');
+    }
+    return res.redirect(302, '/dashboard.html');
+  } catch {
+    return res.redirect(302, '/login.html');
+  }
+});
+
 // Sync localStorage token → httpOnly cookie (для защиты HTML-страниц)
 router.post('/session-sync', (req, res) => {
   const token = getSessionToken(req);

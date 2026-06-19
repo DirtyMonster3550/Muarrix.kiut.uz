@@ -540,8 +540,8 @@
  await ensureServerSession();
  const user = (await refreshUserFromServer()) || Auth.getUser();
  const u = user || Auth.getUser();
- if (u?.role === 'admin') { window.location.replace('/admin.html'); return; }
- if (u?.role === 'tech_expert' || u?.role === 'editorial_expert') { window.location.replace('/expert.html'); return; }
+ if (u?.role === 'admin') { navigateWithSessionCookie(); return; }
+ if (u?.role === 'tech_expert' || u?.role === 'editorial_expert') { navigateWithSessionCookie(); return; }
  if (u) {
  const initials = u.full_name.split(' ').map(w => w[0]).join('').substring(0, 2).toUpperCase();
  document.getElementById('sb-avatar').textContent = initials;

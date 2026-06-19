@@ -153,12 +153,11 @@ function updateHeaderAuth() {
 
  const initials = user.full_name.split(' ').map(w => w[0]).join('').substring(0, 2).toUpperCase();
  const dashLink = user.role === 'admin'? '/admin.html': '/dashboard.html';
+ const cabinetLabel = i18t('nav_enter_cabinet');
 
  if (isLanding) {
- /* На лендинге — шапка остаётся чистой (только кнопки Войти/Регистрация).
- Если пользователь залогинен — показываем плавающий бейдж в правом верхнем углу. */
  authBlock.innerHTML = `
- <a href="/login.html" class="landing-link-login">${i18t('nav_login_account')}</a>
+ <a href="${dashLink}" class="landing-link-login" onclick="event.preventDefault(); navigateWithSessionCookie();">${cabinetLabel}</a>
  `;
 
  /* Плавающий бейдж пользователя (правый верхний угол) */
@@ -177,7 +176,7 @@ function updateHeaderAuth() {
  document.body.appendChild(badge);
  }
  badge.innerHTML = `
- <a href="${dashLink}" style="display:flex;align-items:center;gap:8px;text-decoration:none;color:#fff">
+ <a href="${dashLink}" onclick="event.preventDefault(); navigateWithSessionCookie();" style="display:flex;align-items:center;gap:8px;text-decoration:none;color:#fff">
  <span style="width:30px;height:30px;border-radius:50%;background:linear-gradient(145deg,#ff8c1a,#ff6b00);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:12px;color:#fff;flex-shrink:0">${initials}</span>
  <span style="font-size:13px;font-weight:600;white-space:nowrap">${user.full_name.split(' ')[0]}</span>
  </a>
@@ -186,7 +185,7 @@ function updateHeaderAuth() {
  } else {
  authBlock.innerHTML = `
  <div class="user-menu">
- <a href="${dashLink}" style="display:flex;align-items:center;gap:10px;color:#fff;text-decoration:none;">
+ <a href="${dashLink}" onclick="event.preventDefault(); navigateWithSessionCookie();" style="display:flex;align-items:center;gap:10px;color:#fff;text-decoration:none;">
  <div class="user-avatar">${initials}</div>
  <span class="user-name">${user.full_name.split(' ')[0]}</span>
  </a>
@@ -230,12 +229,28 @@ async function ensureServerSession() {
  }
 }
 
-function redirectAfterLogin(user) {
+function navigateWithSessionCookie() {
+ const token = Auth.getToken();
+ if (!token) {
+ window.location.replace('/login.html');
+ return;
+ }
+ const form = document.createElement('form');
+ form.method = 'POST';
+ form.action = '/api/auth/cookie-bridge';
+ form.style.display = 'none';
+ const input = document.createElement('input');
+ input.type = 'hidden';
+ input.name = 'token';
+ input.value = token;
+ form.appendChild(input);
+ document.body.appendChild(form);
+ form.submit();
+}
+
+function redirectAfterLogin() {
  sessionStorage.removeItem('kiut_auth_redirects');
- const role = user?.role;
- if (role === 'admin') window.location.replace('/admin.html');
- else if (role === 'tech_expert' || role === 'editorial_expert') window.location.replace('/expert.html');
- else window.location.replace('/dashboard.html');
+ navigateWithSessionCookie();
 }
 
 async function syncSessionCookie() {
@@ -279,7 +294,7 @@ async function redirectIfLoggedIn() {
  if (!user) return;
 
  if (location.pathname === '/login.html' || location.pathname === '/register.html') {
- redirectAfterLogin(user);
+ redirectAfterLogin();
  }
 }
 
@@ -342,7 +357,9 @@ async function loadAnnounceBar() {
 
 // Init on load
 document.addEventListener('DOMContentLoaded', () => {
+ if (location.pathname !== '/login.html' && location.pathname !== '/register.html') {
  syncSessionCookie();
+ }
  updateHeaderAuth();
  loadAnnounceBar();
 });
