@@ -261,8 +261,12 @@ async function redirectIfLoggedIn() {
  const next = new URLSearchParams(location.search).get('next');
  const safeNext = next && next.startsWith('/') && !next.startsWith('//') ? next : null;
  if (safeNext) {
+ if (safeNext === '/admin.html' && role !== 'admin') {
+ // не гонять автора в admin → бесконечный цикл
+ } else {
  window.location.replace(safeNext);
  return;
+ }
  }
 
  const role = user.role;
