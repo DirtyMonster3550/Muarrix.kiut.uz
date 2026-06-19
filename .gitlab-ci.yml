@@ -4,6 +4,8 @@
 #   SSH_HOST          – server IP or hostname
 #   SSH_USER          – e.g. deploy
 #   SSH_PORT          – optional, default 22
+#   ADMIN_EMAIL       – admin login email (e.g. dr.admin35@gmail.com)
+#   ADMIN_PASSWORD    – admin password (type: Variable, Mask variable: ON)
 #
 # Auto-provided by GitLab:
 #   CI_REGISTRY, CI_REGISTRY_USER, CI_REGISTRY_PASSWORD, CI_REGISTRY_IMAGE
@@ -105,9 +107,28 @@ deploy:
     - ssh-keyscan -H "$SSH_HOST" >> ~/.ssh/known_hosts
   script:
     - |
+      ADMIN_EMAIL_B64=""
+      ADMIN_PASSWORD_B64=""
+      if [ -n "$ADMIN_EMAIL" ] && [ -n "$ADMIN_PASSWORD" ]; then
+        ADMIN_EMAIL_B64=$(printf '%s' "$ADMIN_EMAIL" | base64 | tr -d '\n')
+        ADMIN_PASSWORD_B64=$(printf '%s' "$ADMIN_PASSWORD" | base64 | tr -d '\n')
+        echo "ADMIN_EMAIL/ADMIN_PASSWORD заданы — обновим .env на сервере"
+      else
+        echo "ADMIN_EMAIL/ADMIN_PASSWORD не заданы в CI Variables — .env на сервере не трогаем"
+      fi
+    - |
       ssh -p ${SSH_PORT:-22} $SSH_USER@$SSH_HOST "
         set -e
         cd $DEPLOY_PATH
+        if [ -n '$ADMIN_EMAIL_B64' ] && [ -n '$ADMIN_PASSWORD_B64' ]; then
+          EMAIL=\$(printf '%s' '$ADMIN_EMAIL_B64' | base64 -d)
+          PASS=\$(printf '%s' '$ADMIN_PASSWORD_B64' | base64 -d)
+          touch .env
+          { grep -v '^ADMIN_EMAIL=' .env 2>/dev/null | grep -v '^ADMIN_PASSWORD=' || true; } > .env.tmp
+          printf 'ADMIN_EMAIL=%s\nADMIN_PASSWORD=%s\n' \"\$EMAIL\" \"\$PASS\" >> .env.tmp
+          mv .env.tmp .env
+          echo 'Обновлены ADMIN_EMAIL и ADMIN_PASSWORD в .env'
+        fi
         echo '$CI_REGISTRY_PASSWORD' | docker login -u '$CI_REGISTRY_USER' --password-stdin $CI_REGISTRY
         IMAGE_TAG=$CI_COMMIT_SHORT_SHA docker compose pull
         IMAGE_TAG=$CI_COMMIT_SHORT_SHA docker compose up -d --remove-orphans
