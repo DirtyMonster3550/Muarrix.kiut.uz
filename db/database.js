@@ -236,23 +236,9 @@ function init() {
     console.log('[init] Создан выпуск Muarrix с открытым приёмом статей');
   }
 
-  // Create default admin if not exists
-  const admin = db.prepare('SELECT id FROM users WHERE role = ?').get('admin');
-  if (!admin) {
-    const hash = bcrypt.hashSync(process.env.ADMIN_PASSWORD || 'Admin@kiut2024', 10);
-    db.prepare(`
-      INSERT INTO users (full_name, email, password, role)
-      VALUES (?, ?, ?, 'admin')
-    `).run('Администратор', process.env.ADMIN_EMAIL || 'admin@kiut.uz', hash);
-  }
-
-  // В системе только один администратор — лишних переводим в авторы
-  const admins = db.prepare("SELECT id FROM users WHERE role = 'admin' ORDER BY id ASC").all();
-  if (admins.length > 1) {
-    const keepId = admins[0].id;
-    const demote = admins.slice(1).map((a) => a.id);
-    db.prepare(`UPDATE users SET role = 'author' WHERE id IN (${demote.map(() => '?').join(',')})`).run(...demote);
-    console.log(`[init] Оставлен один admin (#${keepId}), снята роль у: ${demote.join(', ')}`);
+  // Админ: из ADMIN_EMAIL + ADMIN_PASSWORD в .env на сервере, иначе один раз по умолчанию
+  if (!syncAdminFromEnv(db)) {
+    ensureDefaultAdmin(db);
   }
 
   // Старый статус approved обходил экспертизу — возвращаем в очередь тех. эксперта
@@ -263,4 +249,60 @@ function init() {
   }
 }
 
-module.exports = { db, init, dbPath, DB_FILE };
+/**
+ * Назначает админа из ADMIN_EMAIL + ADMIN_PASSWORD в .env (файл на сервере).
+ * Если пользователь уже зарегистрирован — повышает до admin и обновляет пароль.
+ * @returns {boolean} true если переменные заданы и синхронизация выполнена
+ */
+function syncAdminFromEnv(db) {
+  const email = String(process.env.ADMIN_EMAIL || '').trim();
+  const password = String(process.env.ADMIN_PASSWORD || '').trim();
+  if (!email || !password) return false;
+
+  const hash = bcrypt.hashSync(password, 10);
+  const existing = db.prepare('SELECT id, email, role FROM users WHERE LOWER(email) = LOWER(?)').get(email);
+
+  if (existing) {
+    db.prepare('UPDATE users SET password = ?, role = ? WHERE id = ?').run(hash, 'admin', existing.id);
+    console.log(`[init] Админ: назначен ${existing.email} (был: ${existing.role})`);
+  } else {
+    db.prepare(`
+      INSERT INTO users (full_name, email, password, role)
+      VALUES (?, ?, ?, 'admin')
+    `).run('Администратор', email, hash);
+    console.log(`[init] Админ: создан ${email}`);
+  }
+
+  const keep = db.prepare('SELECT id FROM users WHERE LOWER(email) = LOWER(?)').get(email);
+  if (keep) {
+    const demoted = db.prepare(`
+      UPDATE users SET role = 'author' WHERE role = 'admin' AND id != ?
+    `).run(keep.id);
+    if (demoted.changes > 0) {
+      console.log(`[init] Снята роль admin у ${demoted.changes} других пользователей`);
+    }
+  }
+  return true;
+}
+
+function ensureDefaultAdmin(db) {
+  const admin = db.prepare('SELECT id FROM users WHERE role = ?').get('admin');
+  if (!admin) {
+    const hash = bcrypt.hashSync(process.env.ADMIN_PASSWORD || 'Admin@kiut2024', 10);
+    db.prepare(`
+      INSERT INTO users (full_name, email, password, role)
+      VALUES (?, ?, ?, 'admin')
+    `).run('Администратор', process.env.ADMIN_EMAIL || 'admin@kiut.uz', hash);
+    console.log('[init] Создан админ по умолчанию (задайте ADMIN_EMAIL и ADMIN_PASSWORD в .env на сервере)');
+  }
+
+  const admins = db.prepare("SELECT id FROM users WHERE role = 'admin' ORDER BY id ASC").all();
+  if (admins.length > 1) {
+    const keepId = admins[0].id;
+    const demote = admins.slice(1).map((a) => a.id);
+    db.prepare(`UPDATE users SET role = 'author' WHERE id IN (${demote.map(() => '?').join(',')})`).run(...demote);
+    console.log(`[init] Оставлен один admin (#${keepId}), снята роль у: ${demote.join(', ')}`);
+  }
+}
+
+module.exports = { db, init, dbPath, DB_FILE, syncAdminFromEnv };
