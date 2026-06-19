@@ -112,28 +112,26 @@ deploy:
       if [ -n "$ADMIN_EMAIL" ] && [ -n "$ADMIN_PASSWORD" ]; then
         ADMIN_EMAIL_B64=$(printf '%s' "$ADMIN_EMAIL" | base64 | tr -d '\n')
         ADMIN_PASSWORD_B64=$(printf '%s' "$ADMIN_PASSWORD" | base64 | tr -d '\n')
-        echo "ADMIN_EMAIL/ADMIN_PASSWORD заданы — передадим в контейнер при deploy"
+        echo "ADMIN_EMAIL/ADMIN_PASSWORD заданы — назначим админа после deploy"
       else
         echo "ADMIN_EMAIL/ADMIN_PASSWORD не заданы в CI Variables — .env на сервере не трогаем"
       fi
       ssh -p ${SSH_PORT:-22} $SSH_USER@$SSH_HOST "
         set -e
         cd $DEPLOY_PATH
-        COMPOSE_EXTRA=""
-        RECREATE=""
+        echo '$CI_REGISTRY_PASSWORD' | docker login -u '$CI_REGISTRY_USER' --password-stdin $CI_REGISTRY
+        IMAGE_TAG=$CI_COMMIT_SHORT_SHA docker compose pull
+        IMAGE_TAG=$CI_COMMIT_SHORT_SHA docker compose up -d --remove-orphans
         if [ -n '$ADMIN_EMAIL_B64' ] && [ -n '$ADMIN_PASSWORD_B64' ]; then
           EMAIL=\$(printf '%s' '$ADMIN_EMAIL_B64' | base64 -d)
           PASS=\$(printf '%s' '$ADMIN_PASSWORD_B64' | base64 -d)
-          printf 'ADMIN_EMAIL=%s\nADMIN_PASSWORD=%s\n' \"\$EMAIL\" \"\$PASS\" > /tmp/muarrix-admin.env
-          chmod 600 /tmp/muarrix-admin.env
-          printf '%s\n' 'services:' '  muarrix:' '    env_file:' '      - /tmp/muarrix-admin.env' > /tmp/muarrix-compose-admin.yml
-          COMPOSE_EXTRA='-f /tmp/muarrix-compose-admin.yml'
-          RECREATE='--force-recreate'
-          echo 'ADMIN_EMAIL/ADMIN_PASSWORD переданы через /tmp (без правки .env на сервере)'
+          sleep 5
+          IMAGE_TAG=$CI_COMMIT_SHORT_SHA docker compose exec -T \
+            -e \"ADMIN_EMAIL=\$EMAIL\" \
+            -e \"ADMIN_PASSWORD=\$PASS\" \
+            muarrix node scripts/ensure-admin.js
+          echo 'Админ назначен через ensure-admin.js'
         fi
-        echo '$CI_REGISTRY_PASSWORD' | docker login -u '$CI_REGISTRY_USER' --password-stdin $CI_REGISTRY
-        IMAGE_TAG=$CI_COMMIT_SHORT_SHA docker compose -f docker-compose.yml \$COMPOSE_EXTRA pull
-        IMAGE_TAG=$CI_COMMIT_SHORT_SHA docker compose -f docker-compose.yml \$COMPOSE_EXTRA up -d --remove-orphans \$RECREATE
         docker image prune -f
       "
   rules:
