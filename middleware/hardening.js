@@ -1,5 +1,6 @@
 const path = require('path');
 const { verifyToken } = require('../lib/jwtAuth');
+const { db } = require('../db/database');
 
 const BLOCKED_EXACT = new Set([
   '/package.json',
@@ -78,9 +79,11 @@ function protectHtmlPages(req, res, next) {
 
   try {
     const payload = verifyToken(token);
-    if (!allowedRoles.includes(payload.role)) {
-      if (payload.role === 'admin') return res.redirect(302, '/admin.html');
-      if (payload.role === 'tech_expert' || payload.role === 'editorial_expert') {
+    const row = db.prepare('SELECT role FROM users WHERE id = ?').get(payload.id);
+    const role = row?.role || payload.role;
+    if (!allowedRoles.includes(role)) {
+      if (role === 'admin') return res.redirect(302, '/admin.html');
+      if (role === 'tech_expert' || role === 'editorial_expert') {
         return res.redirect(302, '/expert.html');
       }
       return res.status(403).send('Доступ запрещён');

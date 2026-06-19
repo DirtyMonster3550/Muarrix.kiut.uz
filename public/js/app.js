@@ -230,13 +230,30 @@ async function syncSessionCookie() {
  await ensureServerSession();
 }
 
+async function refreshUserFromServer() {
+ const token = Auth.getToken();
+ if (!token) return null;
+ try {
+ const res = await fetch('/api/auth/me', {
+ headers: { Authorization: `Bearer ${token}` },
+ credentials: 'same-origin',
+ });
+ if (!res.ok) return null;
+ const user = await res.json();
+ Auth.setSession(token, user);
+ return user;
+ } catch {
+ return null;
+ }
+}
+
 /** На login/register: сначала cookie, потом редирект (иначе цикл login ↔ dashboard) */
 async function redirectIfLoggedIn() {
  if (!Auth.isLoggedIn()) return;
  const ok = await ensureServerSession();
  if (!ok) return;
 
- const user = Auth.getUser();
+ const user = (await refreshUserFromServer()) || Auth.getUser();
  if (!user) return;
 
  const next = new URLSearchParams(location.search).get('next');
