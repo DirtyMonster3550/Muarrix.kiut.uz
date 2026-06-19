@@ -258,6 +258,7 @@ async function redirectIfLoggedIn() {
  const user = (await refreshUserFromServer()) || Auth.getUser();
  if (!user) return;
 
+ const role = user.role;
  const next = new URLSearchParams(location.search).get('next');
  const safeNext = next && next.startsWith('/') && !next.startsWith('//') ? next : null;
  if (safeNext) {
@@ -269,7 +270,6 @@ async function redirectIfLoggedIn() {
  }
  }
 
- const role = user.role;
  if (role === 'admin') window.location.replace('/admin.html');
  else if (role === 'tech_expert' || role === 'editorial_expert') window.location.replace('/expert.html');
  else window.location.replace('/dashboard.html');

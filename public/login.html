@@ -126,7 +126,14 @@
  setTimeout(() => {
  const next = new URLSearchParams(location.search).get('next');
  const safeNext = next && next.startsWith('/') && !next.startsWith('//') ? next : null;
- if (safeNext) { window.location.href = safeNext; return; }
+ if (safeNext) {
+ if (safeNext === '/admin.html' && data.user.role !== 'admin') {
+ // автор не идёт в admin
+ } else {
+ window.location.href = safeNext;
+ return;
+ }
+ }
  const role = data.user.role;
  if (role === 'admin') window.location.href = '/admin.html';
  else if (role === 'tech_expert' || role === 'editorial_expert') window.location.href = '/expert.html';
