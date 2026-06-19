@@ -1,6 +1,5 @@
 const path = require('path');
-const { verifyToken } = require('../lib/jwtAuth');
-const { db } = require('../db/database');
+const { resolveSessionUser } = require('../lib/sessionUser');
 
 const BLOCKED_EXACT = new Set([
   '/package.json',
@@ -78,9 +77,9 @@ function protectHtmlPages(req, res, next) {
   }
 
   try {
-    const payload = verifyToken(token);
-    const row = db.prepare('SELECT role FROM users WHERE id = ?').get(payload.id);
-    const role = row?.role || payload.role;
+    const user = resolveSessionUser(req);
+    if (!user) return res.redirect(302, `/login.html?next=${encodeURIComponent(req.path)}`);
+    const role = user.role;
     if (!allowedRoles.includes(role)) {
       if (role === 'admin') return res.redirect(302, '/admin.html');
       if (role === 'tech_expert' || role === 'editorial_expert') {

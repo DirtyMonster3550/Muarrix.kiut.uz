@@ -921,7 +921,10 @@
 
 <script src="/js/app.js"></script>
 <script>
- if (!Auth.isLoggedIn() ||!Auth.isAdmin()) window.location.href = '/login.html';
+ (async function initAdminPage() {
+ if (!Auth.isLoggedIn()) { window.location.href = '/login.html'; return; }
+ await ensureServerSession();
+ if (!Auth.isAdmin()) { window.location.href = '/login.html'; return; }
 
  const user = Auth.getUser();
  if (user) {
@@ -1972,6 +1975,7 @@
 
  // Init
  loadDashboard();
+ })();
 </script>
 </body>
 </html>

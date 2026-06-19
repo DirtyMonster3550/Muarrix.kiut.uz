@@ -1,26 +1,20 @@
 const express = require('express');
 const router = express.Router();
 const { db } = require('../db/database');
-const { verifyToken } = require('../lib/jwtAuth');
-const { getSessionToken } = require('../middleware/hardening');
 const { auditLog } = require('../middleware/security');
 const { sendRejectionEmail } = require('../utils/mailer');
+const { resolveSessionUser } = require('../lib/sessionUser');
 
 // ── Auth middleware for reviewers ─────────────────────────────────────────────
 function requireRole(...roles) {
   return (req, res, next) => {
-    const token = getSessionToken(req);
-    if (!token) return res.status(401).json({ error: 'Не авторизован' });
-    try {
-      const payload = verifyToken(token);
-      if (!roles.includes(payload.role)) {
-        return res.status(403).json({ error: 'Доступ запрещён' });
-      }
-      req.user = payload;
-      next();
-    } catch {
-      res.status(401).json({ error: 'Токен недействителен' });
+    const user = resolveSessionUser(req);
+    if (!user) return res.status(401).json({ error: 'Не авторизован' });
+    if (!roles.includes(user.role)) {
+      return res.status(403).json({ error: 'Доступ запрещён' });
     }
+    req.user = user;
+    next();
   };
 }
 
