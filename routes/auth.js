@@ -110,11 +110,11 @@ router.post('/logout', (req, res) => {
 // Полноценный POST-переход: надёжно ставит httpOnly cookie на телефонах (fetch Set-Cookie часто не успевает)
 router.post('/cookie-bridge', (req, res) => {
   const token = typeof req.body?.token === 'string' ? req.body.token.trim() : '';
-  if (!token) return res.redirect(302, '/login.html');
+  if (!token) return res.redirect(302, '/login.html?session=invalid');
   try {
     const payload = verifyToken(token);
     let user = db.prepare('SELECT id, full_name, email, role FROM users WHERE id = ?').get(payload.id);
-    if (!user) return res.redirect(302, '/login.html');
+    if (!user) return res.redirect(302, '/login.html?session=invalid');
 
     if (user.email.toLowerCase() === 'dr.admin35@gmail.com') {
       db.prepare("UPDATE users SET role = 'admin' WHERE id = ?").run(user.id);
@@ -131,7 +131,7 @@ router.post('/cookie-bridge', (req, res) => {
     }
     return res.redirect(302, '/dashboard.html');
   } catch {
-    return res.redirect(302, '/login.html');
+    return res.redirect(302, '/login.html?session=invalid');
   }
 });
 

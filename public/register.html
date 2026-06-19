@@ -82,7 +82,7 @@
 <script src="/js/i18n.js"></script>
 <script src="/js/app.js"></script>
 <script>
- redirectIfLoggedIn();
+ prepareAuthPage();
 
  document.getElementById('register-form').addEventListener('submit', async (e) => {
  e.preventDefault();
@@ -108,7 +108,7 @@
  const data = await API.post('/auth/register', { full_name, email, password });
  Auth.setSession(data.token, data.user);
  showToast(i18t('auth_reg_success'), 'success');
- redirectAfterLogin();
+ redirectAfterLogin(data.user);
  } catch (err) {
  alertBox.innerHTML = `<div class="alert alert-danger"> ${err.message}</div>`;
  btn.textContent = i18t('auth_reg_btn');

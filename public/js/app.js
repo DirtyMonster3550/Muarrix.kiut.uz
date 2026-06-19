@@ -229,6 +229,16 @@ async function ensureServerSession() {
  }
 }
 
+function cabinetUrlForRole(role) {
+ if (role === 'admin') return '/admin.html';
+ if (role === 'tech_expert' || role === 'editorial_expert') return '/expert.html';
+ return '/dashboard.html';
+}
+
+function goToCabinetByRole(role) {
+ window.location.replace(cabinetUrlForRole(role));
+}
+
 function navigateWithSessionCookie() {
  const token = Auth.getToken();
  if (!token) {
@@ -248,9 +258,21 @@ function navigateWithSessionCookie() {
  form.submit();
 }
 
-function redirectAfterLogin() {
+function redirectAfterLogin(user) {
  sessionStorage.removeItem('kiut_auth_redirects');
- navigateWithSessionCookie();
+ goToCabinetByRole(user?.role);
+}
+
+/** Только очистка битой сессии на login/register — без авторедиректа (он вызывал цикл) */
+async function prepareAuthPage() {
+ if (new URLSearchParams(location.search).get('session') === 'invalid') {
+ Auth.clear();
+ try { await fetch('/api/auth/logout', { method: 'POST', credentials: 'same-origin' }); } catch {}
+ history.replaceState(null, '', '/login.html');
+ return;
+ }
+ const ok = await ensureServerSession();
+ if (!ok && Auth.isLoggedIn()) Auth.clear();
 }
 
 async function syncSessionCookie() {
@@ -281,21 +303,9 @@ async function refreshUserFromServer() {
  }
 }
 
-/** На login/register: если уже вошли — сразу в кабинет */
+/** @deprecated — авторедирект убран, оставлено для совместимости */
 async function redirectIfLoggedIn() {
- if (location.search.includes('next=')) {
- history.replaceState(null, '', '/login.html');
- }
-
- const ok = await ensureServerSession();
- if (!ok && !Auth.isLoggedIn()) return;
-
- const user = (await refreshUserFromServer()) || Auth.getUser();
- if (!user) return;
-
- if (location.pathname === '/login.html' || location.pathname === '/register.html') {
- redirectAfterLogin();
- }
+ await prepareAuthPage();
 }
 
 // ===== Modal =====
