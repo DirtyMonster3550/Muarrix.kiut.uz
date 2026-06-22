@@ -130,7 +130,7 @@ router.post('/:id/cover', requireAdmin, (req, res, next) => {
   if (Number.isNaN(id)) return res.status(400).json({ error: 'Некорректный id' });
   if (!req.file) return res.status(400).json({ error: 'Выберите файл обложки (JPG, PNG или WEBP)' });
 
-  const row = db.prepare('SELECT cover_image FROM issues WHERE id = ?').get(id);
+  const row = db.prepare('SELECT cover_image, accepting_submissions, journal FROM issues WHERE id = ?').get(id);
   if (!row) {
     try { fs.unlinkSync(req.file.path); } catch { /* ignore */ }
     return res.status(404).json({ error: 'Выпуск не найден' });
@@ -148,6 +148,16 @@ router.post('/:id/cover', requireAdmin, (req, res, next) => {
   }
 
   db.prepare('UPDATE issues SET cover_image = ? WHERE id = ?').run(coverPath, id);
+
+  if (row.journal === 'muarrix' && row.accepting_submissions) {
+    const siteCover = path.join(__dirname, '..', 'public', 'img', 'journal-cover.png');
+    try {
+      fs.copyFileSync(req.file.path, siteCover);
+    } catch (e) {
+      console.error('[covers] journal-cover update:', e.message);
+    }
+  }
+
   res.json({ success: true, cover_image: coverPath });
 });
 

@@ -119,6 +119,7 @@ deploy:
       ssh -p ${SSH_PORT:-22} $SSH_USER@$SSH_HOST "
         set -e
         cd $DEPLOY_PATH
+        mkdir -p public/covers/issues
         echo '$CI_REGISTRY_PASSWORD' | docker login -u '$CI_REGISTRY_USER' --password-stdin $CI_REGISTRY
         IMAGE_TAG=$CI_COMMIT_SHORT_SHA docker compose pull
         IMAGE_TAG=$CI_COMMIT_SHORT_SHA docker compose up -d --remove-orphans

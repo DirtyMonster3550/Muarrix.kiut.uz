@@ -13,6 +13,7 @@ services:
       - ./data:/app/data
       - ./uploads:/app/uploads
       - ./public/archives:/app/public/archives
+      - ./public/covers/issues:/app/public/covers/issues
     healthcheck:
       test: [ "CMD", "wget", "-qO-", "http://localhost:3000/api/health/ready" ]
       interval: 30s
