@@ -567,7 +567,10 @@
  </div>
  </div>
  <div class="table-container">
- <div class="table-header"><h3>Список выпусков</h3></div>
+ <div class="table-header" style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">
+ <h3 style="margin:0">Список выпусков</h3>
+ <button type="button" class="btn btn-danger btn-sm" onclick="deleteAllUnusedIssues()">Удалить все без статей</button>
+ </div>
  <div id="issues-body"><div class="empty-state"><div class="loader loader-dark"></div></div></div>
  </div>
  </div>
@@ -1666,6 +1669,18 @@
  try {
  await API.delete('/admin/issues/' + id);
  showToast('Выпуск удалён', 'success');
+ loadIssuesTab();
+ } catch (e) {
+ showToast(e.message || 'Ошибка', 'error');
+ }
+ }
+
+ async function deleteAllUnusedIssues() {
+ if (!confirm('Удалить ВСЕ выпуски, к которым не привязаны статьи? Это действие нельзя отменить.')) return;
+ try {
+ const r = await API.delete('/admin/issues/bulk-unused');
+ showToast(`Удалено выпусков: ${r.deleted || 0}`, 'success');
+ resetIssueForm();
  loadIssuesTab();
  } catch (e) {
  showToast(e.message || 'Ошибка', 'error');

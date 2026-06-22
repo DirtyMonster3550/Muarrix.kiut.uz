@@ -151,6 +151,23 @@ router.post('/:id/cover', requireAdmin, (req, res, next) => {
   res.json({ success: true, cover_image: coverPath });
 });
 
+router.delete('/bulk-unused', requireAdmin, async (_req, res) => {
+  try {
+    const rows = db.prepare(`
+      SELECT i.id, i.cover_image FROM issues i
+      WHERE NOT EXISTS (SELECT 1 FROM submissions s WHERE s.issue_id = i.id)
+    `).all();
+    for (const row of rows) {
+      if (row.cover_image) await deleteCoverFileIfLocal(row.cover_image);
+      db.prepare('DELETE FROM issues WHERE id = ?').run(row.id);
+    }
+    res.json({ success: true, deleted: rows.length });
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ error: 'Не удалось удалить выпуски' });
+  }
+});
+
 router.delete('/:id', requireAdmin, async (req, res) => {
   const id = parseInt(req.params.id, 10);
   if (Number.isNaN(id)) return res.status(400).json({ error: 'Некорректный id' });

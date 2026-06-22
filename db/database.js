@@ -219,22 +219,8 @@ function init() {
     console.error('[syncIssueCovers]', e.message);
   }
 
-  // Выпуск с открытым приёмом — без него авторы не могут подать статью
-  const openMuarrix = db.prepare(`
-    SELECT id FROM issues WHERE journal = 'muarrix' AND accepting_submissions = 1 LIMIT 1
-  `).get();
-  if (!openMuarrix) {
-    const year = new Date().getFullYear();
-    db.prepare(`
-      INSERT INTO issues (journal, title, description, sort_order, accepting_submissions, issued_at)
-      VALUES ('muarrix', ?, ?, 1, 1, ?)
-    `).run(
-      `Выпуск Muarrix.kiut.uz ${year}`,
-      'Приём статей открыт',
-      `${year}-06-01`
-    );
-    console.log('[init] Создан выпуск Muarrix с открытым приёмом статей');
-  }
+  dedupeAutoCreatedIssues(db);
+  ensureOpenMuarrixIssue(db);
 
   // Админ: из ADMIN_EMAIL + ADMIN_PASSWORD в .env на сервере, иначе один раз по умолчанию
   if (!syncAdminFromEnv(db)) {
@@ -247,6 +233,55 @@ function init() {
     db.prepare("UPDATE submissions SET status = 'pending' WHERE status = 'approved'").run();
     console.log(`[init] ${legacy} статей переведено из approved → pending (очередь тех. эксперта)`);
   }
+}
+
+/** Удалить дубли «Выпуск Muarrix.kiut.uz …» — появлялись при каждом рестарте контейнера */
+function dedupeAutoCreatedIssues(db) {
+  const year = new Date().getFullYear();
+  const title = `Выпуск Muarrix.kiut.uz ${year}`;
+  const rows = db.prepare(`
+    SELECT id FROM issues
+    WHERE journal = 'muarrix' AND title = ?
+      AND (archive_folder IS NULL OR TRIM(archive_folder) = '')
+    ORDER BY id ASC
+  `).all(title);
+  if (rows.length <= 1) return;
+  const keepId = rows[rows.length - 1].id;
+  for (const row of rows) {
+    if (row.id === keepId) continue;
+    const inUse = db.prepare('SELECT COUNT(*) AS c FROM submissions WHERE issue_id = ?').get(row.id).c;
+    if (inUse === 0) {
+      db.prepare('DELETE FROM issues WHERE id = ?').run(row.id);
+    }
+  }
+}
+
+/** Один открытый выпуск для приёма статей — не создавать новый при каждом deploy */
+function ensureOpenMuarrixIssue(db) {
+  const open = db.prepare(`
+    SELECT id FROM issues WHERE journal = 'muarrix' AND accepting_submissions = 1 LIMIT 1
+  `).get();
+  if (open) return;
+
+  const year = new Date().getFullYear();
+  const title = `Выпуск Muarrix.kiut.uz ${year}`;
+  const existing = db.prepare(`
+    SELECT id FROM issues WHERE journal = 'muarrix' AND title = ? ORDER BY id DESC LIMIT 1
+  `).get(title);
+
+  if (existing) {
+    db.prepare('UPDATE issues SET accepting_submissions = 1 WHERE id = ?').run(existing.id);
+    return;
+  }
+
+  const anyIssue = db.prepare(`SELECT id FROM issues WHERE journal = 'muarrix' LIMIT 1`).get();
+  if (anyIssue) return;
+
+  db.prepare(`
+    INSERT INTO issues (journal, title, description, sort_order, accepting_submissions, issued_at)
+    VALUES ('muarrix', ?, ?, 1, 1, ?)
+  `).run(title, 'Приём статей открыт', `${year}-06-01`);
+  console.log('[init] Создан выпуск Muarrix с открытым приёмом статей');
 }
 
 /**
