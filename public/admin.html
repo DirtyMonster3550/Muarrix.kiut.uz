@@ -921,20 +921,6 @@
 
 <script src="/js/app.js"></script>
 <script>
- (async function initAdminPage() {
- await ensureServerSession();
- const user = (await refreshUserFromServer()) || Auth.getUser();
- // HTML уже выдал сервер по cookie — не уходим на login (иначе снова цикл)
- if (user) {
- const initials = user.full_name.split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase();
- document.getElementById('sb-name').textContent = user.full_name;
- document.getElementById('sb-email').textContent = user.email;
- document.querySelector('.admin-avatar').textContent = initials;
- document.getElementById('profile-avatar').textContent = initials;
- document.getElementById('profile-name').textContent = user.full_name;
- document.getElementById('profile-email').textContent = user.email;
- }
-
  let currentSubId = null;
  let currentFilter = 'all';
  let currentSearch = '';
@@ -1961,19 +1947,28 @@
  return String(str?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
  }
 
- // Show security badge on initial load
- (async () => {
+ // Init
+ async function bootstrapAdminPage() {
+ await ensureServerSession();
+ const user = (await refreshUserFromServer()) || Auth.getUser();
+ if (user) {
+ const initials = user.full_name.split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase();
+ document.getElementById('sb-name').textContent = user.full_name;
+ document.getElementById('sb-email').textContent = user.email;
+ document.querySelector('.admin-avatar').textContent = initials;
+ document.getElementById('profile-avatar').textContent = initials;
+ document.getElementById('profile-name').textContent = user.full_name;
+ document.getElementById('profile-email').textContent = user.email;
+ }
+ loadDashboard();
  try {
  const s = await API.get('/admin/security/stats');
  const badge = document.getElementById('security-badge');
  const total = s.activeBans + s.bannedUsers;
  if (total > 0) { badge.style.display = 'inline'; badge.textContent = total; }
  } catch(e) {}
- })();
-
- // Init
- loadDashboard();
- })();
+ }
+ bootstrapAdminPage();
 </script>
 </body>
 </html>
