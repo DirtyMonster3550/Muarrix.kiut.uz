@@ -1531,13 +1531,23 @@
  const token = Auth.getToken();
  const headers = {};
  if (token) headers.Authorization = 'Bearer ' + token;
- const res = await fetch('/api/admin/issues/' + issueId + '/cover', {
+ let res;
+ try {
+ res = await fetch('/api/admin/issues/' + issueId + '/cover', {
  method: 'POST',
  headers,
  credentials: 'same-origin',
  body: fd,
  });
- const data = await res.json();
+ } catch {
+ throw new Error('Сеть: не удалось отправить обложку (Failed to fetch). Проверьте интернет или попросите админа права на uploads/issue-covers.');
+ }
+ let data;
+ try {
+ data = await res.json();
+ } catch {
+ throw new Error('Сервер вернул неожиданный ответ при загрузке обложки (HTTP ' + res.status + ')');
+ }
  if (!res.ok) throw new Error(data.error || 'Ошибка загрузки обложки');
  return data;
  }
@@ -1658,6 +1668,7 @@
  document.getElementById('issue-existing-cover').value = uploaded.cover_image || '';
  setIssueCoverPreview(uploaded.cover_image || '');
  document.getElementById('issue-cover-file').value = '';
+ document.getElementById('issue-edit-id').value = issueId;
  }
  showToast('Выпуск сохранён', 'success');
  resetIssueForm();

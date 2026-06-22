@@ -121,7 +121,10 @@ router.put('/:id', requireAdmin, (req, res) => {
 router.post('/:id/cover', requireAdmin, (req, res, next) => {
   coverUpload.single('cover')(req, res, (err) => {
     if (err) {
-      return res.status(400).json({ error: err.message || 'Ошибка загрузки файла' });
+      const msg = err.code === 'EACCES' || err.code === 'EPERM'
+        ? 'Нет прав на запись обложки на сервере (uploads/issue-covers). Обратитесь к администратору.'
+        : (err.message || 'Ошибка загрузки файла');
+      return res.status(400).json({ error: msg });
     }
     next();
   });

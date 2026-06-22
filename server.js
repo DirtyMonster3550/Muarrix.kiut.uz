@@ -30,7 +30,7 @@ app.use(helmet({
       scriptSrcAttr: ["'unsafe-inline'"],  // allow onclick/onchange/etc. in HTML
       styleSrc: ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com'],
       fontSrc: ["'self'", 'https://fonts.gstatic.com'],
-      imgSrc: ["'self'", 'data:'],
+      imgSrc: ["'self'", 'data:', 'blob:'],
       connectSrc: ["'self'"],
     },
   },
@@ -99,6 +99,7 @@ app.use(protectHtmlPages);
 app.use('/archives', express.static(archivesDirectory()));
 
 // ── Static files (public only — NO /uploads here) ────────────────────────────
+app.use('/covers/issues', express.static(path.join(__dirname, 'uploads', 'issue-covers')));
 app.use(express.static(path.join(__dirname, 'public')));
 
 // ── Protected /uploads – staff + author of the submission ─────────────────────
