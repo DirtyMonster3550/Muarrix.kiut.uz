@@ -561,7 +561,7 @@
  </div>
  </div>
  <div style="margin-top:20px;display:flex;gap:10px;flex-wrap:wrap">
- <button type="button" class="btn btn-primary" onclick="saveIssueForm()">Сохранить выпуск</button>
+ <button type="button" id="issue-save-btn" class="btn btn-primary" onclick="saveIssueForm()">Сохранить выпуск</button>
  <button type="button" class="btn btn-secondary" onclick="resetIssueForm()">Очистить форму</button>
  </div>
  </div>
@@ -1495,6 +1495,8 @@
 
  // ===== ISSUES (выпуски) =====
  let issueArchiveFolders = [];
+ let issueArchiveFoldersLoaded = false;
+ let issueCoverPreviewObjectUrl = null;
 
  function escapeIssueHtml(t) {
  const d = document.createElement('div');
@@ -1504,18 +1506,27 @@
 
  function setIssueCoverPreview(url) {
  const img = document.getElementById('issue-cover-preview');
+ if (issueCoverPreviewObjectUrl) {
+ URL.revokeObjectURL(issueCoverPreviewObjectUrl);
+ issueCoverPreviewObjectUrl = null;
+ }
  if (!url) {
  img.style.display = 'none';
  img.removeAttribute('src');
  return;
  }
- img.src = url + (url.includes('?') ? '&' : '?') + 't=' + Date.now();
+ if (url.startsWith('blob:')) issueCoverPreviewObjectUrl = url;
+ img.onerror = () => { img.style.display = 'none'; };
+ img.onload = () => { img.style.display = 'block'; };
+ img.src = url.includes('?') ? url : url + '?t=' + Date.now();
  img.style.display = 'block';
  }
 
  async function loadIssueArchiveFolders() {
+ if (issueArchiveFoldersLoaded && issueArchiveFolders.length) return;
  try {
  issueArchiveFolders = await API.get('/admin/issues/archive-folders');
+ issueArchiveFoldersLoaded = true;
  const dl = document.getElementById('issue-archive-folder-list');
  if (dl) {
  dl.innerHTML = issueArchiveFolders.map((f) => `<option value="${escapeIssueHtml(f)}">`).join('');
@@ -1526,11 +1537,16 @@
  }
 
  async function uploadIssueCover(issueId, file) {
+ if (file.size > 3 * 1024 * 1024) {
+ throw new Error('Файл больше 3 МБ — сожмите изображение');
+ }
  const fd = new FormData();
  fd.append('cover', file);
  const token = Auth.getToken();
  const headers = {};
  if (token) headers.Authorization = 'Bearer ' + token;
+ const ctrl = new AbortController();
+ const timer = setTimeout(() => ctrl.abort(), 90000);
  let res;
  try {
  res = await fetch('/api/admin/issues/' + issueId + '/cover', {
@@ -1538,9 +1554,15 @@
  headers,
  credentials: 'same-origin',
  body: fd,
+ signal: ctrl.signal,
  });
- } catch {
- throw new Error('Сеть: не удалось отправить обложку (Failed to fetch). Проверьте интернет или попросите админа права на uploads/issue-covers.');
+ } catch (e) {
+ if (e.name === 'AbortError') {
+ throw new Error('Таймаут загрузки обложки (90 сек). Попробуйте файл поменьше или обновите страницу.');
+ }
+ throw new Error('Сеть: не удалось отправить обложку. Проверьте интернет и попробуйте снова.');
+ } finally {
+ clearTimeout(timer);
  }
  let data;
  try {
@@ -1559,10 +1581,11 @@
  });
 
  async function loadIssuesTab() {
- try {
- await loadIssueArchiveFolders();
- const data = await API.get('/admin/issues');
  const body = document.getElementById('issues-body');
+ try {
+ body.innerHTML = '<div class="empty-state"><div class="loader loader-dark"></div><p style="margin-top:12px;color:var(--text-muted)">Загрузка выпусков…</p></div>';
+ loadIssueArchiveFolders().catch(() => {});
+ const data = await API.get('/admin/issues');
  if (!data.length) {
  body.innerHTML = '<div class="empty-state"><div class="icon"></div><h3>Выпусков пока нет</h3><p>Создайте первый выпуск формой выше</p></div>';
  return;
@@ -1573,7 +1596,7 @@
  <tbody>${data.map((it, i) => `
  <tr>
  <td style="color:var(--text-muted)">${i + 1}</td>
- <td>${it.cover_image ? `<img src="${escapeIssueHtml(it.cover_image)}" alt="" style="width:36px;height:48px;object-fit:cover;border-radius:4px;border:1px solid var(--border)">` : '<span style="font-size:11px;color:var(--danger)">нет</span>'}</td>
+ <td>${it.cover_image ? `<img src="${escapeIssueHtml(it.cover_image)}?t=${it.id}" alt="" onerror="this.outerHTML='<span style=\\'font-size:11px;color:var(--danger)\\'>нет</span>'" style="width:36px;height:48px;object-fit:cover;border-radius:4px;border:1px solid var(--border)">` : '<span style="font-size:11px;color:var(--danger)">нет</span>'}</td>
  <td style="font-size:13px;font-weight:600">${escapeIssueHtml(it.title)}</td>
  <td style="font-size:11px;color:var(--text-muted);max-width:140px;word-break:break-word">${it.archive_folder ? escapeIssueHtml(it.archive_folder) : '—'}</td>
  <td style="font-size:12px">${it.issued_at? escapeIssueHtml(it.issued_at): '—'}</td>
@@ -1628,6 +1651,7 @@
  }
 
  async function saveIssueForm() {
+ const saveBtn = document.getElementById('issue-save-btn');
  const id = document.getElementById('issue-edit-id').value.trim();
  const coverFile = document.getElementById('issue-cover-file').files[0];
  const existingCover = document.getElementById('issue-existing-cover').value.trim();
@@ -1657,6 +1681,7 @@
  return;
  }
  try {
+ if (saveBtn) { saveBtn.disabled = true; saveBtn.textContent = coverFile ? 'Загрузка обложки…' : 'Сохранение…'; }
  let issueId = id;
  if (id) await API.put('/admin/issues/' + id, payload);
  else {
@@ -1675,6 +1700,8 @@
  loadIssuesTab();
  } catch (e) {
  showToast(e.message || 'Ошибка', 'error');
+ } finally {
+ if (saveBtn) { saveBtn.disabled = false; saveBtn.textContent = 'Сохранить выпуск'; }
  }
  }
 

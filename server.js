@@ -100,6 +100,7 @@ app.use('/archives', express.static(archivesDirectory()));
 
 // ── Static files (public only — NO /uploads here) ────────────────────────────
 app.use('/covers/issues', express.static(path.join(__dirname, 'uploads', 'issue-covers')));
+app.use('/covers/issues', express.static(path.join(__dirname, 'public', 'covers', 'issues')));
 app.use(express.static(path.join(__dirname, 'public')));
 
 // ── Protected /uploads – staff + author of the submission ─────────────────────

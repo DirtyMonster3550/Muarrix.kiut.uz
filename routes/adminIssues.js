@@ -19,6 +19,9 @@ const {
 const ALLOWED_JOURNALS = ['muarrix', 'finecs', 'conference'];
 const COVER_EXTS = new Set(['.jpg', '.jpeg', '.png', '.webp']);
 
+let archiveFoldersCache = { at: 0, folders: [] };
+const ARCHIVE_FOLDERS_TTL_MS = 60 * 1000;
+
 ensureCoversDir().catch((e) => console.error('[covers]', e));
 
 const coverStorage = multer.diskStorage({
@@ -58,10 +61,16 @@ router.get('/', requireAdmin, (req, res) => {
 
 router.get('/archive-folders', requireAdmin, async (_req, res) => {
   try {
+    const now = Date.now();
+    if (now - archiveFoldersCache.at < ARCHIVE_FOLDERS_TTL_MS) {
+      return res.json(archiveFoldersCache.folders);
+    }
     const { archivesDirectory } = require('../lib/paths');
     const { discoverIssuesInDir } = require('../lib/archiveStructure');
     const discovered = await discoverIssuesInDir(archivesDirectory());
-    res.json(discovered.map((d) => d.folder).sort((a, b) => a.localeCompare(b, 'ru', { numeric: true })));
+    const folders = discovered.map((d) => d.folder).sort((a, b) => a.localeCompare(b, 'ru', { numeric: true }));
+    archiveFoldersCache = { at: now, folders };
+    res.json(folders);
   } catch (e) {
     console.error(e);
     res.status(500).json({ error: 'Не удалось прочитать папки архива' });
