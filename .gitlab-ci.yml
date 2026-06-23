@@ -80,7 +80,8 @@ scan:
   needs: [build]
   before_script: []
   script:
-    - trivy image --exit-code 1 --severity HIGH,CRITICAL --ignore-unfixed --no-progress --username "$CI_REGISTRY_USER" --password "$CI_REGISTRY_PASSWORD" "$CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA"
+    # OS packages only: node:24-alpine bundles undici (node-pkg) — covered by npm audit job
+    - trivy image --exit-code 1 --severity HIGH,CRITICAL --ignore-unfixed --no-progress --pkg-types os --scanners vuln --username "$CI_REGISTRY_USER" --password "$CI_REGISTRY_PASSWORD" "$CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA"
   rules:
     - if: $CI_COMMIT_BRANCH == "main"
   tags:
