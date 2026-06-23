@@ -324,6 +324,9 @@
  К публикации
  <span class="admin-pending-badge" id="publish-badge" style="display:none">0</span>
  </a>
+ <a href="javascript:void(0)" data-tab="quick-publish" onclick="return switchTab('quick-publish',this)">
+ Быстрая публикация
+ </a>
  <a href="javascript:void(0)" data-tab="users" onclick="return switchTab('users',this)">
  Пользователи
  </a>
@@ -487,6 +490,34 @@
  </ol>
  </div>
  <div id="publish-body"><div class="empty-state"><div class="loader loader-dark"></div></div></div>
+ </div>
+
+ <!-- ===== QUICK PUBLISH TAB ===== -->
+ <div id="tab-quick-publish" class="tab-content" style="display:none">
+ <div class="page-header" style="margin-bottom:20px">
+ <h2 style="font-size:20px;font-weight:700">Быстрая публикация в архив</h2>
+ <p style="font-size:13px;color:var(--text-muted);margin-top:4px">Экстренный путь: PDF сразу в выбранный выпуск, без экспертизы и подачи автором. У выпуска должна быть указана «Папка в архиве».</p>
+ </div>
+ <div class="settings-section" style="margin-bottom:20px">
+ <div class="settings-section-body">
+ <div id="quick-publish-alert"></div>
+ <div class="form-group">
+ <label class="form-label">Выпуск журнала <span style="color:var(--danger)">*</span></label>
+ <select id="quick-publish-issue" class="form-control"></select>
+ <p style="font-size:12px;color:var(--text-muted);margin:6px 0 0" id="quick-publish-issue-hint"></p>
+ </div>
+ <div id="quick-publish-rows"></div>
+ <div style="display:flex;flex-wrap:wrap;gap:10px;margin-top:16px">
+ <button type="button" class="btn btn-secondary btn-sm" onclick="addQuickPublishRow()">+ Добавить PDF</button>
+ <button type="button" class="btn btn-primary" id="quick-publish-submit" onclick="submitQuickPublish()">Опубликовать в архив</button>
+ <a href="/archives.html" class="btn btn-secondary btn-sm" target="_blank" rel="noopener">Открыть архив</a>
+ </div>
+ </div>
+ </div>
+ <div id="quick-publish-results" style="display:none" class="settings-section">
+ <div class="settings-section-header"><h3>Результат</h3></div>
+ <div class="settings-section-body" id="quick-publish-results-body"></div>
+ </div>
  </div>
 
  <!-- ===== USERS TAB ===== -->
@@ -932,6 +963,7 @@
  dashboard: 'Обзор',
  submissions: 'Управление статьями',
  publish: 'К публикации',
+ 'quick-publish': 'Быстрая публикация',
  issues: 'Выпуски журналов',
  users: 'Пользователи',
  security: 'Мониторинг безопасности',
@@ -951,6 +983,7 @@
  if (tab === 'dashboard') loadDashboard();
  if (tab === 'submissions') loadSubmissions();
  if (tab === 'publish') loadPublishQueue();
+ if (tab === 'quick-publish') loadQuickPublishTab();
  if (tab === 'issues') loadIssuesTab();
  if (tab === 'users') loadUsers();
  if (tab === 'security') loadSecurity();
@@ -1150,6 +1183,221 @@
  loadPublishQueue();
  loadDashboard();
  } catch(e) { showToast(e.message, 'error'); }
+ }
+
+ // ===== QUICK PUBLISH (PDF → archive) =====
+ let quickPublishRowSeq = 0;
+ let quickPublishIssuesCache = [];
+
+ function guessTitleFromPdfFilename(name) {
+  const stem = String(name || '').replace(/\.pdf$/i, '');
+  return stem
+   .replace(/\+/g, ' ')
+   .replace(/_/g, ' ')
+   .replace(/\s*\(\d+\)\s*$/i, '')
+   .replace(/\s{2,}/g, ' ')
+   .trim();
+ }
+
+ function quickPublishRowHtml(id) {
+  return `
+ <div class="quick-pub-row" data-row-id="${id}" style="border:1px solid var(--border);border-radius:12px;padding:16px;margin-top:14px;background:#fff">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+   <strong style="font-size:13px;color:var(--primary)">PDF #${id}</strong>
+   <button type="button" class="btn btn-secondary btn-sm" onclick="removeQuickPublishRow(${id})">Убрать</button>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+   <div class="form-group" style="margin:0">
+    <label class="form-label">Название статьи <span style="color:var(--danger)">*</span></label>
+    <input type="text" class="form-control qp-title" placeholder="Название">
+   </div>
+   <div class="form-group" style="margin:0">
+    <label class="form-label">Авторы</label>
+    <input type="text" class="form-control qp-authors" placeholder="Иванов И.И., Петров П.П.">
+   </div>
+  </div>
+  <div class="form-group" style="margin:12px 0 0">
+   <label class="form-label">Краткое описание (необязательно)</label>
+   <textarea class="form-control qp-abstract" rows="2" placeholder="Аннотация для архива"></textarea>
+  </div>
+  <div class="form-group" style="margin:12px 0 0">
+   <label class="form-label">PDF-файл <span style="color:var(--danger)">*</span></label>
+   <input type="file" class="form-control qp-file" accept=".pdf,application/pdf" onchange="onQuickPublishFileChange(${id}, this)">
+   <p class="qp-file-hint" style="font-size:12px;color:var(--text-muted);margin:6px 0 0"></p>
+  </div>
+ </div>`;
+ }
+
+ function addQuickPublishRow() {
+  quickPublishRowSeq += 1;
+  const wrap = document.getElementById('quick-publish-rows');
+  wrap.insertAdjacentHTML('beforeend', quickPublishRowHtml(quickPublishRowSeq));
+ }
+
+ function removeQuickPublishRow(id) {
+  const row = document.querySelector(`.quick-pub-row[data-row-id="${id}"]`);
+  if (row) row.remove();
+  const left = document.querySelectorAll('.quick-pub-row');
+  if (!left.length) addQuickPublishRow();
+ }
+
+ function onQuickPublishFileChange(id, input) {
+  const row = document.querySelector(`.quick-pub-row[data-row-id="${id}"]`);
+  if (!row || !input.files?.[0]) return;
+  const file = input.files[0];
+  const hint = row.querySelector('.qp-file-hint');
+  if (hint) hint.textContent = file.name;
+  const titleEl = row.querySelector('.qp-title');
+  if (titleEl && !titleEl.value.trim()) {
+   titleEl.value = guessTitleFromPdfFilename(file.name);
+  }
+ }
+
+ function updateQuickPublishIssueHint() {
+  const sel = document.getElementById('quick-publish-issue');
+  const hint = document.getElementById('quick-publish-issue-hint');
+  if (!sel || !hint) return;
+  const issue = quickPublishIssuesCache.find((i) => String(i.id) === sel.value);
+  if (!issue) {
+   hint.textContent = '';
+   return;
+  }
+  if (issue.archive_folder) {
+   hint.innerHTML = `Папка архива: <code>${escHtml(issue.archive_folder)}</code>`;
+   hint.style.color = 'var(--text-muted)';
+  } else {
+   hint.textContent = 'У этого выпуска не задана «Папка в архиве» — укажите в разделе «Выпуски журналов».';
+   hint.style.color = 'var(--danger)';
+  }
+ }
+
+ async function loadQuickPublishTab() {
+  const sel = document.getElementById('quick-publish-issue');
+  const rows = document.getElementById('quick-publish-rows');
+  const alertBox = document.getElementById('quick-publish-alert');
+  const results = document.getElementById('quick-publish-results');
+  if (alertBox) alertBox.innerHTML = '';
+  if (results) results.style.display = 'none';
+
+  try {
+   quickPublishIssuesCache = await API.get('/admin/issues');
+   if (!quickPublishIssuesCache.length) {
+    if (sel) sel.innerHTML = '<option value="">— нет выпусков —</option>';
+    if (rows) rows.innerHTML = '<div class="alert alert-info">Сначала создайте выпуск в разделе «Выпуски журналов».</div>';
+    return;
+   }
+
+   const sorted = [...quickPublishIssuesCache].sort((a, b) => (b.sort_order || 0) - (a.sort_order || 0));
+   if (sel) {
+    sel.innerHTML = sorted.map((i) =>
+     `<option value="${i.id}">${escHtml(i.title)}${i.archive_folder ? '' : ' (нет папки архива)'}</option>`
+    ).join('');
+    const withFolder = sorted.find((i) => i.archive_folder);
+    sel.value = String((withFolder || sorted[0]).id);
+   }
+
+   if (rows && !rows.querySelector('.quick-pub-row')) {
+    rows.innerHTML = '';
+    addQuickPublishRow();
+   }
+   updateQuickPublishIssueHint();
+   if (sel) sel.onchange = updateQuickPublishIssueHint;
+  } catch (e) {
+   if (rows) rows.innerHTML = `<div class="alert alert-danger">${escHtml(e.message)}</div>`;
+  }
+ }
+
+ async function submitQuickPublish() {
+  const issueId = document.getElementById('quick-publish-issue')?.value;
+  const alertBox = document.getElementById('quick-publish-alert');
+  const btn = document.getElementById('quick-publish-submit');
+  const results = document.getElementById('quick-publish-results');
+  const resultsBody = document.getElementById('quick-publish-results-body');
+
+  if (!issueId) {
+   showToast('Выберите выпуск журнала', 'error');
+   return;
+  }
+
+  const rowEls = [...document.querySelectorAll('.quick-pub-row')];
+  const payloads = rowEls.map((row) => ({
+   title: row.querySelector('.qp-title')?.value?.trim() || '',
+   authors: row.querySelector('.qp-authors')?.value?.trim() || '',
+   abstract: row.querySelector('.qp-abstract')?.value?.trim() || '',
+   file: row.querySelector('.qp-file')?.files?.[0] || null,
+  })).filter((p) => p.file || p.title);
+
+  const ready = payloads.filter((p) => p.file && p.title);
+  if (!ready.length) {
+   showToast('Добавьте хотя бы один PDF и укажите название', 'error');
+   return;
+  }
+
+  if (alertBox) alertBox.innerHTML = '';
+  btn.disabled = true;
+  const origText = btn.textContent;
+  btn.textContent = 'Публикация…';
+
+  const ok = [];
+  const failed = [];
+
+  for (const item of ready) {
+   const fd = new FormData();
+   fd.append('issue_id', issueId);
+   fd.append('title', item.title);
+   fd.append('authors', item.authors);
+   fd.append('abstract', item.abstract);
+   fd.append('pdf', item.file);
+   try {
+    const res = await fetch('/api/admin/quick-publish', {
+     method: 'POST',
+     headers: { Authorization: `Bearer ${Auth.getToken()}` },
+     credentials: 'same-origin',
+     body: fd,
+    });
+    let data = {};
+    const ct = res.headers.get('content-type') || '';
+    if (ct.includes('application/json')) {
+     data = await res.json();
+    } else if (!res.ok) {
+     throw new Error(`Сервер вернул ${res.status}. Возможно, файл слишком большой или nginx оборвал соединение.`);
+    }
+    if (!res.ok) throw new Error(data.error || `Ошибка ${res.status}`);
+    ok.push({ title: item.title, file: data.archiveFile, folder: data.folder });
+   } catch (e) {
+    const msg = e.message === 'Failed to fetch'
+     ? (item.file && item.file.size > 60000
+       ? `Файл ${Math.round(item.file.size / 1024)} КБ — nginx на сервере обрывает загрузки больше ~64 КБ. Нужно в конфиге nginx добавить client_max_body_size 50m; и перезагрузить nginx.`
+       : 'Сервер не ответил (проверьте доступность сайта и права на папку архива)')
+     : e.message;
+    failed.push({ title: item.title, error: msg });
+   }
+  }
+
+  btn.disabled = false;
+  btn.textContent = origText;
+
+  if (ok.length) {
+   showToast(`Опубликовано: ${ok.length}`, 'success');
+  }
+  if (failed.length) {
+   showToast(`Ошибок: ${failed.length}`, 'error');
+  }
+
+  if (results && resultsBody) {
+   results.style.display = 'block';
+   resultsBody.innerHTML = `
+    ${ok.length ? `<p style="color:var(--success);font-weight:600;margin-bottom:8px">Успешно: ${ok.length}</p>
+    <ul style="margin:0 0 16px;padding-left:20px">${ok.map((r) => `<li>${escHtml(r.title)} → ${escHtml(r.file)}</li>`).join('')}</ul>` : ''}
+    ${failed.length ? `<p style="color:var(--danger);font-weight:600;margin-bottom:8px">Ошибки: ${failed.length}</p>
+    <ul style="margin:0;padding-left:20px">${failed.map((r) => `<li>${escHtml(r.title)}: ${escHtml(r.error)}</li>`).join('')}</ul>` : ''}
+   `;
+  }
+
+  if (ok.length && !failed.length) {
+   document.getElementById('quick-publish-rows').innerHTML = '';
+   addQuickPublishRow();
+  }
  }
 
  async function syncPublishedArchive() {

@@ -8,7 +8,7 @@ const { db, dbPath } = require('../db/database');
 const { sendApprovalEmail, sendRejectionEmail, sendTestEmail } = require('../utils/mailer');
 const { requireAdmin } = require('./adminAuth');
 const { auditLog } = require('../middleware/security');
-const { publishSubmissionToArchive, syncPublishedToArchive } = require('../lib/publishSubmission');
+const { publishSubmissionToArchive, syncPublishedToArchive, publishPdfToIssueArchive } = require('../lib/publishSubmission');
 
 const UPLOADS_DIR = path.join(__dirname, '..', 'uploads');
 
@@ -28,6 +28,29 @@ const publishPdfUpload = multer({
     else cb(new Error('Для публикации принимается только PDF'));
   },
 });
+
+const uploadPdfMemory = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 50 * 1024 * 1024 },
+  fileFilter: (_req, file, cb) => {
+    const ext = path.extname(file.originalname || '').toLowerCase();
+    const mime = String(file.mimetype || '').toLowerCase();
+    if (ext === '.pdf' || mime === 'application/pdf') cb(null, true);
+    else cb(new Error('Разрешён только PDF'));
+  },
+});
+
+function handleQuickPublishUpload(req, res, next) {
+  uploadPdfMemory.single('pdf')(req, res, (err) => {
+    if (err) {
+      if (err.code === 'LIMIT_FILE_SIZE') {
+        return res.status(413).json({ error: 'PDF слишком большой (максимум 50 МБ)' });
+      }
+      return res.status(400).json({ error: err.message || 'Ошибка загрузки PDF' });
+    }
+    next();
+  });
+}
 
 function isPdfFile(filePath) {
   try {
@@ -470,6 +493,50 @@ router.put('/users/:id/role', requireAdmin, (req, res) => {
   auditLog(req.user.id, 'change_role', 'user', id, `${user.role} → ${role}`);
 
   res.json({ success: true, id, role });
+});
+
+// ── Быстрая публикация PDF в архив выпуска (без экспертизы) ─────────────────
+router.post('/quick-publish', requireAdmin, handleQuickPublishUpload, async (req, res) => {
+  if (!req.file?.buffer?.length) {
+    return res.status(400).json({ error: 'Выберите PDF-файл' });
+  }
+
+  const issueId = parseInt(req.body?.issue_id, 10);
+  const title = String(req.body?.title || '').trim();
+  const authors = req.body?.authors || '';
+  const abstract = req.body?.abstract || '';
+
+  try {
+    const result = await publishPdfToIssueArchive(db, {
+      issueId,
+      pdfBuffer: req.file.buffer,
+      title,
+      authors,
+      abstract,
+    });
+
+    if (!result.ok) {
+      return res.status(400).json({ error: result.error });
+    }
+
+    auditLog(
+      req.user.id,
+      'quick_publish',
+      'issue',
+      issueId,
+      `${result.archiveFile} → ${result.folder}`
+    );
+
+    res.json({
+      success: true,
+      archiveFile: result.archiveFile,
+      folder: result.folder,
+      issueTitle: result.issueTitle,
+    });
+  } catch (e) {
+    console.error('[quick-publish]', e);
+    res.status(500).json({ error: 'Не удалось опубликовать PDF в архив' });
+  }
 });
 
 module.exports = router;
