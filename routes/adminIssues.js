@@ -212,11 +212,10 @@ router.delete('/bulk-unused', requireAdmin, async (req, res) => {
   }
 });
 
-router.delete('/:id', requireAdmin, async (req, res) => {
+async function deleteIssueById(req, res, force) {
   const id = parseInt(req.params.id, 10);
   if (Number.isNaN(id)) return res.status(400).json({ error: 'Некорректный id' });
 
-  const force = req.query.force === '1' || req.query.force === 'true';
   const row = db.prepare('SELECT id, title, cover_image, archive_folder FROM issues WHERE id = ?').get(id);
   if (!row) return res.status(404).json({ error: 'Не найдено' });
 
@@ -225,7 +224,7 @@ router.delete('/:id', requireAdmin, async (req, res) => {
 
   if (articleCount > 0 && !force) {
     return res.status(400).json({
-      error: 'К выпуску привязаны статьи — удаление невозможно',
+      error: 'К выпуску привязаны статьи. Обновите страницу (Ctrl+F5) и подтвердите принудительное удаление.',
       articleCount,
       canForceDelete: true,
     });
@@ -248,7 +247,14 @@ router.delete('/:id', requireAdmin, async (req, res) => {
   if (row.cover_image) await deleteCoverFileIfLocal(row.cover_image);
   db.prepare('DELETE FROM issues WHERE id = ?').run(id);
 
-  res.json({ success: true, unlinkedArticles: articleCount });
+  return res.json({ success: true, unlinkedArticles: articleCount });
+}
+
+router.post('/:id/force-delete', requireAdmin, (req, res) => deleteIssueById(req, res, true));
+
+router.delete('/:id', requireAdmin, (req, res) => {
+  const force = req.query.force === '1' || req.query.force === 'true';
+  return deleteIssueById(req, res, force);
 });
 
 module.exports = router;
