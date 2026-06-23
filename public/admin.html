@@ -883,13 +883,14 @@
  <h3> Журнал действий администратора</h3>
  <button class="btn btn-secondary btn-sm" onclick="loadAuditLog()">Обновить</button>
  </div>
+ <p style="font-size:12px;color:var(--text-muted);padding:0 16px 12px;margin:0">Только для администратора. Опасные действия (удаление выпусков, публикации и т.д.) сохраняются здесь и <strong>не могут быть удалены</strong>.</p>
  <div style="overflow-x:auto">
  <table>
  <thead>
- <tr><th>Дата</th><th>Действие</th><th>Тип объекта</th><th>ID объекта</th><th>Детали</th></tr>
+ <tr><th>Дата</th><th>Администратор</th><th>Действие</th><th>Детали</th></tr>
  </thead>
  <tbody id="audit-log-body">
- <tr><td colspan="5" style="text-align:center;color:var(--text-muted);padding:20px">Загрузка…</td></tr>
+ <tr><td colspan="4" style="text-align:center;color:var(--text-muted);padding:20px">Загрузка…</td></tr>
  </tbody>
  </table>
  </div>
@@ -1764,7 +1765,12 @@
  return;
  }
  if (url.startsWith('blob:')) issueCoverPreviewObjectUrl = url;
- img.onerror = () => { img.style.display = 'none'; };
+ img.onerror = () => {
+  img.style.display = 'none';
+  if (!url.startsWith('blob:')) {
+   console.warn('Обложка на сервере не найдена:', url, '— загрузите файл заново');
+  }
+ };
  img.onload = () => { img.style.display = 'block'; };
  img.src = url.includes('?') ? url : url + '?t=' + Date.now();
  img.style.display = 'block';
@@ -1782,6 +1788,18 @@
  } catch {
  issueArchiveFolders = [];
  }
+ }
+
+ function formatCoverUploadError(e, file) {
+  const msg = e && e.message ? e.message : String(e);
+  if (msg === 'Failed to fetch' || /network|connection|reset|abort/i.test(msg)) {
+   const kb = file && file.size ? Math.round(file.size / 1024) : 0;
+   if (kb > 64) {
+    return `Загрузка оборвалась (${kb} КБ). Часто nginx на сервере режет файлы больше ~64 КБ — нужно client_max_body_size 50m; для muarrix.kiut.uz. Пока сожмите обложку до JPG ~200–400 КБ и попробуйте снова.`;
+   }
+   return 'Соединение оборвалось (ERR_CONNECTION_RESET). Сожмите JPG до ~300 КБ, проверьте Wi‑Fi KIUT и попробуйте снова.';
+  }
+  return msg;
  }
 
  async function uploadIssueCover(issueId, file) {
@@ -1805,10 +1823,10 @@
  signal: ctrl.signal,
  });
  } catch (e) {
- if (e.name === 'AbortError') {
- throw new Error('Таймаут загрузки обложки (90 сек). Попробуйте файл поменьше или обновите страницу.');
- }
- throw new Error('Сеть: не удалось отправить обложку. Проверьте интернет и попробуйте снова.');
+  if (e.name === 'AbortError') {
+   throw new Error('Таймаут загрузки обложки (90 сек). Попробуйте файл поменьше или обновите страницу.');
+  }
+  throw new Error(formatCoverUploadError(e, file));
  } finally {
  clearTimeout(timer);
  }
@@ -1840,19 +1858,20 @@
  }
  body.innerHTML = `
  <table>
- <thead><tr><th>#</th><th>Обложка</th><th>Название выпуска</th><th>Архив</th><th>Дата</th><th>Приём</th><th>Сорт.</th><th></th></tr></thead>
+ <thead><tr><th>#</th><th>Обложка</th><th>Название выпуска</th><th>Архив</th><th>Статьи</th><th>Дата</th><th>Приём</th><th>Сорт.</th><th></th></tr></thead>
  <tbody>${data.map((it, i) => `
  <tr>
  <td style="color:var(--text-muted)">${i + 1}</td>
  <td>${it.cover_image ? `<img src="${escapeIssueHtml(it.cover_image)}?t=${it.id}" alt="" onerror="this.outerHTML='<span style=\\'font-size:11px;color:var(--danger)\\'>нет</span>'" style="width:36px;height:48px;object-fit:cover;border-radius:4px;border:1px solid var(--border)">` : '<span style="font-size:11px;color:var(--danger)">нет</span>'}</td>
  <td style="font-size:13px;font-weight:600">${escapeIssueHtml(it.title)}</td>
  <td style="font-size:11px;color:var(--text-muted);max-width:140px;word-break:break-word">${it.archive_folder ? escapeIssueHtml(it.archive_folder) : '—'}</td>
+ <td style="font-size:12px;text-align:center">${(it.submission_count || 0) > 0 ? `<span style="color:var(--danger);font-weight:600">${it.submission_count}</span>` : '0'}</td>
  <td style="font-size:12px">${it.issued_at? escapeIssueHtml(it.issued_at): '—'}</td>
  <td>${it.accepting_submissions? '<span class="status-badge status-approved">Открыт</span>': '<span class="status-badge status-pending">Закрыт</span>'}</td>
  <td style="text-align:center">${it.sort_order}</td>
  <td>
  <button type="button" class="btn btn-secondary btn-sm" onclick="editIssueRow(${it.id})">Изменить</button>
- <button type="button" class="btn btn-secondary btn-sm" onclick="deleteIssueRow(${it.id})">Удалить</button>
+ <button type="button" class="btn btn-danger btn-sm" onclick="deleteIssueRow(${it.id})">Удалить</button>
  </td>
  </tr>`).join('')}
  </tbody>
@@ -1954,18 +1973,86 @@
  }
 
  async function deleteIssueRow(id) {
- if (!confirm('Удалить выпуск №' + id + '? Если к нему привязаны статьи, удаление будет отклонено.')) return;
+ let it;
  try {
- await API.delete('/admin/issues/' + id);
- showToast('Выпуск удалён', 'success');
- loadIssuesTab();
+  const issues = await API.get('/admin/issues');
+  it = issues.find((x) => Number(x.id) === Number(id));
  } catch (e) {
- showToast(e.message || 'Ошибка', 'error');
+  showToast(e.message || 'Ошибка', 'error');
+  return;
+ }
+ if (!it) {
+  showToast('Выпуск не найден — обновляю список', 'info');
+  loadIssuesTab();
+  return;
+ }
+
+ const issueTitle = it.title || ('№' + id);
+ const count = Number(it.submission_count) || 0;
+
+ async function doDelete(force) {
+  const token = Auth.getToken();
+  const headers = {};
+  if (token) headers.Authorization = 'Bearer ' + token;
+  const url = '/api/admin/issues/' + id + (force ? '?force=1' : '');
+  const res = await fetch(url, { method: 'DELETE', headers, credentials: 'same-origin' });
+  let data = {};
+  try { data = await res.json(); } catch { data = {}; }
+  if (!res.ok) {
+   const err = new Error(data.error || ('Ошибка ' + res.status));
+   err.canForceDelete = !!data.canForceDelete;
+   err.articleCount = data.articleCount;
+   throw err;
+  }
+  return data;
+ }
+
+ if (count > 0) {
+  const msg =
+   'Выпуск «' + issueTitle + '» содержит ' + count + ' статей.\n\n' +
+   'Удалить выпуск принудительно?\n' +
+   '• Статьи останутся в «Все статьи», но без привязки к выпуску\n' +
+   '• Запись сохранится в «Мониторинг → Журнал действий администратора»';
+  if (!confirm(msg)) return;
+  if (!confirm('Последнее подтверждение: удалить выпуск «' + issueTitle + '»?')) return;
+  try {
+   const r = await doDelete(true);
+   showToast('Выпуск удалён' + (r.unlinkedArticles ? ' (отвязано статей: ' + r.unlinkedArticles + ')' : ''), 'success');
+   if (String(document.getElementById('issue-edit-id').value) === String(id)) resetIssueForm();
+   loadIssuesTab();
+  } catch (e) {
+   showToast(e.message || 'Ошибка', 'error');
+  }
+  return;
+ }
+
+ if (!confirm('Удалить выпуск «' + issueTitle + '»?')) return;
+ try {
+  await doDelete(false);
+  showToast('Выпуск удалён', 'success');
+  if (String(document.getElementById('issue-edit-id').value) === String(id)) resetIssueForm();
+  loadIssuesTab();
+ } catch (e) {
+  if (e.canForceDelete) {
+   const n = e.articleCount || count || '?';
+   if (!confirm('К выпуску привязаны статьи (' + n + '). Удалить принудительно?')) return;
+   if (!confirm('Подтвердите удаление выпуска «' + issueTitle + '»')) return;
+   try {
+    const r = await doDelete(true);
+    showToast('Выпуск удалён (отвязано статей: ' + (r.unlinkedArticles || n) + ')', 'success');
+    if (String(document.getElementById('issue-edit-id').value) === String(id)) resetIssueForm();
+    loadIssuesTab();
+   } catch (e2) {
+    showToast(e2.message || 'Ошибка', 'error');
+   }
+   return;
+  }
+  showToast(e.message || 'Ошибка', 'error');
  }
  }
 
  async function deleteAllUnusedIssues() {
- if (!confirm('Удалить ВСЕ выпуски, к которым не привязаны статьи? Это действие нельзя отменить.')) return;
+ if (!confirm('Удалить ВСЕ выпуски без статей? Запись сохранится в журнале действий администратора.')) return;
  try {
  const r = await API.delete('/admin/issues/bulk-unused');
  showToast(`Удалено выпусков: ${r.deleted || 0}`, 'success');
@@ -2068,26 +2155,53 @@
  test_email: ' Тест email',
  download_backup: ' Скачал backup',
  change_password: ' Смена пароля',
+ delete_issue: ' Удалён выпуск',
+ delete_issue_force: ' Принудительно удалён выпуск',
+ delete_issues_bulk_unused: ' Массовое удаление выпусков без статей',
+ quick_publish: ' Быстрая публикация PDF',
+ change_role: ' Смена роли',
+ create_user: ' Создан пользователь',
  };
+
+ function formatAuditDetails(action, details) {
+  if (!details) return '—';
+  try {
+   const d = JSON.parse(details);
+   if (action === 'delete_issue' || action === 'delete_issue_force') {
+    const lines = [
+     '«' + (d.issueTitle || '—') + '»',
+     'статей: ' + (d.articleCount ?? 0),
+    ];
+    if (d.archive_folder) lines.push('архив: ' + d.archive_folder);
+    if (d.articles && d.articles.length) {
+     lines.push('статьи: ' + d.articles.slice(0, 5).map((a) => a.title).join('; ') + (d.articles.length > 5 ? '…' : ''));
+    }
+    return lines.join(' · ');
+   }
+   if (action === 'delete_issues_bulk_unused' && d.issues) {
+    return 'удалено: ' + d.deleted + ' · ' + d.issues.map((i) => i.title).slice(0, 4).join('; ') + (d.issues.length > 4 ? '…' : '');
+   }
+  } catch { /* plain text */ }
+  return details;
+ }
 
  async function loadAuditLog() {
  const tbody = document.getElementById('audit-log-body');
  try {
  const rows = await API.get('/admin/audit-log');
  if (!rows.length) {
- tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--text-muted);padding:20px">Записей нет</td></tr>';
+ tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--text-muted);padding:20px">Записей нет</td></tr>';
  return;
  }
  tbody.innerHTML = rows.map(r => `
  <tr>
  <td style="font-size:12px;white-space:nowrap">${new Date(r.created_at).toLocaleString('ru-RU')}</td>
+ <td style="font-size:12px">${escHtml(r.admin_name || r.admin_email || '—')}</td>
  <td style="font-size:13px">${auditActionLabels[r.action] || escHtml(r.action)}</td>
- <td style="font-size:12px;color:var(--text-muted)">${r.target_type? escHtml(r.target_type): '—'}</td>
- <td style="font-size:12px;text-align:center">${r.target_id?? '—'}</td>
- <td style="font-size:12px;color:var(--text-muted)">${r.details? escHtml(r.details): '—'}</td>
+ <td style="font-size:12px;color:var(--text-muted);max-width:420px;word-break:break-word">${escHtml(formatAuditDetails(r.action, r.details))}</td>
  </tr>`).join('');
  } catch(e) {
- tbody.innerHTML = `<tr><td colspan="5" class="alert alert-danger">${e.message}</td></tr>`;
+ tbody.innerHTML = `<tr><td colspan="4" class="alert alert-danger">${e.message}</td></tr>`;
  }
  }
 

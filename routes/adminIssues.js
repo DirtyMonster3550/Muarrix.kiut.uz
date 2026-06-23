@@ -9,6 +9,7 @@ const path = require('path');
 const multer = require('multer');
 const { db } = require('../db/database');
 const { requireAdmin } = require('./adminAuth');
+const { auditLog } = require('../middleware/security');
 const {
   normalizeArchiveFolder,
   ensureCoversDir,
@@ -51,7 +52,12 @@ const coverUpload = multer({
 
 router.get('/', requireAdmin, (req, res) => {
   try {
-    const rows = db.prepare('SELECT * FROM issues ORDER BY sort_order DESC, id DESC').all();
+    const rows = db.prepare(`
+      SELECT i.*,
+        (SELECT COUNT(*) FROM submissions s WHERE s.issue_id = i.id) AS submission_count
+      FROM issues i
+      ORDER BY i.sort_order DESC, i.id DESC
+    `).all();
     res.json(rows);
   } catch (e) {
     console.error(e);
@@ -173,15 +179,31 @@ router.post('/:id/cover', requireAdmin, (req, res, next) => {
   res.json({ success: true, cover_image: coverPath });
 });
 
-router.delete('/bulk-unused', requireAdmin, async (_req, res) => {
+router.delete('/bulk-unused', requireAdmin, async (req, res) => {
   try {
     const rows = db.prepare(`
-      SELECT i.id, i.cover_image FROM issues i
+      SELECT i.id, i.title, i.cover_image, i.archive_folder FROM issues i
       WHERE NOT EXISTS (SELECT 1 FROM submissions s WHERE s.issue_id = i.id)
     `).all();
     for (const row of rows) {
       if (row.cover_image) await deleteCoverFileIfLocal(row.cover_image);
       db.prepare('DELETE FROM issues WHERE id = ?').run(row.id);
+    }
+    if (rows.length) {
+      auditLog(
+        req.user.id,
+        'delete_issues_bulk_unused',
+        'issue',
+        null,
+        JSON.stringify({
+          deleted: rows.length,
+          issues: rows.map((r) => ({
+            id: r.id,
+            title: r.title,
+            archive_folder: r.archive_folder || null,
+          })),
+        })
+      );
     }
     res.json({ success: true, deleted: rows.length });
   } catch (e) {
@@ -193,15 +215,40 @@ router.delete('/bulk-unused', requireAdmin, async (_req, res) => {
 router.delete('/:id', requireAdmin, async (req, res) => {
   const id = parseInt(req.params.id, 10);
   if (Number.isNaN(id)) return res.status(400).json({ error: 'Некорректный id' });
-  const inUse = db.prepare('SELECT COUNT(*) AS c FROM submissions WHERE issue_id = ?').get(id).c;
-  if (inUse > 0) {
-    return res.status(400).json({ error: 'К выпуску привязаны статьи — удаление невозможно' });
+
+  const force = req.query.force === '1' || req.query.force === 'true';
+  const row = db.prepare('SELECT id, title, cover_image, archive_folder FROM issues WHERE id = ?').get(id);
+  if (!row) return res.status(404).json({ error: 'Не найдено' });
+
+  const articleRows = db.prepare('SELECT id, title FROM submissions WHERE issue_id = ?').all(id);
+  const articleCount = articleRows.length;
+
+  if (articleCount > 0 && !force) {
+    return res.status(400).json({
+      error: 'К выпуску привязаны статьи — удаление невозможно',
+      articleCount,
+      canForceDelete: true,
+    });
   }
-  const row = db.prepare('SELECT cover_image FROM issues WHERE id = ?').get(id);
-  const r = db.prepare('DELETE FROM issues WHERE id = ?').run(id);
-  if (!r.changes) return res.status(404).json({ error: 'Не найдено' });
-  if (row?.cover_image) await deleteCoverFileIfLocal(row.cover_image);
-  res.json({ success: true });
+
+  const auditPayload = {
+    issueTitle: row.title,
+    archive_folder: row.archive_folder || null,
+    articleCount,
+    articles: articleRows.map((a) => ({ id: a.id, title: a.title })),
+  };
+
+  if (articleCount > 0) {
+    db.prepare('UPDATE submissions SET issue_id = NULL WHERE issue_id = ?').run(id);
+    auditLog(req.user.id, 'delete_issue_force', 'issue', id, JSON.stringify(auditPayload));
+  } else {
+    auditLog(req.user.id, 'delete_issue', 'issue', id, JSON.stringify(auditPayload));
+  }
+
+  if (row.cover_image) await deleteCoverFileIfLocal(row.cover_image);
+  db.prepare('DELETE FROM issues WHERE id = ?').run(id);
+
+  res.json({ success: true, unlinkedArticles: articleCount });
 });
 
 module.exports = router;

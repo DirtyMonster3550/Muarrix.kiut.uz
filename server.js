@@ -99,6 +99,12 @@ app.use(protectHtmlPages);
 app.use('/archives', express.static(archivesDirectory()));
 
 // ── Static files (public only — NO /uploads here) ────────────────────────────
+app.use((req, res, next) => {
+  if (/admin\.html$|expert\.html$|dashboard\.html$/.test(req.path)) {
+    res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate');
+  }
+  next();
+});
 app.use('/covers/issues', express.static(path.join(__dirname, 'uploads', 'issue-covers')));
 app.use('/covers/issues', express.static(path.join(__dirname, 'public', 'covers', 'issues')));
 app.use(express.static(path.join(__dirname, 'public')));
