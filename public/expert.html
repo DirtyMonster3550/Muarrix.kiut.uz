@@ -201,6 +201,25 @@
    .expert-main { margin-left: 0; padding: 24px 18px; }
    .expert-layout { flex-direction: column; }
  }
+ .profile-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+ .profile-card {
+   background: #fff; border: 1px solid var(--border); border-radius: 14px; padding: 28px;
+ }
+ .profile-card h3 { font-size: 20px; font-weight: 700; color: var(--primary); margin-bottom: 8px; }
+ .profile-card .sub { font-size: 15px; color: var(--text-muted); margin-bottom: 20px; line-height: 1.5; }
+ .profile-card label { display: block; font-size: 15px; font-weight: 700; margin-bottom: 8px; }
+ .profile-card input {
+   width: 100%; padding: 14px 16px; border: 2px solid var(--border); border-radius: 10px;
+   font-size: 16px; font-family: inherit; min-height: 52px; margin-bottom: 16px;
+ }
+ .profile-card input:disabled { background: #f1f5f9; color: var(--text-muted); }
+ .profile-card .hint { font-size: 14px; color: var(--text-muted); margin: -8px 0 16px; line-height: 1.45; }
+ .profile-alert { margin-bottom: 16px; font-size: 15px; padding: 12px 14px; border-radius: 10px; }
+ .profile-alert.ok { background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; }
+ .profile-alert.err { background: #fef2f2; color: #b91c1c; border: 1px solid #fecaca; }
+ .btn-recall { background: #d97706; color: #fff; }
+ .btn-recall:hover { background: #b45309; }
+ @media (max-width: 900px) { .profile-grid { grid-template-columns: 1fr; } }
  </style>
 </head>
 <body data-i18n-doc="expert">
@@ -231,9 +250,16 @@
  <span data-i18n="expert_my_queue">Моя очередь</span>
  <span class="sidebar-badge" id="queue-badge" style="display:none">0</span>
  </a></li>
+ <li id="nav-sent-wrap" style="display:none"><a href="javascript:void(0)" data-tab="sent" onclick="return switchTab('sent',this)">
+ <span data-i18n="expert_sent_tab">Отправлено на ред. эксперт</span>
+ <span class="sidebar-badge" id="sent-badge" style="display:none">0</span>
+ </a></li>
  <li><a href="javascript:void(0)" data-tab="notifications" onclick="return switchTab('notifications',this)">
  <span data-i18n="dash_notifications">Уведомления</span>
  <span class="sidebar-badge" id="notif-badge" style="display:none">0</span>
+ </a></li>
+ <li><a href="javascript:void(0)" data-tab="profile" onclick="return switchTab('profile',this)">
+ <span data-i18n="expert_profile">Мой профиль</span>
  </a></li>
  </ul>
  <div class="sidebar-footer">
@@ -265,11 +291,59 @@
  </div>
  </div>
 
+ <!-- Sent to editorial tab (tech expert only) -->
+ <div id="tab-sent" class="tab-content">
+ <div class="page-header">
+ <div>
+ <h2 data-i18n="expert_sent_title">Передано на редакционную проверку</h2>
+ <p class="page-sub" data-i18n="expert_sent_sub">Статьи, которые вы одобрили и назначили редакционному эксперту. Пока ред. эксперт не принял решение, вы можете вернуть статью на техническую проверку.</p>
+ </div>
+ <button class="btn btn-file" onclick="loadSentToEditorial()" data-i18n="expert_refresh">↻ Обновить</button>
+ </div>
+ <div id="sent-body">
+ <div class="empty-box"><div class="icon">⏳</div><p data-i18n="expert_loading">Загрузка…</p></div>
+ </div>
+ </div>
+
  <!-- Notifications tab -->
  <div id="tab-notifications" class="tab-content">
  <div class="page-header"><h2 data-i18n="dash_notifications">Уведомления</h2></div>
  <div id="notif-body">
  <div class="empty-box"><div class="icon">⏳</div><p data-i18n="expert_loading">Загрузка…</p></div>
+ </div>
+ </div>
+
+ <!-- Profile tab -->
+ <div id="tab-profile" class="tab-content">
+ <div class="page-header">
+ <div>
+ <h2 data-i18n="expert_profile">Мой профиль</h2>
+ <p class="page-sub" data-i18n="expert_profile_sub">Измените отображаемое имя и пароль для входа.</p>
+ </div>
+ </div>
+ <div class="profile-grid">
+ <div class="profile-card">
+ <h3 data-i18n="expert_profile_name">Отображаемое имя</h3>
+ <p class="sub" data-i18n="expert_profile_name_hint">Так вас видят авторы и администратор в системе.</p>
+ <div id="profile-name-alert"></div>
+ <label for="profile-full-name" data-i18n="expert_profile_name">Отображаемое имя</label>
+ <input type="text" id="profile-full-name" autocomplete="name" maxlength="200">
+ <label for="profile-email" data-i18n="expert_profile_email">Email (нельзя изменить)</label>
+ <input type="email" id="profile-email" disabled>
+ <button type="button" class="btn btn-file" onclick="saveProfileName()" data-i18n="expert_profile_save">Сохранить имя</button>
+ </div>
+ <div class="profile-card">
+ <h3 data-i18n="expert_profile_pwd_title">Изменить пароль</h3>
+ <div id="profile-pwd-alert"></div>
+ <label for="profile-cur-pwd" data-i18n="expert_profile_pwd_current">Текущий пароль</label>
+ <input type="password" id="profile-cur-pwd" autocomplete="current-password">
+ <label for="profile-new-pwd" data-i18n="expert_profile_pwd_new">Новый пароль</label>
+ <input type="password" id="profile-new-pwd" autocomplete="new-password" data-i18n-placeholder="auth_new_password_ph">
+ <div class="hint" data-i18n="auth_new_password_hint">Не менее 8 символов, буквы и цифры</div>
+ <label for="profile-new-pwd2" data-i18n="expert_profile_pwd_new2">Повторите новый пароль</label>
+ <input type="password" id="profile-new-pwd2" autocomplete="new-password">
+ <button type="button" class="btn btn-file" onclick="changeProfilePassword()" data-i18n="expert_profile_pwd_save">Изменить пароль</button>
+ </div>
  </div>
  </div>
 
@@ -321,11 +395,15 @@
  document.getElementById('sb-email').textContent = me.email;
  applyExpertRoleLabels();
  if (me.role === 'tech_expert') {
- try { editorialExperts = await API.get('/review/editorial-experts'); } catch { editorialExperts = []; }
+  document.getElementById('nav-sent-wrap').style.display = '';
+  try { editorialExperts = await API.get('/review/editorial-experts'); } catch { editorialExperts = []; }
+ } else {
+  document.getElementById('nav-sent-wrap').style.display = 'none';
  }
  loadStats();
  loadQueue();
  loadNotifications();
+ if (me.role === 'tech_expert') loadSentToEditorial();
  } catch { location.href = '/login.html'; }
  }
 
@@ -336,7 +414,59 @@
  document.getElementById('tab-' + name).classList.add('active');
  if (el) el.classList.add('active');
  if (name === 'notifications') loadNotifications();
+ if (name === 'profile') loadProfileTab();
+ if (name === 'sent') loadSentToEditorial();
  return false;
+ }
+
+ function loadProfileTab() {
+ if (!currentUser) return;
+ document.getElementById('profile-full-name').value = currentUser.full_name || '';
+ document.getElementById('profile-email').value = currentUser.email || '';
+ document.getElementById('profile-name-alert').innerHTML = '';
+ document.getElementById('profile-pwd-alert').innerHTML = '';
+ }
+
+ async function saveProfileName() {
+ const alertBox = document.getElementById('profile-name-alert');
+ const full_name = document.getElementById('profile-full-name')?.value?.trim() || '';
+ alertBox.innerHTML = '';
+ if (full_name.length < 2) {
+  alertBox.innerHTML = `<div class="profile-alert err">${escHtml(i18t('expert_profile_name'))}</div>`;
+  return;
+ }
+ try {
+  const data = await API.put('/auth/profile', { full_name });
+  currentUser = data.user;
+  Auth.setSession(Auth.getToken(), data.user);
+  document.getElementById('sb-name').textContent = data.user.full_name;
+  alertBox.innerHTML = `<div class="profile-alert ok">${escHtml(i18t('expert_profile_saved'))}</div>`;
+  showToast(i18t('expert_profile_saved'), 'success');
+ } catch (e) {
+  alertBox.innerHTML = `<div class="profile-alert err">${escHtml(e.message)}</div>`;
+ }
+ }
+
+ async function changeProfilePassword() {
+ const alertBox = document.getElementById('profile-pwd-alert');
+ const current_password = document.getElementById('profile-cur-pwd')?.value || '';
+ const new_password = document.getElementById('profile-new-pwd')?.value || '';
+ const new_password2 = document.getElementById('profile-new-pwd2')?.value || '';
+ alertBox.innerHTML = '';
+ if (new_password !== new_password2) {
+  alertBox.innerHTML = `<div class="profile-alert err">${escHtml(i18t('expert_profile_pwd_mismatch'))}</div>`;
+  return;
+ }
+ try {
+  await API.put('/auth/change-password', { current_password, new_password });
+  document.getElementById('profile-cur-pwd').value = '';
+  document.getElementById('profile-new-pwd').value = '';
+  document.getElementById('profile-new-pwd2').value = '';
+  alertBox.innerHTML = `<div class="profile-alert ok">${escHtml(i18t('expert_profile_pwd_ok'))}</div>`;
+  showToast(i18t('expert_profile_pwd_ok'), 'success');
+ } catch (e) {
+  alertBox.innerHTML = `<div class="profile-alert err">${escHtml(e.message)}</div>`;
+ }
  }
 
  // logout() — from app.js
@@ -352,7 +482,86 @@
  const qb = document.getElementById('queue-badge');
  if (d.inQueue > 0) { qb.textContent = d.inQueue; qb.style.display = ''; }
  else qb.style.display = 'none';
+ const sb = document.getElementById('sent-badge');
+ if (sb && d.sentToEditorial > 0) { sb.textContent = d.sentToEditorial; sb.style.display = ''; }
+ else if (sb) sb.style.display = 'none';
  } catch {}
+ }
+
+ // ── Sent to editorial (tech expert) ───────────────────────────────────────
+ async function loadSentToEditorial() {
+ if (currentUser?.role !== 'tech_expert') return;
+ const body = document.getElementById('sent-body');
+ if (!body) return;
+ body.innerHTML = '<div class="empty-box"><div class="icon">⏳</div><p>' + i18t('expert_loading') + '</p></div>';
+ try {
+  const items = await API.get('/review/sent-to-editorial');
+  const sb = document.getElementById('sent-badge');
+  if (sb) {
+   if (items.length) { sb.textContent = items.length; sb.style.display = ''; }
+   else sb.style.display = 'none';
+  }
+  if (!items.length) {
+   body.innerHTML = '<div class="empty-box"><div class="icon"></div><h3>' + i18t('expert_sent_empty_title') + '</h3><p>' + i18t('expert_sent_empty_p') + '</p></div>';
+   return;
+  }
+  body.innerHTML = items.map((a) => sentArticleCard(a)).join('');
+  document.querySelectorAll('[data-i18n-placeholder-id="expert_recall_ph"]').forEach((el) => {
+   el.placeholder = i18t('expert_recall_ph');
+  });
+ } catch (e) {
+  body.innerHTML = `<div class="empty-box"><div class="icon"></div><p>${escHtml(e.message)}</p></div>`;
+ }
+ }
+
+ function sentArticleCard(a) {
+  const fileBtn = a.file_path
+   ? `<a class="btn btn-file btn-sm" href="/uploads/${escHtml(a.file_path)}?token=${Auth.getToken()}" target="_blank" download>${i18t('expert_download')} (Word)</a>`
+   : `<span class="ac-no-file">${i18t('expert_no_file')}</span>`;
+  const journalLabel = typeof journalName === 'function' ? journalName(a.journal) : a.journal;
+  const sentWhen = a.reviewed_at || a.submitted_at;
+  return `
+ <div class="article-card" id="sent-card-${a.id}">
+ <div class="ac-title">${escHtml(a.title)} ${typeof statusBadge === 'function' ? statusBadge(a.status) : ''}</div>
+ <div class="ac-meta">
+  <span>${escHtml(a.full_name)}</span>
+  <span>${escHtml(a.email)}</span>
+  <span>${escHtml(journalLabel)}</span>
+  ${a.issue_title ? `<span>${escHtml(a.issue_title)}</span>` : ''}
+  ${a.assigned_editorial_name ? `<span>${i18t('expert_assigned_to')}: ${escHtml(a.assigned_editorial_name)}</span>` : ''}
+  <span>${i18t('expert_sent_at')}: ${formatDate(sentWhen)}</span>
+ </div>
+ <div class="ac-authors"><strong>${i18t('expert_authors_label')}</strong> ${escHtml(a.authors)}</div>
+ <div class="ac-actions">
+  ${fileBtn}
+  <textarea id="recall-note-${a.id}" data-i18n-placeholder-id="expert_recall_ph" placeholder="${escHtml(i18t('expert_recall_ph'))}"></textarea>
+  <div class="ac-btns">
+   <button type="button" class="btn btn-recall" onclick="recallTech(${a.id})">${i18t('expert_recall_btn')}</button>
+  </div>
+ </div>
+ </div>`;
+ }
+
+ async function recallTech(id) {
+  if (!confirm(i18t('expert_recall_confirm'))) return;
+  const reason = document.getElementById('recall-note-' + id)?.value?.trim() || '';
+  try {
+   await API.post(`/review/submissions/${id}/recall-tech`, { reason });
+   showToast(i18t('expert_recall_ok'), 'success');
+   document.getElementById('sent-card-' + id)?.remove();
+   loadStats();
+   loadQueue();
+   const body = document.getElementById('sent-body');
+   if (body && !body.querySelector('.article-card')) {
+    body.innerHTML = '<div class="empty-box"><div class="icon"></div><h3>' + i18t('expert_sent_empty_title') + '</h3><p>' + i18t('expert_sent_empty_p') + '</p></div>';
+   }
+   const sb = document.getElementById('sent-badge');
+   const remaining = document.querySelectorAll('#sent-body .article-card').length;
+   if (sb) {
+    if (remaining > 0) { sb.textContent = remaining; sb.style.display = ''; }
+    else sb.style.display = 'none';
+   }
+  } catch (e) { showToast(e.message, 'error'); }
  }
 
  // ── Queue ─────────────────────────────────────────────────────────────────
@@ -465,6 +674,7 @@
  showToast(i18t('expert_approve_ok'), 'success');
  document.getElementById('card-' + id)?.remove();
  loadStats();
+ if (currentUser?.role === 'tech_expert') loadSentToEditorial();
  } catch(e) { showToast(e.message, 'error'); }
  }
 
@@ -515,6 +725,8 @@
  const tab = active?.getAttribute('data-tab') || 'queue';
  if (tab === 'queue') loadQueue();
  if (tab === 'notifications') loadNotifications();
+ if (tab === 'sent') loadSentToEditorial();
+ if (tab === 'profile') loadProfileTab();
  });
 
  init();

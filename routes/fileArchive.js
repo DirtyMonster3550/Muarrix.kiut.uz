@@ -10,6 +10,7 @@ const {
   groupIssuesByYearTom,
 } = require('../lib/archiveStructure');
 const { getArticleMetadata, loadFolderArticleIndex } = require('../lib/articleMetadata');
+const { isFullIssueFileName, resolveFullIssueByFolder } = require('../lib/fullIssuePdf');
 const { buildArchiveIndex } = require('../lib/archiveSearch');
 const { smartSearch, findSimilarArticles } = require('../lib/archiveSmartSearch');
 const { buildDbCoverMap, resolveCoverUrl } = require('../lib/issueCovers');
@@ -19,7 +20,8 @@ const { db } = require('../db/database');
 
 const ARCHIVES_ROOT = archivesDirectory();
 
-async function listFilesInFolder(folderRel) {
+async function listFilesInFolder(folderRel, options = {}) {
+  const configuredFullIssue = options.fullIssueFile || null;
   const resolved = resolveArchivePath(ARCHIVES_ROOT, folderRel);
   if (!resolved) return null;
   let st;
@@ -35,7 +37,8 @@ async function listFilesInFolder(folderRel) {
   const files = dirents
     .filter((f) => f.isFile() && !f.name.startsWith('.'))
     .filter((f) => ALLOWED_EXT.has(path.extname(f.name).toLowerCase()))
-    .filter((f) => !f.name.toLowerCase().endsWith('.json'));
+    .filter((f) => !f.name.toLowerCase().endsWith('.json'))
+    .filter((f) => !isFullIssueFileName(f.name, configuredFullIssue));
 
   const enriched = await Promise.all(
     files.map(async (f) => {
@@ -169,14 +172,17 @@ router.get('/issue', async (req, res) => {
     return res.status(400).json({ error: 'Укажите параметр folder' });
   }
   try {
-    let files = await listFilesInFolder(folder);
+    const normalized = folder.replace(/\\/g, '/').replace(/^\/+|\/+$/g, '');
+    const issueRow = db.prepare(`
+      SELECT id, archive_folder, full_issue_file
+      FROM issues
+      WHERE REPLACE(TRIM(archive_folder), '\\', '/') = ?
+      LIMIT 1
+    `).get(normalized);
+
+    const fullIssueFile = issueRow?.full_issue_file || null;
+    let files = await listFilesInFolder(folder, { fullIssueFile });
     if (files === null) {
-      const normalized = folder.replace(/\\/g, '/').replace(/^\/+|\/+$/g, '');
-      const issueRow = db.prepare(`
-        SELECT id FROM issues
-        WHERE REPLACE(TRIM(archive_folder), '\\', '/') = ?
-        LIMIT 1
-      `).get(normalized);
       if (!issueRow) {
         return res.status(404).json({ error: 'Выпуск не найден' });
       }
@@ -184,7 +190,8 @@ router.get('/issue', async (req, res) => {
     }
     const dbCoverByFolder = buildDbCoverMap(db);
     const coverUrl = await resolveCoverUrl({ folder, archiveRoot: ARCHIVES_ROOT, dbCoverByFolder });
-    res.json({ folder, files, coverUrl });
+    const fullIssue = await resolveFullIssueByFolder(db, folder, ARCHIVES_ROOT);
+    res.json({ folder, files, coverUrl, fullIssue });
   } catch (e) {
     console.error('[file-archive]', e);
     res.status(500).json({ error: 'Ошибка чтения выпуска' });

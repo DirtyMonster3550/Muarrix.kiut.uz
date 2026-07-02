@@ -327,6 +327,9 @@
  <a href="javascript:void(0)" data-tab="quick-publish" onclick="return switchTab('quick-publish',this)">
  Быстрая публикация
  </a>
+ <a href="javascript:void(0)" data-tab="archive-manage" onclick="return switchTab('archive-manage',this)">
+ Архив выпуска
+ </a>
  <a href="javascript:void(0)" data-tab="users" onclick="return switchTab('users',this)">
  Пользователи
  </a>
@@ -520,9 +523,70 @@
  </div>
  </div>
 
+ <!-- ===== ARCHIVE MANAGE TAB ===== -->
+ <div id="tab-archive-manage" class="tab-content" style="display:none">
+ <div class="page-header" style="margin-bottom:20px">
+ <h2 style="font-size:20px;font-weight:700">Архив выпуска</h2>
+ <p style="font-size:13px;color:var(--text-muted);margin-top:4px">Удаление уже опубликованных PDF из публичного архива. Файл и запись в articles.json будут удалены с сайта.</p>
+ </div>
+ <div class="settings-section" style="margin-bottom:20px">
+ <div class="settings-section-body">
+ <div id="archive-manage-alert"></div>
+ <div class="form-group">
+ <label class="form-label">Выпуск журнала</label>
+ <select id="archive-manage-issue" class="form-control"></select>
+ <p style="font-size:12px;color:var(--text-muted);margin:6px 0 0" id="archive-manage-issue-hint"></p>
+ </div>
+ <div style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:16px">
+ <button type="button" class="btn btn-secondary btn-sm" onclick="loadArchiveManageArticles()">Обновить список</button>
+ <a href="/archives.html" class="btn btn-secondary btn-sm" target="_blank" rel="noopener">Открыть архив</a>
+ </div>
+ <div id="archive-manage-list"><div class="empty-state" style="padding:28px"><p>Выберите выпуск и нажмите «Обновить список»</p></div></div>
+ </div>
+ </div>
+ </div>
+
  <!-- ===== USERS TAB ===== -->
  <div id="tab-users" class="tab-content" style="display:none">
+ <div class="settings-section" style="margin-bottom:24px">
+ <div class="settings-section-header">
+ <span style="font-size:20px">+</span>
+ <div>
+ <h3>Добавить пользователя</h3>
+ <p style="font-size:12px;color:var(--text-muted);margin-top:2px">Создайте аккаунт и сразу назначьте роль. Роль администратора через эту форму назначить нельзя.</p>
+ </div>
+ </div>
+ <div class="settings-section-body">
+ <div id="create-user-alert"></div>
+ <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+ <div class="form-group" style="margin:0">
+ <label class="form-label">ФИО <span style="color:var(--danger)">*</span></label>
+ <input type="text" id="new-user-name" class="form-control" placeholder="Иванов Иван Иванович">
+ </div>
+ <div class="form-group" style="margin:0">
+ <label class="form-label">Email <span style="color:var(--danger)">*</span></label>
+ <input type="email" id="new-user-email" class="form-control" placeholder="user@example.com" autocomplete="off">
+ </div>
+ </div>
+ <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px">
+ <div class="form-group" style="margin:0">
+ <label class="form-label">Пароль <span style="color:var(--danger)">*</span></label>
+ <input type="password" id="new-user-password" class="form-control" placeholder="Минимум 8 символов, буквы и цифры" autocomplete="new-password">
+ </div>
+ <div class="form-group" style="margin:0">
+ <label class="form-label">Роль <span style="color:var(--danger)">*</span></label>
+ <select id="new-user-role" class="form-control">
+ <option value="author"> Автор</option>
+ <option value="tech_expert"> Техн. эксперт</option>
+ <option value="editorial_expert"> Ред. эксперт</option>
+ </select>
+ </div>
+ </div>
+ <button type="button" class="btn btn-primary" style="margin-top:16px" onclick="createUser()"> Создать пользователя</button>
+ </div>
+ </div>
  <div class="table-container">
+ <div class="table-header"><h3>Все пользователи</h3></div>
  <div id="users-body"><div class="empty-state"><div class="loader loader-dark"></div></div></div>
  </div>
  </div>
@@ -562,6 +626,22 @@
  <input type="text" id="issue-archive-folder" class="form-control" list="issue-archive-folder-list" placeholder="Например: 2025/Том 5 № 1 (2025)">
  <datalist id="issue-archive-folder-list"></datalist>
  <p style="font-size:12px;color:var(--text-muted);margin:6px 0 0">Куда на сервере складываются PDF этого выпуска. Без этой папки публикация на вкладке «К публикации» не сработает.</p>
+ </div>
+ <div class="form-group">
+ <label class="form-label">Полный сборник выпуска (PDF)</label>
+ <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;align-items:end">
+ <div>
+ <label class="form-label" style="font-size:12px;font-weight:600;color:var(--text-muted)">Имя файла в архиве</label>
+ <input type="text" id="issue-full-issue-file" class="form-control" placeholder="сборник.pdf">
+ </div>
+ <div>
+ <label class="form-label" style="font-size:12px;font-weight:600;color:var(--text-muted)">PDF-файл</label>
+ <input type="file" id="issue-full-issue-pdf" class="form-control" accept=".pdf,application/pdf">
+ </div>
+ </div>
+ <p style="font-size:12px;color:var(--text-muted);margin:8px 0 0">Загрузка <strong>через сайт</strong> (до 50 МБ). Сохраните выпуск с папкой архива, выберите PDF и нажмите «Сохранить выпуск» или «Загрузить сборник». На проде nginx должен разрешать тело запроса ≥ 50 МБ (<code>client_max_body_size 50m;</code>).</p>
+ <div id="issue-full-issue-status" style="font-size:12px;margin-top:8px"></div>
+ <button type="button" class="btn btn-secondary btn-sm" style="margin-top:10px" onclick="uploadFullIssueOnly()">Загрузить сборник</button>
  </div>
  <div class="form-group">
  <label class="form-label">Обложка выпуска <span style="color:var(--danger)">*</span></label>
@@ -965,6 +1045,7 @@
  submissions: 'Управление статьями',
  publish: 'К публикации',
  'quick-publish': 'Быстрая публикация',
+ 'archive-manage': 'Архив выпуска',
  issues: 'Выпуски журналов',
  users: 'Пользователи',
  security: 'Мониторинг безопасности',
@@ -985,6 +1066,7 @@
  if (tab === 'submissions') loadSubmissions();
  if (tab === 'publish') loadPublishQueue();
  if (tab === 'quick-publish') loadQuickPublishTab();
+ if (tab === 'archive-manage') loadArchiveManageTab();
  if (tab === 'issues') loadIssuesTab();
  if (tab === 'users') loadUsers();
  if (tab === 'security') loadSecurity();
@@ -1401,6 +1483,143 @@
   }
  }
 
+ // ===== ARCHIVE MANAGE (delete published PDFs) =====
+ let archiveManageIssuesCache = [];
+ let archiveManageListBound = false;
+
+ function bindArchiveManageDelete() {
+  if (archiveManageListBound) return;
+  const list = document.getElementById('archive-manage-list');
+  if (!list) return;
+  list.addEventListener('click', (e) => {
+   const btn = e.target.closest('.archive-delete-btn');
+   if (!btn) return;
+   deleteArchiveArticle(
+    parseInt(btn.dataset.issueId, 10),
+    decodeURIComponent(btn.dataset.file || ''),
+    decodeURIComponent(btn.dataset.title || '')
+   );
+  });
+  archiveManageListBound = true;
+ }
+
+ async function loadArchiveManageTab() {
+  bindArchiveManageDelete();
+  const sel = document.getElementById('archive-manage-issue');
+  const list = document.getElementById('archive-manage-list');
+  const alertBox = document.getElementById('archive-manage-alert');
+  if (alertBox) alertBox.innerHTML = '';
+
+  try {
+   archiveManageIssuesCache = await API.get('/admin/issues');
+   if (!archiveManageIssuesCache.length) {
+    if (sel) sel.innerHTML = '';
+    if (list) list.innerHTML = '<div class="alert alert-warning">Сначала создайте выпуск в разделе «Выпуски журналов».</div>';
+    return;
+   }
+
+   const sorted = [...archiveManageIssuesCache].sort((a, b) => (b.sort_order || 0) - (a.sort_order || 0));
+   if (sel) {
+    const prev = sel.value;
+    sel.innerHTML = sorted.map((i) =>
+     `<option value="${i.id}">${escHtml(i.title)}${i.archive_folder ? '' : ' (нет папки архива)'}</option>`
+    ).join('');
+    const withFolder = sorted.find((i) => i.archive_folder);
+    sel.value = prev && sorted.some((i) => String(i.id) === prev) ? prev : (withFolder ? String(withFolder.id) : String(sorted[0].id));
+    sel.onchange = () => { updateArchiveManageIssueHint(); loadArchiveManageArticles(); };
+   }
+   updateArchiveManageIssueHint();
+   await loadArchiveManageArticles();
+  } catch (e) {
+   if (list) list.innerHTML = `<div class="alert alert-danger">${escHtml(e.message)}</div>`;
+  }
+ }
+
+ function updateArchiveManageIssueHint() {
+  const sel = document.getElementById('archive-manage-issue');
+  const hint = document.getElementById('archive-manage-issue-hint');
+  if (!sel || !hint) return;
+  const issue = archiveManageIssuesCache.find((i) => String(i.id) === sel.value);
+  if (!issue) {
+   hint.textContent = '';
+   return;
+  }
+  if (issue.archive_folder) {
+   const folderEnc = encodeURIComponent(issue.archive_folder);
+   hint.innerHTML = `Папка архива: <code>${escHtml(issue.archive_folder)}</code> · <a href="/archive-issue.html?folder=${folderEnc}" target="_blank" rel="noopener">Открыть выпуск на сайте</a>`;
+  } else {
+   hint.textContent = 'У этого выпуска не задана «Папка в архиве» — укажите в разделе «Выпуски журналов».';
+  }
+ }
+
+ async function loadArchiveManageArticles() {
+  const issueId = document.getElementById('archive-manage-issue')?.value;
+  const list = document.getElementById('archive-manage-list');
+  const alertBox = document.getElementById('archive-manage-alert');
+  if (!issueId || !list) return;
+  if (alertBox) alertBox.innerHTML = '';
+
+  list.innerHTML = '<div class="empty-state" style="padding:28px"><div class="loader loader-dark"></div></div>';
+
+  try {
+   const data = await API.get(`/admin/archive/issues/${issueId}/articles`);
+   if (!data.articles?.length) {
+    list.innerHTML = '<div class="empty-state" style="padding:28px"><p>В этом выпуске нет PDF в архиве</p></div>';
+    return;
+   }
+
+   list.innerHTML = `
+    <div class="table-container">
+     <table class="admin-table">
+      <thead>
+       <tr>
+        <th style="width:36px">#</th>
+        <th>Название</th>
+        <th>Авторы</th>
+        <th>PDF</th>
+        <th style="width:120px"></th>
+       </tr>
+      </thead>
+      <tbody>
+       ${data.articles.map((a, idx) => {
+        const authors = Array.isArray(a.authors) ? a.authors.join(', ') : (a.authors || '—');
+        const pdfUrl = `/archives/${data.folder.split('/').map(encodeURIComponent).join('/')}/${encodeURIComponent(a.file)}`;
+        return `<tr>
+         <td>${idx + 1}</td>
+         <td>
+          <div style="font-weight:600">${escHtml(a.title)}</div>
+          ${a.quickPublish ? '<span style="font-size:11px;color:var(--text-muted)">быстрая публикация</span>' : ''}
+          ${a.submissionId ? `<span style="font-size:11px;color:var(--text-muted)">подача #${a.submissionId}</span>` : ''}
+         </td>
+         <td style="font-size:13px;color:var(--text-muted)">${escHtml(authors || '—')}</td>
+         <td><a href="${pdfUrl}" target="_blank" rel="noopener">${escHtml(a.file)}</a></td>
+         <td>
+          <button type="button" class="btn btn-danger btn-sm archive-delete-btn" data-issue-id="${issueId}" data-file="${encodeURIComponent(a.file)}" data-title="${encodeURIComponent(a.title || a.file)}">Удалить</button>
+         </td>
+        </tr>`;
+       }).join('')}
+      </tbody>
+     </table>
+    </div>
+   `;
+  } catch (e) {
+   list.innerHTML = `<div class="alert alert-danger">${escHtml(e.message)}</div>`;
+  }
+ }
+
+ async function deleteArchiveArticle(issueId, fileName, title) {
+  const label = title || fileName;
+  if (!confirm(`Удалить из архива?\n\n${label}\n\nPDF исчезнет с сайта. Это действие нельзя отменить.`)) return;
+
+  try {
+   await API.delete(`/admin/archive/issues/${issueId}/articles/${encodeURIComponent(fileName)}`);
+   showToast('Статья удалена из архива', 'success');
+   await loadArchiveManageArticles();
+  } catch (e) {
+   showToast(e.message, 'error');
+  }
+ }
+
  async function syncPublishedArchive() {
  if (!confirm('Скопировать все ранее опубликованные статьи в публичный архив?')) return;
  try {
@@ -1652,6 +1871,31 @@
  } catch(e) { showToast(e.message, 'error'); }
  }
 
+ async function createUser() {
+ const alertBox = document.getElementById('create-user-alert');
+ const full_name = document.getElementById('new-user-name').value.trim();
+ const email = document.getElementById('new-user-email').value.trim();
+ const password = document.getElementById('new-user-password').value;
+ const role = document.getElementById('new-user-role').value;
+ alertBox.innerHTML = '';
+ if (!full_name || !email || !password) {
+  alertBox.innerHTML = '<div class="alert alert-danger"> Заполните все поля</div>';
+  return;
+ }
+ try {
+  await API.post('/admin/users', { full_name, email, password, role });
+  showToast('Пользователь создан', 'success');
+  document.getElementById('new-user-name').value = '';
+  document.getElementById('new-user-email').value = '';
+  document.getElementById('new-user-password').value = '';
+  document.getElementById('new-user-role').value = 'author';
+  loadUsers();
+  loadDashboard();
+ } catch (e) {
+  alertBox.innerHTML = `<div class="alert alert-danger"> ${escHtml(e.message)}</div>`;
+ }
+ }
+
  function roleSelect(u) {
  if (u.role === 'admin') return roleLabel('admin');
  return `
@@ -1685,7 +1929,11 @@
  <td style="white-space:nowrap">
  <button class="btn btn-secondary btn-sm" style="font-size:11px" onclick="openUserDetail(${u.id})"> Детали</button>
  ${u.role!== 'admin'
-? (u.is_banned
+? `<button class="btn btn-secondary btn-sm" style="font-size:11px" onclick="resetUserPasswordPrompt(${u.id})">Пароль</button>`
++ (u.submissions_count === 0
+? `<button class="btn btn-danger btn-sm" style="font-size:11px" onclick="deleteUser(${u.id})">Удалить</button>`
+: '')
++ (u.is_banned
 ? `<button class="btn btn-secondary btn-sm" style="font-size:11px" onclick="unbanUser(${u.id});loadUsers()">Разблокировать</button>`
 : `<button class="btn btn-danger btn-sm" style="font-size:11px" onclick="banUserFromList(${u.id})">Заблокировать</button>`)
 : ''}
@@ -1776,6 +2024,23 @@
  img.style.display = 'block';
  }
 
+ function updateFullIssueFormStatus(it) {
+ const el = document.getElementById('issue-full-issue-status');
+ if (!el) return;
+ const name = document.getElementById('issue-full-issue-file')?.value?.trim();
+ if (!name) { el.innerHTML = ''; return; }
+ if (it && it.full_issue_file) {
+  if (it.full_issue_exists) {
+   el.innerHTML = `<span style="color:var(--success)">✓ Файл <code>${escapeIssueHtml(it.full_issue_file)}</code> найден в папке архива — кнопка на сайте активна.</span>`;
+  } else if (it.full_issue_pending) {
+   const folder = it.archive_folder ? escapeIssueHtml(it.archive_folder) : 'папка архива';
+   el.innerHTML = `<span style="color:#b45309">⏳ Имя <code>${escapeIssueHtml(it.full_issue_file)}</code> сохранено — загрузите PDF через форму выше.</span>`;
+  }
+  return;
+ }
+ el.innerHTML = '<span style="color:var(--text-muted)">Выберите PDF и загрузите через сайт (кнопка ниже или «Сохранить выпуск»).</span>';
+ }
+
  async function loadIssueArchiveFolders() {
  if (issueArchiveFoldersLoaded && issueArchiveFolders.length) return;
  try {
@@ -1795,7 +2060,7 @@
   if (msg === 'Failed to fetch' || /network|connection|reset|abort/i.test(msg)) {
    const kb = file && file.size ? Math.round(file.size / 1024) : 0;
    if (kb > 64) {
-    return `Загрузка оборвалась (${kb} КБ). Часто nginx на сервере режет файлы больше ~64 КБ — нужно client_max_body_size 50m; для muarrix.kiut.uz. Пока сожмите обложку до JPG ~200–400 КБ и попробуйте снова.`;
+    return `Загрузка оборвалась (${kb} КБ). Nginx на сервере режет файлы больше ~64 КБ. Нужно IT: в конфиге nginx для muarrix.kiut.uz добавить client_max_body_size 50m; и перезагрузить nginx. Временно: сожмите обложку до JPG меньше 50 КБ (например squoosh.app).`;
    }
    return 'Соединение оборвалось (ERR_CONNECTION_RESET). Сожмите JPG до ~300 КБ, проверьте Wi‑Fi KIUT и попробуйте снова.';
   }
@@ -1840,6 +2105,82 @@
  return data;
  }
 
+ function formatFullIssueUploadError(e, file) {
+  const msg = e && e.message ? e.message : String(e);
+  if (msg === 'Failed to fetch' || /network|connection|reset|abort/i.test(msg)) {
+   const mb = file && file.size ? (file.size / (1024 * 1024)).toFixed(1) : 0;
+   return `Загрузка оборвалась (${mb} МБ). На сервере nginx должен разрешать большие файлы: client_max_body_size 50m; для muarrix.kiut.uz. Локально обычно работает сразу.`;
+  }
+  return msg;
+ }
+
+ async function uploadIssueFullPdf(issueId, file) {
+ if (file.size > 50 * 1024 * 1024) {
+ throw new Error('PDF больше 50 МБ');
+ }
+ const fd = new FormData();
+ fd.append('pdf', file);
+ const fileName = document.getElementById('issue-full-issue-file')?.value?.trim();
+ if (fileName) fd.append('file_name', fileName);
+ const token = Auth.getToken();
+ const headers = {};
+ if (token) headers.Authorization = 'Bearer ' + token;
+ const ctrl = new AbortController();
+ const timer = setTimeout(() => ctrl.abort(), 300000);
+ let res;
+ try {
+ res = await fetch('/api/admin/issues/' + issueId + '/full-issue', {
+ method: 'POST',
+ headers,
+ credentials: 'same-origin',
+ body: fd,
+ signal: ctrl.signal,
+ });
+ } catch (e) {
+  if (e.name === 'AbortError') {
+   throw new Error('Таймаут загрузки сборника (5 мин). Проверьте соединение.');
+  }
+  throw new Error(formatFullIssueUploadError(e, file));
+ } finally {
+ clearTimeout(timer);
+ }
+ let data;
+ try {
+ data = await res.json();
+ } catch {
+ throw new Error('Сервер вернул неожиданный ответ (HTTP ' + res.status + ')');
+ }
+ if (!res.ok) throw new Error(data.error || 'Ошибка загрузки сборника');
+ if (data.full_issue_file) {
+  document.getElementById('issue-full-issue-file').value = data.full_issue_file;
+ }
+ document.getElementById('issue-full-issue-pdf').value = '';
+ return data;
+ }
+
+ async function uploadFullIssueOnly() {
+ const id = document.getElementById('issue-edit-id').value.trim();
+ const file = document.getElementById('issue-full-issue-pdf')?.files?.[0];
+ if (!id) {
+  showToast('Сначала сохраните выпуск (папка архива и обложка)', 'error');
+  return;
+ }
+ if (!file) {
+  showToast('Выберите PDF сборника', 'error');
+  return;
+ }
+ try {
+  const data = await uploadIssueFullPdf(id, file);
+  showToast('Сборник загружен: ' + (data.full_issue_file || file.name), 'success');
+  const issues = await API.get('/admin/issues');
+  const it = issues.find((x) => String(x.id) === String(id));
+  if (it) updateFullIssueFormStatus(it);
+  loadIssuesTab();
+ } catch (e) {
+  showToast(e.message, 'error');
+ }
+ }
+
  document.getElementById('issue-cover-file')?.addEventListener('change', function () {
  const file = this.files && this.files[0];
  if (!file) return;
@@ -1858,13 +2199,14 @@
  }
  body.innerHTML = `
  <table>
- <thead><tr><th>#</th><th>Обложка</th><th>Название выпуска</th><th>Архив</th><th>Статьи</th><th>Дата</th><th>Приём</th><th>Сорт.</th><th></th></tr></thead>
+ <thead><tr><th>#</th><th>Обложка</th><th>Название выпуска</th><th>Архив</th><th>Сборник</th><th>Статьи</th><th>Дата</th><th>Приём</th><th>Сорт.</th><th></th></tr></thead>
  <tbody>${data.map((it, i) => `
  <tr>
  <td style="color:var(--text-muted)">${i + 1}</td>
  <td>${it.cover_image ? `<img src="${escapeIssueHtml(it.cover_image)}?t=${it.id}" alt="" onerror="this.outerHTML='<span style=\\'font-size:11px;color:var(--danger)\\'>нет</span>'" style="width:36px;height:48px;object-fit:cover;border-radius:4px;border:1px solid var(--border)">` : '<span style="font-size:11px;color:var(--danger)">нет</span>'}</td>
  <td style="font-size:13px;font-weight:600">${escapeIssueHtml(it.title)}</td>
  <td style="font-size:11px;color:var(--text-muted);max-width:140px;word-break:break-word">${it.archive_folder ? escapeIssueHtml(it.archive_folder) : '—'}</td>
+ <td style="font-size:12px;text-align:center" title="${it.full_issue_file ? escapeIssueHtml(it.full_issue_file) : ''}">${!it.full_issue_file ? '—' : (it.full_issue_exists ? '<span style="color:var(--success);font-weight:700">✓</span>' : '<span style="color:#b45309" title="файл ещё не на сервере">⏳</span>')}</td>
  <td style="font-size:12px;text-align:center">${(it.submission_count || 0) > 0 ? `<span style="color:var(--danger);font-weight:600">${it.submission_count}</span>` : '0'}</td>
  <td style="font-size:12px">${it.issued_at? escapeIssueHtml(it.issued_at): '—'}</td>
  <td>${it.accepting_submissions? '<span class="status-badge status-approved">Открыт</span>': '<span class="status-badge status-pending">Закрыт</span>'}</td>
@@ -1891,6 +2233,8 @@
  document.getElementById('issue-title').value = it.title;
  document.getElementById('issue-desc').value = it.description || '';
  document.getElementById('issue-archive-folder').value = it.archive_folder || '';
+ document.getElementById('issue-full-issue-file').value = it.full_issue_file || '';
+ updateFullIssueFormStatus(it);
  document.getElementById('issue-existing-cover').value = it.cover_image || '';
  document.getElementById('issue-cover-file').value = '';
  setIssueCoverPreview(it.cover_image || '');
@@ -1909,6 +2253,9 @@
  document.getElementById('issue-title').value = '';
  document.getElementById('issue-desc').value = '';
  document.getElementById('issue-archive-folder').value = '';
+ document.getElementById('issue-full-issue-file').value = '';
+ document.getElementById('issue-full-issue-pdf').value = '';
+ updateFullIssueFormStatus(null);
  document.getElementById('issue-existing-cover').value = '';
  document.getElementById('issue-cover-file').value = '';
  setIssueCoverPreview('');
@@ -1921,12 +2268,14 @@
  const saveBtn = document.getElementById('issue-save-btn');
  const id = document.getElementById('issue-edit-id').value.trim();
  const coverFile = document.getElementById('issue-cover-file').files[0];
+ const fullIssuePdf = document.getElementById('issue-full-issue-pdf')?.files?.[0];
  const existingCover = document.getElementById('issue-existing-cover').value.trim();
  const payload = {
  journal: document.getElementById('issue-journal').value,
  title: document.getElementById('issue-title').value.trim(),
  description: document.getElementById('issue-desc').value.trim(),
  archive_folder: document.getElementById('issue-archive-folder').value.trim(),
+ full_issue_file: document.getElementById('issue-full-issue-file').value.trim() || null,
  sort_order: parseInt(document.getElementById('issue-sort').value, 10) || 0,
  accepting_submissions: document.getElementById('issue-accepting').checked? '1': '0',
  issued_at: document.getElementById('issue-issued-at').value || null,
@@ -1948,7 +2297,7 @@
  return;
  }
  try {
- if (saveBtn) { saveBtn.disabled = true; saveBtn.textContent = coverFile ? 'Загрузка обложки…' : 'Сохранение…'; }
+ if (saveBtn) { saveBtn.disabled = true; saveBtn.textContent = (coverFile || fullIssuePdf) ? 'Загрузка файлов…' : 'Сохранение…'; }
  let issueId = id;
  if (id) await API.put('/admin/issues/' + id, payload);
  else {
@@ -1961,6 +2310,10 @@
  setIssueCoverPreview(uploaded.cover_image || '');
  document.getElementById('issue-cover-file').value = '';
  document.getElementById('issue-edit-id').value = issueId;
+ }
+ if (fullIssuePdf) {
+  if (saveBtn) saveBtn.textContent = 'Загрузка сборника…';
+  await uploadIssueFullPdf(issueId, fullIssuePdf);
  }
  showToast('Выпуск сохранён', 'success');
  resetIssueForm();
@@ -2115,7 +2468,11 @@
  <div style="font-size:14px"><strong>Email:</strong> ${escHtml(user.email)}</div>
  <div style="font-size:13px;color:var(--text-muted);margin-top:4px"><strong>Зарегистрирован:</strong> ${formatDate(user.created_at)} ${bannedTag}</div>
  ${user.role!== 'admin'
-? (user.is_banned
+? `<button class="btn btn-secondary btn-sm" style="font-size:12px" onclick="resetUserPasswordPrompt(${user.id})">Сбросить пароль</button>`
++ (submissions.length === 0
+? `<button class="btn btn-danger btn-sm" style="font-size:12px" onclick="deleteUser(${user.id});closeModal('user-detail-modal')">Удалить пользователя</button>`
+: '')
++ (user.is_banned
 ? `<button class="btn btn-secondary btn-sm" style="margin-top:10px;font-size:12px" onclick="unbanUser(${user.id});closeModal('user-detail-modal');loadUsers()">Разблокировать</button>`
 : `<button class="btn btn-danger btn-sm" style="margin-top:10px;font-size:12px" onclick="banUserFromList(${user.id});closeModal('user-detail-modal')">Заблокировать аккаунт</button>`)
 : ''}
@@ -2356,6 +2713,30 @@
  showToast('Аккаунт разблокирован', 'success');
  loadSecurity();
  } catch(e) { showToast(e.message, 'error'); }
+ }
+
+ async function resetUserPassword(userId, newPassword) {
+ try {
+  await API.put(`/admin/users/${userId}/password`, { new_password: newPassword });
+  showToast('Пароль изменён', 'success');
+ } catch (e) { showToast(e.message, 'error'); }
+ }
+
+ function resetUserPasswordPrompt(userId) {
+ const pwd = prompt('Новый пароль (минимум 8 символов, буквы и цифры):');
+ if (!pwd) return;
+ if (pwd.length < 8) { showToast('Пароль слишком короткий', 'error'); return; }
+ resetUserPassword(userId, pwd);
+ }
+
+ async function deleteUser(userId) {
+ if (!confirm('Удалить пользователя без статей? Это действие нельзя отменить.')) return;
+ try {
+  await API.delete(`/admin/users/${userId}`);
+  showToast('Пользователь удалён', 'success');
+  loadUsers();
+  loadDashboard();
+ } catch (e) { showToast(e.message, 'error'); }
  }
 
  async function banUserFromList(id) {

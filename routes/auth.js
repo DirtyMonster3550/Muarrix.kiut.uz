@@ -247,6 +247,48 @@ router.post('/refresh-session', requireAuth, (req, res) => {
   });
 });
 
+// Update own profile (name)
+router.put('/profile', requireAuth, (req, res) => {
+  const { full_name } = req.body;
+
+  if (typeof full_name !== 'string' || full_name.trim().length < 2 || full_name.length > 200) {
+    return res.status(400).json({ error: 'Укажите корректное имя (от 2 символов)' });
+  }
+
+  db.prepare('UPDATE users SET full_name = ? WHERE id = ?').run(full_name.trim(), req.user.id);
+
+  const user = db.prepare('SELECT id, full_name, email, role FROM users WHERE id = ?').get(req.user.id);
+  if (!user) return res.status(404).json({ error: 'Пользователь не найден' });
+
+  res.json({
+    success: true,
+    user: { id: user.id, full_name: user.full_name, email: user.email, role: user.role },
+  });
+});
+
+// Change own password
+router.put('/change-password', requireAuth, (req, res) => {
+  const { current_password, new_password } = req.body;
+
+  if (!current_password || !new_password) {
+    return res.status(400).json({ error: 'Заполните все поля' });
+  }
+
+  const row = db.prepare('SELECT password FROM users WHERE id = ?').get(req.user.id);
+  if (!row || !bcrypt.compareSync(current_password, row.password)) {
+    return res.status(400).json({ error: 'Неверный текущий пароль' });
+  }
+
+  if (new_password.length < 8 || !/[A-Za-z]/.test(new_password) || !/\d/.test(new_password)) {
+    return res.status(400).json({ error: 'Пароль должен быть не менее 8 символов и содержать буквы и цифры' });
+  }
+
+  const hash = bcrypt.hashSync(new_password, 10);
+  db.prepare('UPDATE users SET password = ? WHERE id = ?').run(hash, req.user.id);
+
+  res.json({ success: true });
+});
+
 function requireAuth(req, res, next) {
   const token = getSessionToken(req);
   if (!token) return res.status(401).json({ error: 'Не авторизован' });

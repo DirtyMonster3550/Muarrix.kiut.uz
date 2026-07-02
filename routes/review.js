@@ -141,9 +141,97 @@ router.get('/stats', requireRole('tech_expert', 'editorial_expert'), (req, res) 
     WHERE status = 'rejected' AND rejection_stage = ?
   `).get(isTech ? 'tech' : 'editorial').c;
 
+  const sentToEditorial = isTech
+    ? db.prepare(`
+        SELECT COUNT(*) as c FROM submissions
+        WHERE status = 'tech_approved' AND tech_reviewer_id = ?
+      `).get(req.user.id).c
+    : 0;
+
   const total = db.prepare('SELECT COUNT(*) as c FROM submissions').get().c;
 
-  res.json({ inQueue, visible, approved, rejected, total });
+  res.json({ inQueue, visible, sentToEditorial, approved, rejected, total });
+});
+
+// ── Tech expert: статьи, уже переданные на ред. эксперта ────────────────────
+router.get('/sent-to-editorial', requireRole('tech_expert'), (req, res) => {
+  const rows = db.prepare(`
+    SELECT s.id, s.title, s.authors, s.journal, s.abstract, s.status,
+           s.submitted_at, s.reviewed_at, s.file_path, s.admin_note,
+           u.full_name, u.email,
+           i.title AS issue_title,
+           ae.full_name AS assigned_editorial_name,
+           ae.email AS assigned_editorial_email
+    FROM submissions s
+    JOIN users u ON s.user_id = u.id
+    LEFT JOIN issues i ON s.issue_id = i.id
+    LEFT JOIN users ae ON s.assigned_editorial_id = ae.id
+    WHERE s.status = 'tech_approved' AND s.tech_reviewer_id = ?
+    ORDER BY s.reviewed_at DESC, s.submitted_at ASC
+  `).all(req.user.id);
+  res.json(rows);
+});
+
+// ── Tech expert: вернуть статью из ред. экспертизы на техническую проверку ──
+router.post('/submissions/:id/recall-tech', requireRole('tech_expert'), (req, res) => {
+  const id = parseInt(req.params.id, 10);
+  const reason = String(req.body?.reason || '').trim();
+
+  const sub = db.prepare(`
+    SELECT s.*, u.full_name, u.email
+    FROM submissions s JOIN users u ON s.user_id = u.id
+    WHERE s.id = ?
+  `).get(id);
+  if (!sub) return res.status(404).json({ error: 'Не найдено' });
+
+  if (sub.status !== 'tech_approved') {
+    return res.status(400).json({ error: 'Статья уже прошла следующий этап — отменить передачу нельзя' });
+  }
+  if (sub.tech_reviewer_id !== req.user.id) {
+    return res.status(403).json({ error: 'Можно вернуть только статьи, которые вы сами передали' });
+  }
+
+  const editorialId = sub.assigned_editorial_id;
+  const editorial = editorialId
+    ? db.prepare('SELECT full_name FROM users WHERE id = ?').get(editorialId)
+    : null;
+
+  db.prepare(`
+    UPDATE submissions
+    SET status = 'pending',
+        assigned_editorial_id = NULL,
+        tech_reviewer_id = NULL,
+        admin_note = ?,
+        reviewed_at = NULL
+    WHERE id = ?
+  `).run(reason || null, id);
+
+  notifyUser(
+    sub.user_id,
+    id,
+    'info',
+    reason
+      ? `Технический эксперт вернул вашу статью «${sub.title}» на повторную проверку. Комментарий: ${reason}`
+      : `Технический эксперт вернул вашу статью «${sub.title}» на повторную техническую проверку.`
+  );
+
+  if (editorialId) {
+    notifyUser(
+      editorialId,
+      id,
+      'info',
+      `Статья «${sub.title}» снята с вашей очереди — технический эксперт отменил передачу.`
+    );
+  }
+
+  notifyAdmins(
+    id,
+    `Тех. эксперт отменил передачу статьи «${sub.title}»${editorial ? ` (была у ${editorial.full_name})` : ''}.`
+  );
+
+  auditLog(req.user.id, 'tech_recall', 'submission', id, reason || sub.title);
+
+  res.json({ success: true });
 });
 
 // ── Approve submission ────────────────────────────────────────────────────────

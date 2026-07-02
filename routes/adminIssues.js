@@ -16,6 +16,8 @@ const {
   coversDir,
   deleteCoverFileIfLocal,
 } = require('../lib/issueCovers');
+const { normalizeFullIssueFileName, resolveFullIssueForIssue, saveFullIssuePdf } = require('../lib/fullIssuePdf');
+const { archivesDirectory } = require('../lib/paths');
 
 const ALLOWED_JOURNALS = ['muarrix', 'finecs', 'conference'];
 const COVER_EXTS = new Set(['.jpg', '.jpeg', '.png', '.webp']);
@@ -50,7 +52,18 @@ const coverUpload = multer({
   },
 });
 
-router.get('/', requireAdmin, (req, res) => {
+const fullIssueUpload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 50 * 1024 * 1024 },
+  fileFilter: (_req, file, cb) => {
+    const ext = path.extname(file.originalname || '').toLowerCase();
+    const mime = String(file.mimetype || '').toLowerCase();
+    if (ext === '.pdf' || mime === 'application/pdf') cb(null, true);
+    else cb(new Error('Разрешён только PDF'));
+  },
+});
+
+router.get('/', requireAdmin, async (req, res) => {
   try {
     const rows = db.prepare(`
       SELECT i.*,
@@ -58,7 +71,16 @@ router.get('/', requireAdmin, (req, res) => {
       FROM issues i
       ORDER BY i.sort_order DESC, i.id DESC
     `).all();
-    res.json(rows);
+    const archiveRoot = archivesDirectory();
+    const enriched = await Promise.all(rows.map(async (row) => {
+      const fullIssue = await resolveFullIssueForIssue(row, archiveRoot);
+      return {
+        ...row,
+        full_issue_exists: fullIssue.exists,
+        full_issue_pending: fullIssue.pending && !!fullIssue.file,
+      };
+    }));
+    res.json(enriched);
   } catch (e) {
     console.error(e);
     res.status(500).json({ error: 'Ошибка базы: нет таблицы issues? Перезапустите сервер после обновления.' });
@@ -84,7 +106,7 @@ router.get('/archive-folders', requireAdmin, async (_req, res) => {
 });
 
 router.post('/', requireAdmin, (req, res) => {
-  const { journal, title, description, sort_order, accepting_submissions, issued_at, archive_folder } = req.body;
+  const { journal, title, description, sort_order, accepting_submissions, issued_at, archive_folder, full_issue_file } = req.body;
   if (!title || !journal) {
     return res.status(400).json({ error: 'Укажите журнал и название выпуска' });
   }
@@ -97,12 +119,13 @@ router.post('/', requireAdmin, (req, res) => {
   const ord = Number.isFinite(Number(sort_order)) ? Number(sort_order) : 0;
   const when = issued_at && String(issued_at).trim() ? String(issued_at).trim() : null;
   const folder = normalizeArchiveFolder(archive_folder);
+  const fullIssueFile = normalizeFullIssueFileName(full_issue_file);
 
   try {
     const r = db.prepare(`
-      INSERT INTO issues (journal, title, description, sort_order, accepting_submissions, issued_at, archive_folder)
-      VALUES (?, ?, ?, ?, ?, ?, ?)
-    `).run(journal, title, description != null ? String(description) : null, ord, acc, when, folder);
+      INSERT INTO issues (journal, title, description, sort_order, accepting_submissions, issued_at, archive_folder, full_issue_file)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+    `).run(journal, title, description != null ? String(description) : null, ord, acc, when, folder, fullIssueFile);
     res.json({ success: true, id: r.lastInsertRowid });
   } catch (e) {
     console.error(e);
@@ -111,7 +134,7 @@ router.post('/', requireAdmin, (req, res) => {
 });
 
 router.put('/:id', requireAdmin, (req, res) => {
-  const { journal, title, description, sort_order, accepting_submissions, issued_at, archive_folder } = req.body;
+  const { journal, title, description, sort_order, accepting_submissions, issued_at, archive_folder, full_issue_file } = req.body;
   const id = parseInt(req.params.id, 10);
   if (Number.isNaN(id)) return res.status(400).json({ error: 'Некорректный id' });
   if (journal && !ALLOWED_JOURNALS.includes(journal)) {
@@ -125,11 +148,19 @@ router.put('/:id', requireAdmin, (req, res) => {
   const ord = Number.isFinite(Number(sort_order)) ? Number(sort_order) : 0;
   const when = issued_at && String(issued_at).trim() ? String(issued_at).trim() : null;
   const folder = archive_folder != null ? normalizeArchiveFolder(archive_folder) : null;
+  const fullIssueFile = full_issue_file !== undefined
+    ? normalizeFullIssueFileName(full_issue_file)
+    : undefined;
 
-  db.prepare(`
-    UPDATE issues SET journal = ?, title = ?, description = ?, sort_order = ?, accepting_submissions = ?, issued_at = ?, archive_folder = ?
-    WHERE id = ?
-  `).run(journal, title, description != null ? String(description) : null, ord, acc, when, folder, id);
+  const sets = ['journal = ?', 'title = ?', 'description = ?', 'sort_order = ?', 'accepting_submissions = ?', 'issued_at = ?', 'archive_folder = ?'];
+  const params = [journal, title, description != null ? String(description) : null, ord, acc, when, folder];
+  if (fullIssueFile !== undefined) {
+    sets.push('full_issue_file = ?');
+    params.push(fullIssueFile);
+  }
+  params.push(id);
+
+  db.prepare(`UPDATE issues SET ${sets.join(', ')} WHERE id = ?`).run(...params);
   res.json({ success: true });
 });
 
@@ -177,6 +208,52 @@ router.post('/:id/cover', requireAdmin, (req, res, next) => {
   }
 
   res.json({ success: true, cover_image: coverPath });
+});
+
+router.post('/:id/full-issue', requireAdmin, (req, res, next) => {
+  fullIssueUpload.single('pdf')(req, res, (err) => {
+    if (err) {
+      if (err.code === 'LIMIT_FILE_SIZE') {
+        return res.status(413).json({ error: 'PDF слишком большой (максимум 50 МБ)' });
+      }
+      return res.status(400).json({ error: err.message || 'Ошибка загрузки PDF' });
+    }
+    next();
+  });
+}, async (req, res) => {
+  const id = parseInt(req.params.id, 10);
+  if (Number.isNaN(id)) return res.status(400).json({ error: 'Некорректный id' });
+
+  if (!req.file?.buffer?.length) {
+    return res.status(400).json({ error: 'Выберите PDF-файл сборника' });
+  }
+
+  const desiredName = req.body?.file_name || req.body?.fileName || null;
+
+  try {
+    const result = await saveFullIssuePdf(db, id, req.file.buffer, {
+      fileName: desiredName,
+      originalName: req.file.originalname,
+    });
+    if (!result.ok) return res.status(400).json({ error: result.error });
+
+    auditLog(
+      req.user.id,
+      'upload_full_issue',
+      'issue',
+      id,
+      `${result.file} → ${result.folder}`
+    );
+
+    res.json({
+      success: true,
+      full_issue_file: result.file,
+      folder: result.folder,
+    });
+  } catch (e) {
+    console.error('[full-issue upload]', e);
+    res.status(500).json({ error: 'Не удалось сохранить PDF сборника' });
+  }
 });
 
 router.delete('/bulk-unused', requireAdmin, async (req, res) => {

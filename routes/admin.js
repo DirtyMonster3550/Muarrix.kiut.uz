@@ -3,12 +3,13 @@ const router = express.Router();
 const path = require('path');
 const fs = require('fs');
 const crypto = require('crypto');
+const bcrypt = require('bcryptjs');
 const multer = require('multer');
 const { db, dbPath } = require('../db/database');
 const { sendApprovalEmail, sendRejectionEmail, sendTestEmail } = require('../utils/mailer');
 const { requireAdmin } = require('./adminAuth');
 const { auditLog } = require('../middleware/security');
-const { publishSubmissionToArchive, syncPublishedToArchive, publishPdfToIssueArchive } = require('../lib/publishSubmission');
+const { publishSubmissionToArchive, syncPublishedToArchive, publishPdfToIssueArchive, listIssueArchiveArticles, removeArchiveArticle } = require('../lib/publishSubmission');
 
 const UPLOADS_DIR = path.join(__dirname, '..', 'uploads');
 
@@ -471,6 +472,57 @@ router.get('/users', requireAdmin, (req, res) => {
 
 // Change user role (admin role cannot be assigned — only one admin exists in the system)
 const ASSIGNABLE_ROLES = ['author', 'tech_expert', 'editorial_expert'];
+const EMAIL_RE = /^[^\s@]{1,64}@[^\s@]{1,253}\.[^\s@]{2,}$/;
+
+function validateUserPassword(password) {
+  if (!password || password.length < 8 || !/[A-Za-z]/.test(password) || !/\d/.test(password)) {
+    return 'Пароль: минимум 8 символов, буквы и цифры';
+  }
+  return null;
+}
+
+router.post('/users', requireAdmin, (req, res) => {
+  const { full_name, email, password, role } = req.body;
+
+  if (!full_name || !email || !password || !role) {
+    return res.status(400).json({ error: 'Заполните все поля' });
+  }
+  if (typeof full_name !== 'string' || full_name.trim().length < 2 || full_name.length > 200) {
+    return res.status(400).json({ error: 'Укажите корректное имя' });
+  }
+  if (!EMAIL_RE.test(String(email).trim()) || String(email).length > 254) {
+    return res.status(400).json({ error: 'Укажите корректный email' });
+  }
+  const pwdError = validateUserPassword(password);
+  if (pwdError) return res.status(400).json({ error: pwdError });
+  if (!ASSIGNABLE_ROLES.includes(role)) {
+    return res.status(400).json({ error: 'Недопустимая роль' });
+  }
+
+  const normalizedEmail = String(email).trim().toLowerCase();
+  const existing = db.prepare('SELECT id FROM users WHERE email = ?').get(normalizedEmail);
+  if (existing) {
+    return res.status(409).json({ error: 'Email уже зарегистрирован' });
+  }
+
+  const hash = bcrypt.hashSync(password, 10);
+  const result = db.prepare(`
+    INSERT INTO users (full_name, email, password, role)
+    VALUES (?, ?, ?, ?)
+  `).run(full_name.trim(), normalizedEmail, hash, role);
+
+  auditLog(req.user.id, 'create_user', 'user', result.lastInsertRowid, `${full_name.trim()} · ${role}`);
+
+  res.json({
+    success: true,
+    user: {
+      id: result.lastInsertRowid,
+      full_name: full_name.trim(),
+      email: normalizedEmail,
+      role,
+    },
+  });
+});
 
 router.put('/users/:id/role', requireAdmin, (req, res) => {
   const id = parseInt(req.params.id, 10);
@@ -493,6 +545,109 @@ router.put('/users/:id/role', requireAdmin, (req, res) => {
   auditLog(req.user.id, 'change_role', 'user', id, `${user.role} → ${role}`);
 
   res.json({ success: true, id, role });
+});
+
+router.put('/users/:id/password', requireAdmin, (req, res) => {
+  const id = parseInt(req.params.id, 10);
+  const { new_password } = req.body;
+
+  if (Number.isNaN(id)) return res.status(400).json({ error: 'Некорректный id' });
+
+  const pwdError = validateUserPassword(new_password);
+  if (pwdError) return res.status(400).json({ error: pwdError });
+
+  const user = db.prepare('SELECT id, full_name, email, role FROM users WHERE id = ?').get(id);
+  if (!user) return res.status(404).json({ error: 'Пользователь не найден' });
+  if (user.role === 'admin') {
+    return res.status(400).json({ error: 'Пароль администратора нельзя сбросить через эту форму' });
+  }
+
+  const hash = bcrypt.hashSync(new_password, 10);
+  db.prepare(`
+    UPDATE users SET password = ?, reset_token = NULL, reset_token_expires = NULL WHERE id = ?
+  `).run(hash, id);
+
+  auditLog(req.user.id, 'reset_user_password', 'user', id, user.email);
+
+  res.json({ success: true });
+});
+
+router.delete('/users/:id', requireAdmin, (req, res) => {
+  const id = parseInt(req.params.id, 10);
+  if (Number.isNaN(id)) return res.status(400).json({ error: 'Некорректный id' });
+  if (id === req.user.id) {
+    return res.status(400).json({ error: 'Нельзя удалить собственный аккаунт' });
+  }
+
+  const user = db.prepare('SELECT id, full_name, email, role FROM users WHERE id = ?').get(id);
+  if (!user) return res.status(404).json({ error: 'Пользователь не найден' });
+  if (user.role === 'admin') {
+    return res.status(400).json({ error: 'Администратора нельзя удалить' });
+  }
+
+  const submissionsCount = db.prepare('SELECT COUNT(*) AS c FROM submissions WHERE user_id = ?').get(id).c;
+  if (submissionsCount > 0) {
+    return res.status(400).json({
+      error: `У пользователя ${submissionsCount} статей. Удаление невозможно — заблокируйте аккаунт.`,
+    });
+  }
+
+  const deleteUser = db.transaction((userId) => {
+    db.prepare('UPDATE submissions SET tech_reviewer_id = NULL WHERE tech_reviewer_id = ?').run(userId);
+    db.prepare('UPDATE submissions SET editorial_reviewer_id = NULL WHERE editorial_reviewer_id = ?').run(userId);
+    db.prepare('UPDATE submissions SET assigned_editorial_id = NULL WHERE assigned_editorial_id = ?').run(userId);
+    db.prepare('DELETE FROM notifications WHERE user_id = ?').run(userId);
+    db.prepare('DELETE FROM users WHERE id = ?').run(userId);
+  });
+
+  deleteUser(id);
+  auditLog(req.user.id, 'delete_user', 'user', id, `${user.full_name} · ${user.email}`);
+
+  res.json({ success: true });
+});
+
+// ── Архив выпуска: список и удаление опубликованных PDF ─────────────────────
+router.get('/archive/issues/:issueId/articles', requireAdmin, async (req, res) => {
+  const issueId = parseInt(req.params.issueId, 10);
+  if (Number.isNaN(issueId)) {
+    return res.status(400).json({ error: 'Некорректный id выпуска' });
+  }
+
+  try {
+    const result = await listIssueArchiveArticles(db, issueId);
+    if (!result.ok) return res.status(400).json({ error: result.error });
+    res.json(result);
+  } catch (e) {
+    console.error('[admin archive list]', e);
+    res.status(500).json({ error: 'Не удалось прочитать архив выпуска' });
+  }
+});
+
+router.delete('/archive/issues/:issueId/articles/:fileName', requireAdmin, async (req, res) => {
+  const issueId = parseInt(req.params.issueId, 10);
+  if (Number.isNaN(issueId)) {
+    return res.status(400).json({ error: 'Некорректный id выпуска' });
+  }
+
+  const fileName = decodeURIComponent(req.params.fileName || '');
+
+  try {
+    const result = await removeArchiveArticle(db, { issueId, fileName });
+    if (!result.ok) return res.status(400).json({ error: result.error });
+
+    auditLog(
+      req.user.id,
+      'remove_archive_article',
+      'issue',
+      issueId,
+      `${result.file} ← ${result.folder}`
+    );
+
+    res.json({ success: true, file: result.file, folder: result.folder });
+  } catch (e) {
+    console.error('[admin archive delete]', e);
+    res.status(500).json({ error: 'Не удалось удалить статью из архива' });
+  }
 });
 
 // ── Быстрая публикация PDF в архив выпуска (без экспертизы) ─────────────────

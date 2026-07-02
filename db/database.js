@@ -172,6 +172,9 @@ function init() {
   if (!issueCols.includes('archive_folder')) {
     db.exec('ALTER TABLE issues ADD COLUMN archive_folder TEXT');
   }
+  if (!issueCols.includes('full_issue_file')) {
+    db.exec('ALTER TABLE issues ADD COLUMN full_issue_file TEXT');
+  }
 
   const userCols = db.prepare('PRAGMA table_info(users)').all().map((c) => c.name);
   if (!userCols.includes('is_banned')) {
