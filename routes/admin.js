@@ -3,10 +3,9 @@ const router = express.Router();
 const path = require('path');
 const fs = require('fs');
 const crypto = require('crypto');
-const bcrypt = require('bcryptjs');
 const multer = require('multer');
-const { db, dbPath } = require('../db/database');
-const { sendApprovalEmail, sendRejectionEmail, sendTestEmail } = require('../utils/mailer');
+const { db } = require('../db/database');
+const { sendApprovalEmail, sendRejectionEmail } = require('../utils/mailer');
 const { requireAdmin } = require('./adminAuth');
 const { auditLog } = require('../middleware/security');
 const { publishSubmissionToArchive, syncPublishedToArchive, publishPdfToIssueArchive, listIssueArchiveArticles, removeArchiveArticle } = require('../lib/publishSubmission');
@@ -68,19 +67,107 @@ function isPdfFile(filePath) {
   }
 }
 
-// Dashboard stats
+// ── Dashboard stats ────────────────────────────────────────────────────────────
 router.get('/stats', requireAdmin, (req, res) => {
-  const total             = db.prepare('SELECT COUNT(*) as c FROM submissions').get().c;
-  const pending           = db.prepare("SELECT COUNT(*) as c FROM submissions WHERE status = 'pending'").get().c;
-  const tech_approved     = db.prepare("SELECT COUNT(*) as c FROM submissions WHERE status = 'tech_approved'").get().c;
-  const editorial_approved= db.prepare("SELECT COUNT(*) as c FROM submissions WHERE status = 'editorial_approved'").get().c;
-  const published         = db.prepare("SELECT COUNT(*) as c FROM submissions WHERE status = 'published'").get().c;
-  const rejected          = db.prepare("SELECT COUNT(*) as c FROM submissions WHERE status = 'rejected'").get().c;
-  const users             = db.prepare("SELECT COUNT(*) as c FROM users WHERE role NOT IN ('admin')").get().c;
+  const total              = db.prepare('SELECT COUNT(*) as c FROM submissions').get().c;
+  const pending            = db.prepare("SELECT COUNT(*) as c FROM submissions WHERE status = 'pending'").get().c;
+  const tech_approved      = db.prepare("SELECT COUNT(*) as c FROM submissions WHERE status = 'tech_approved'").get().c;
+  const editorial_approved = db.prepare("SELECT COUNT(*) as c FROM submissions WHERE status = 'editorial_approved'").get().c;
+  const published          = db.prepare("SELECT COUNT(*) as c FROM submissions WHERE status = 'published'").get().c;
+  const rejected           = db.prepare("SELECT COUNT(*) as c FROM submissions WHERE status = 'rejected'").get().c;
+  const users              = db.prepare("SELECT COUNT(*) as c FROM users WHERE role NOT IN ('admin')").get().c;
   res.json({ total, pending, tech_approved, editorial_approved, published, rejected, users });
 });
 
-// Get all submissions
+// ── Submissions ────────────────────────────────────────────────────────────────
+
+// Export CSV (must be before /:id)
+router.get('/submissions/export', requireAdmin, (req, res) => {
+  const { status } = req.query;
+  let query = `
+    SELECT s.id, s.title, s.authors, s.journal, s.status,
+           s.submitted_at, s.reviewed_at, s.admin_note,
+           u.full_name, u.email, i.title AS issue_title
+    FROM submissions s
+    JOIN users u ON s.user_id = u.id
+    LEFT JOIN issues i ON s.issue_id = i.id
+    WHERE 1=1
+  `;
+  const params = [];
+  if (status && status !== 'all') { query += ' AND s.status = ?'; params.push(status); }
+  query += ' ORDER BY s.submitted_at DESC';
+  const rows = db.prepare(query).all(...params);
+
+  function csvCell(v) { return `"${String(v ?? '').replace(/"/g, '""')}"`; }
+
+  const headers = ['ID','Название','Авторы','Журнал','Email автора','ФИО автора','Статус','Выпуск','Дата подачи','Дата решения','Примечание'];
+  const lines = [
+    headers.join(','),
+    ...rows.map(r => [
+      r.id,
+      csvCell(r.title),
+      csvCell(r.authors),
+      r.journal,
+      csvCell(r.email),
+      csvCell(r.full_name),
+      r.status,
+      csvCell(r.issue_title || ''),
+      r.submitted_at || '',
+      r.reviewed_at || '',
+      csvCell(r.admin_note || ''),
+    ].join(',')),
+  ];
+  const csv = '\uFEFF' + lines.join('\r\n');
+
+  auditLog(req.user.id, 'export_csv', 'submissions', null, `status=${status || 'all'}, count=${rows.length}`);
+
+  res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+  res.setHeader('Content-Disposition', `attachment; filename="submissions_${new Date().toISOString().slice(0,10)}.csv"`);
+  res.send(csv);
+});
+
+// Bulk action (must be before /:id)
+router.post('/submissions/bulk', requireAdmin, async (req, res) => {
+  const { ids, action, note } = req.body;
+  if (!Array.isArray(ids) || !ids.length) return res.status(400).json({ error: 'Укажите статьи' });
+  if (action !== 'reject') {
+    return res.status(400).json({ error: 'Массовое одобрение отключено — статьи проходят экспертизу' });
+  }
+
+  const cleanIds = ids.map(id => parseInt(id, 10)).filter(id => !Number.isNaN(id));
+  if (!cleanIds.length) return res.status(400).json({ error: 'Некорректные ID' });
+
+  let processed = 0;
+  for (const id of cleanIds) {
+    const sub = db.prepare(`
+      SELECT s.*, u.full_name, u.email FROM submissions s
+      JOIN users u ON s.user_id = u.id WHERE s.id = ?
+    `).get(id);
+    if (!sub || sub.status === 'published') continue;
+
+    db.prepare(`
+      UPDATE submissions
+      SET status = 'rejected',
+          admin_note = ?,
+          assigned_editorial_id = NULL,
+          rejection_stage = 'admin',
+          rejection_reason = ?,
+          reviewed_at = CURRENT_TIMESTAMP
+      WHERE id = ?
+    `).run(note || null, note || 'Возвращено администратором', id);
+
+    const msg = `Ваша статья "${sub.title}" возвращена на доработку.${note ? ' Примечание: ' + note : ''}`;
+    db.prepare(`INSERT INTO notifications (user_id, submission_id, type, message) VALUES (?, ?, 'rejected', ?)`)
+      .run(sub.user_id, id, msg);
+
+    auditLog(req.user.id, 'bulk_reject', 'submission', id, sub.title);
+    processed++;
+  }
+
+  res.json({ success: true, processed });
+});
+
+// List submissions
 router.get('/submissions', requireAdmin, (req, res) => {
   const { status, search } = req.query;
   let query = `
@@ -91,7 +178,6 @@ router.get('/submissions', requireAdmin, (req, res) => {
     WHERE 1=1
   `;
   const params = [];
-
   if (status && status !== 'all') {
     query += ' AND s.status = ?';
     params.push(status);
@@ -102,7 +188,6 @@ router.get('/submissions', requireAdmin, (req, res) => {
     params.push(like, like, like);
   }
   query += ' ORDER BY s.submitted_at DESC';
-
   res.json(db.prepare(query).all(...params));
 });
 
@@ -119,7 +204,43 @@ router.get('/submissions/:id', requireAdmin, (req, res) => {
   res.json(row);
 });
 
-// Approve submission — только после экспертизы (legacy: editorial_approved → publish через /publish)
+// Reject submission
+router.post('/submissions/:id/reject', requireAdmin, async (req, res) => {
+  const { note } = req.body;
+  const sub = db.prepare(`
+    SELECT s.*, u.full_name, u.email
+    FROM submissions s JOIN users u ON s.user_id = u.id
+    WHERE s.id = ?
+  `).get(req.params.id);
+
+  if (!sub) return res.status(404).json({ error: 'Не найдено' });
+  if (sub.status === 'published') {
+    return res.status(400).json({ error: 'Нельзя отклонить опубликованную статью' });
+  }
+
+  db.prepare(`
+    UPDATE submissions
+    SET status = 'rejected',
+        admin_note = ?,
+        assigned_editorial_id = NULL,
+        rejection_stage = 'admin',
+        rejection_reason = ?,
+        reviewed_at = CURRENT_TIMESTAMP
+    WHERE id = ?
+  `).run(note || null, note || 'Возвращено администратором', req.params.id);
+
+  db.prepare(`
+    INSERT INTO notifications (user_id, submission_id, type, message)
+    VALUES (?, ?, 'rejected', ?)
+  `).run(sub.user_id, sub.id, `Ваша статья "${sub.title}" возвращена на доработку.${note ? ' Примечание: ' + note : ''}`);
+
+  auditLog(req.user.id, 'reject_submission', 'submission', sub.id, sub.title);
+
+  const emailResult = await sendRejectionEmail(sub.email, sub.full_name, sub.title, sub.journal, note);
+  res.json({ success: true, emailSent: emailResult.success, stub: emailResult.stub });
+});
+
+// Approve submission (legacy)
 router.post('/submissions/:id/approve', requireAdmin, async (req, res) => {
   const { note } = req.body;
   const sub = db.prepare(`
@@ -163,43 +284,7 @@ router.post('/submissions/:id/approve', requireAdmin, async (req, res) => {
   res.json({ success: true, emailSent: emailResult.success, stub: emailResult.stub });
 });
 
-// Reject submission (admin may return to author at any pre-publish stage)
-router.post('/submissions/:id/reject', requireAdmin, async (req, res) => {
-  const { note } = req.body;
-  const sub = db.prepare(`
-    SELECT s.*, u.full_name, u.email
-    FROM submissions s JOIN users u ON s.user_id = u.id
-    WHERE s.id = ?
-  `).get(req.params.id);
-
-  if (!sub) return res.status(404).json({ error: 'Не найдено' });
-  if (sub.status === 'published') {
-    return res.status(400).json({ error: 'Нельзя отклонить опубликованную статью' });
-  }
-
-  db.prepare(`
-    UPDATE submissions
-    SET status = 'rejected',
-        admin_note = ?,
-        assigned_editorial_id = NULL,
-        rejection_stage = 'admin',
-        rejection_reason = ?,
-        reviewed_at = CURRENT_TIMESTAMP
-    WHERE id = ?
-  `).run(note || null, note || 'Возвращено администратором', req.params.id);
-
-  db.prepare(`
-    INSERT INTO notifications (user_id, submission_id, type, message)
-    VALUES (?, ?, 'rejected', ?)
-  `).run(sub.user_id, sub.id, `Ваша статья "${sub.title}" возвращена на доработку.${note ? ' Примечание: ' + note : ''}`);
-
-  auditLog(req.user.id, 'reject_submission', 'submission', sub.id, sub.title);
-
-  const emailResult = await sendRejectionEmail(sub.email, sub.full_name, sub.title, sub.journal, note);
-  res.json({ success: true, emailSent: emailResult.success, stub: emailResult.stub });
-});
-
-// ── Publish submission (admin uploads PDF + publishes editorial_approved) ───────
+// Publish submission (upload PDF + publish to archive)
 router.post('/submissions/:id/publish', requireAdmin, (req, res) => {
   publishPdfUpload.single('pdf')(req, res, async (uploadErr) => {
     if (uploadErr) {
@@ -217,15 +302,11 @@ router.post('/submissions/:id/publish', requireAdmin, (req, res) => {
     `).get(id);
 
     if (!sub) {
-      if (req.file) {
-        try { fs.unlinkSync(req.file.path); } catch {}
-      }
+      if (req.file) { try { fs.unlinkSync(req.file.path); } catch {} }
       return res.status(404).json({ error: 'Не найдено' });
     }
     if (sub.status !== 'editorial_approved') {
-      if (req.file) {
-        try { fs.unlinkSync(req.file.path); } catch {}
-      }
+      if (req.file) { try { fs.unlinkSync(req.file.path); } catch {} }
       return res.status(400).json({ error: 'Статья не в очереди на публикацию' });
     }
     if (!req.file) {
@@ -286,7 +367,7 @@ router.post('/submissions/:id/publish', requireAdmin, (req, res) => {
   });
 });
 
-// ── Backfill: опубликованные статьи → файловый архив ────────────────────────
+// ── Archive: sync published submissions ───────────────────────────────────────
 router.post('/archive/sync-published', requireAdmin, async (_req, res) => {
   try {
     const result = await syncPublishedToArchive(db);
@@ -297,322 +378,12 @@ router.post('/archive/sync-published', requireAdmin, async (_req, res) => {
   }
 });
 
-// ── Export submissions as CSV ─────────────────────────────────────────────────
-router.get('/submissions/export', requireAdmin, (req, res) => {
-  const { status } = req.query;
-  let query = `
-    SELECT s.id, s.title, s.authors, s.journal, s.status,
-           s.submitted_at, s.reviewed_at, s.admin_note,
-           u.full_name, u.email, i.title AS issue_title
-    FROM submissions s
-    JOIN users u ON s.user_id = u.id
-    LEFT JOIN issues i ON s.issue_id = i.id
-    WHERE 1=1
-  `;
-  const params = [];
-  if (status && status !== 'all') { query += ' AND s.status = ?'; params.push(status); }
-  query += ' ORDER BY s.submitted_at DESC';
-  const rows = db.prepare(query).all(...params);
-
-  function csvCell(v) { return `"${String(v ?? '').replace(/"/g, '""')}"`; }
-
-  const headers = ['ID','Название','Авторы','Журнал','Email автора','ФИО автора','Статус','Выпуск','Дата подачи','Дата решения','Примечание'];
-  const lines = [
-    headers.join(','),
-    ...rows.map(r => [
-      r.id,
-      csvCell(r.title),
-      csvCell(r.authors),
-      r.journal,
-      csvCell(r.email),
-      csvCell(r.full_name),
-      r.status,
-      csvCell(r.issue_title || ''),
-      r.submitted_at || '',
-      r.reviewed_at || '',
-      csvCell(r.admin_note || ''),
-    ].join(',')),
-  ];
-  const csv = '\uFEFF' + lines.join('\r\n'); // BOM for correct encoding in Excel
-
-  auditLog(req.user.id, 'export_csv', 'submissions', null, `status=${status || 'all'}, count=${rows.length}`);
-
-  res.setHeader('Content-Type', 'text/csv; charset=utf-8');
-  res.setHeader('Content-Disposition', `attachment; filename="submissions_${new Date().toISOString().slice(0,10)}.csv"`);
-  res.send(csv);
-});
-
-// ── Bulk action on submissions ────────────────────────────────────────────────
-router.post('/submissions/bulk', requireAdmin, async (req, res) => {
-  const { ids, action, note } = req.body;
-  if (!Array.isArray(ids) || !ids.length) return res.status(400).json({ error: 'Укажите статьи' });
-  if (action !== 'reject') {
-    return res.status(400).json({ error: 'Массовое одобрение отключено — статьи проходят экспертизу' });
-  }
-
-  const cleanIds = ids.map(id => parseInt(id, 10)).filter(id => !Number.isNaN(id));
-  if (!cleanIds.length) return res.status(400).json({ error: 'Некорректные ID' });
-
-  let processed = 0;
-
-  for (const id of cleanIds) {
-    const sub = db.prepare(`
-      SELECT s.*, u.full_name, u.email FROM submissions s
-      JOIN users u ON s.user_id = u.id WHERE s.id = ?
-    `).get(id);
-    if (!sub || sub.status === 'published') continue;
-
-    db.prepare(`
-      UPDATE submissions
-      SET status = 'rejected',
-          admin_note = ?,
-          assigned_editorial_id = NULL,
-          rejection_stage = 'admin',
-          rejection_reason = ?,
-          reviewed_at = CURRENT_TIMESTAMP
-      WHERE id = ?
-    `).run(note || null, note || 'Возвращено администратором', id);
-
-    const msg = `Ваша статья "${sub.title}" возвращена на доработку.${note ? ' Примечание: ' + note : ''}`;
-    db.prepare(`INSERT INTO notifications (user_id, submission_id, type, message) VALUES (?, ?, 'rejected', ?)`)
-      .run(sub.user_id, id, msg);
-
-    auditLog(req.user.id, 'bulk_reject', 'submission', id, sub.title);
-    processed++;
-  }
-
-  res.json({ success: true, processed });
-});
-
-// ── User's submissions (for detail modal) ─────────────────────────────────────
-router.get('/users/:id/submissions', requireAdmin, (req, res) => {
-  const id = parseInt(req.params.id, 10);
-  if (Number.isNaN(id)) return res.status(400).json({ error: 'Некорректный id' });
-  const user = db.prepare('SELECT id, full_name, email, role, is_banned, created_at FROM users WHERE id = ?').get(id);
-  if (!user) return res.status(404).json({ error: 'Пользователь не найден' });
-  const submissions = db.prepare(`
-    SELECT s.*, i.title AS issue_title FROM submissions s
-    LEFT JOIN issues i ON s.issue_id = i.id
-    WHERE s.user_id = ? ORDER BY s.submitted_at DESC
-  `).all(id);
-  res.json({ user, submissions });
-});
-
-// ── Audit log ─────────────────────────────────────────────────────────────────
-router.get('/audit-log', requireAdmin, (req, res) => {
-  const rows = db.prepare(`
-    SELECT a.*, u.full_name AS admin_name, u.email AS admin_email
-    FROM audit_log a
-    LEFT JOIN users u ON a.admin_id = u.id
-    ORDER BY a.created_at DESC LIMIT 500
-  `).all();
-  res.json(rows);
-});
-
-// ── Test email ────────────────────────────────────────────────────────────────
-router.post('/test-email', requireAdmin, async (req, res) => {
-  const admin = db.prepare('SELECT email FROM users WHERE id = ?').get(req.user.id);
-  const result = await sendTestEmail(admin?.email || req.body.email);
-  auditLog(req.user.id, 'test_email', null, null, admin?.email);
-  res.json(result);
-});
-
-// ── Database backup ───────────────────────────────────────────────────────────
-router.get('/backup', requireAdmin, (req, res) => {
-  const filename = `stem_backup_${new Date().toISOString().slice(0, 10)}.db`;
-  auditLog(req.user.id, 'download_backup', null, null, filename);
-  res.download(dbPath, filename);
-});
-
-// ===== SETTINGS =====
-router.get('/settings', requireAdmin, (req, res) => {
-  const rows = db.prepare('SELECT key, value FROM settings').all();
-  const obj = {};
-  rows.forEach(r => { obj[r.key] = r.value; });
-  res.json(obj);
-});
-
-router.put('/settings', requireAdmin, (req, res) => {
-  const allowed = ['announce_text', 'announce_enabled', 'announce_cta', 'site_email', 'site_phone', 'site_address'];
-  const stmt = db.prepare('INSERT OR REPLACE INTO settings (key, value, updated_at) VALUES (?, ?, CURRENT_TIMESTAMP)');
-  const update = db.transaction((data) => {
-    for (const [key, value] of Object.entries(data)) {
-      if (allowed.includes(key)) stmt.run(key, String(value));
-    }
-  });
-  update(req.body);
-  res.json({ success: true });
-});
-
-// Change admin password
-router.put('/change-password', requireAdmin, (req, res) => {
-  const { current_password, new_password } = req.body;
-  const bcrypt = require('bcryptjs');
-  const admin = db.prepare('SELECT * FROM users WHERE id = ?').get(req.user.id);
-  if (!admin || !bcrypt.compareSync(current_password, admin.password)) {
-    return res.status(400).json({ error: 'Неверный текущий пароль' });
-  }
-  if (!new_password || new_password.length < 6) {
-    return res.status(400).json({ error: 'Новый пароль должен быть не менее 6 символов' });
-  }
-  const hash = bcrypt.hashSync(new_password, 10);
-  db.prepare('UPDATE users SET password = ? WHERE id = ?').run(hash, req.user.id);
-  res.json({ success: true });
-});
-
-// Get all users
-router.get('/users', requireAdmin, (req, res) => {
-  const rows = db.prepare(`
-    SELECT id, full_name, email, role, is_banned, created_at,
-      (SELECT COUNT(*) FROM submissions WHERE user_id = users.id) as submissions_count
-    FROM users ORDER BY created_at DESC
-  `).all();
-  res.json(rows);
-});
-
-// Change user role (admin role cannot be assigned — only one admin exists in the system)
-const ASSIGNABLE_ROLES = ['author', 'tech_expert', 'editorial_expert'];
-const EMAIL_RE = /^[^\s@]{1,64}@[^\s@]{1,253}\.[^\s@]{2,}$/;
-
-function validateUserPassword(password) {
-  if (!password || password.length < 8 || !/[A-Za-z]/.test(password) || !/\d/.test(password)) {
-    return 'Пароль: минимум 8 символов, буквы и цифры';
-  }
-  return null;
-}
-
-router.post('/users', requireAdmin, (req, res) => {
-  const { full_name, email, password, role } = req.body;
-
-  if (!full_name || !email || !password || !role) {
-    return res.status(400).json({ error: 'Заполните все поля' });
-  }
-  if (typeof full_name !== 'string' || full_name.trim().length < 2 || full_name.length > 200) {
-    return res.status(400).json({ error: 'Укажите корректное имя' });
-  }
-  if (!EMAIL_RE.test(String(email).trim()) || String(email).length > 254) {
-    return res.status(400).json({ error: 'Укажите корректный email' });
-  }
-  const pwdError = validateUserPassword(password);
-  if (pwdError) return res.status(400).json({ error: pwdError });
-  if (!ASSIGNABLE_ROLES.includes(role)) {
-    return res.status(400).json({ error: 'Недопустимая роль' });
-  }
-
-  const normalizedEmail = String(email).trim().toLowerCase();
-  const existing = db.prepare('SELECT id FROM users WHERE email = ?').get(normalizedEmail);
-  if (existing) {
-    return res.status(409).json({ error: 'Email уже зарегистрирован' });
-  }
-
-  const hash = bcrypt.hashSync(password, 10);
-  const result = db.prepare(`
-    INSERT INTO users (full_name, email, password, role)
-    VALUES (?, ?, ?, ?)
-  `).run(full_name.trim(), normalizedEmail, hash, role);
-
-  auditLog(req.user.id, 'create_user', 'user', result.lastInsertRowid, `${full_name.trim()} · ${role}`);
-
-  res.json({
-    success: true,
-    user: {
-      id: result.lastInsertRowid,
-      full_name: full_name.trim(),
-      email: normalizedEmail,
-      role,
-    },
-  });
-});
-
-router.put('/users/:id/role', requireAdmin, (req, res) => {
-  const id = parseInt(req.params.id, 10);
-  const { role } = req.body;
-
-  if (!ASSIGNABLE_ROLES.includes(role)) {
-    return res.status(400).json({ error: 'Недопустимая роль' });
-  }
-  if (id === req.user.id) {
-    return res.status(400).json({ error: 'Нельзя изменить собственную роль' });
-  }
-
-  const user = db.prepare('SELECT id, full_name, role FROM users WHERE id = ?').get(id);
-  if (!user) return res.status(404).json({ error: 'Пользователь не найден' });
-  if (user.role === 'admin') {
-    return res.status(400).json({ error: 'Роль администратора нельзя изменить' });
-  }
-
-  db.prepare('UPDATE users SET role = ? WHERE id = ?').run(role, id);
-  auditLog(req.user.id, 'change_role', 'user', id, `${user.role} → ${role}`);
-
-  res.json({ success: true, id, role });
-});
-
-router.put('/users/:id/password', requireAdmin, (req, res) => {
-  const id = parseInt(req.params.id, 10);
-  const { new_password } = req.body;
-
-  if (Number.isNaN(id)) return res.status(400).json({ error: 'Некорректный id' });
-
-  const pwdError = validateUserPassword(new_password);
-  if (pwdError) return res.status(400).json({ error: pwdError });
-
-  const user = db.prepare('SELECT id, full_name, email, role FROM users WHERE id = ?').get(id);
-  if (!user) return res.status(404).json({ error: 'Пользователь не найден' });
-  if (user.role === 'admin') {
-    return res.status(400).json({ error: 'Пароль администратора нельзя сбросить через эту форму' });
-  }
-
-  const hash = bcrypt.hashSync(new_password, 10);
-  db.prepare(`
-    UPDATE users SET password = ?, reset_token = NULL, reset_token_expires = NULL WHERE id = ?
-  `).run(hash, id);
-
-  auditLog(req.user.id, 'reset_user_password', 'user', id, user.email);
-
-  res.json({ success: true });
-});
-
-router.delete('/users/:id', requireAdmin, (req, res) => {
-  const id = parseInt(req.params.id, 10);
-  if (Number.isNaN(id)) return res.status(400).json({ error: 'Некорректный id' });
-  if (id === req.user.id) {
-    return res.status(400).json({ error: 'Нельзя удалить собственный аккаунт' });
-  }
-
-  const user = db.prepare('SELECT id, full_name, email, role FROM users WHERE id = ?').get(id);
-  if (!user) return res.status(404).json({ error: 'Пользователь не найден' });
-  if (user.role === 'admin') {
-    return res.status(400).json({ error: 'Администратора нельзя удалить' });
-  }
-
-  const submissionsCount = db.prepare('SELECT COUNT(*) AS c FROM submissions WHERE user_id = ?').get(id).c;
-  if (submissionsCount > 0) {
-    return res.status(400).json({
-      error: `У пользователя ${submissionsCount} статей. Удаление невозможно — заблокируйте аккаунт.`,
-    });
-  }
-
-  const deleteUser = db.transaction((userId) => {
-    db.prepare('UPDATE submissions SET tech_reviewer_id = NULL WHERE tech_reviewer_id = ?').run(userId);
-    db.prepare('UPDATE submissions SET editorial_reviewer_id = NULL WHERE editorial_reviewer_id = ?').run(userId);
-    db.prepare('UPDATE submissions SET assigned_editorial_id = NULL WHERE assigned_editorial_id = ?').run(userId);
-    db.prepare('DELETE FROM notifications WHERE user_id = ?').run(userId);
-    db.prepare('DELETE FROM users WHERE id = ?').run(userId);
-  });
-
-  deleteUser(id);
-  auditLog(req.user.id, 'delete_user', 'user', id, `${user.full_name} · ${user.email}`);
-
-  res.json({ success: true });
-});
-
-// ── Архив выпуска: список и удаление опубликованных PDF ─────────────────────
+// ── Archive: list articles in issue folder ────────────────────────────────────
 router.get('/archive/issues/:issueId/articles', requireAdmin, async (req, res) => {
   const issueId = parseInt(req.params.issueId, 10);
   if (Number.isNaN(issueId)) {
     return res.status(400).json({ error: 'Некорректный id выпуска' });
   }
-
   try {
     const result = await listIssueArchiveArticles(db, issueId);
     if (!result.ok) return res.status(400).json({ error: result.error });
@@ -623,25 +394,18 @@ router.get('/archive/issues/:issueId/articles', requireAdmin, async (req, res) =
   }
 });
 
+// ── Archive: delete article from issue folder ─────────────────────────────────
 router.delete('/archive/issues/:issueId/articles/:fileName', requireAdmin, async (req, res) => {
   const issueId = parseInt(req.params.issueId, 10);
   if (Number.isNaN(issueId)) {
     return res.status(400).json({ error: 'Некорректный id выпуска' });
   }
-
   const fileName = decodeURIComponent(req.params.fileName || '');
-
   try {
     const result = await removeArchiveArticle(db, { issueId, fileName });
     if (!result.ok) return res.status(400).json({ error: result.error });
 
-    auditLog(
-      req.user.id,
-      'remove_archive_article',
-      'issue',
-      issueId,
-      `${result.file} ← ${result.folder}`
-    );
+    auditLog(req.user.id, 'remove_archive_article', 'issue', issueId, `${result.file} ← ${result.folder}`);
 
     res.json({ success: true, file: result.file, folder: result.folder });
   } catch (e) {
@@ -650,7 +414,7 @@ router.delete('/archive/issues/:issueId/articles/:fileName', requireAdmin, async
   }
 });
 
-// ── Быстрая публикация PDF в архив выпуска (без экспертизы) ─────────────────
+// ── Quick publish: PDF directly to archive (no review) ───────────────────────
 router.post('/quick-publish', requireAdmin, handleQuickPublishUpload, async (req, res) => {
   if (!req.file?.buffer?.length) {
     return res.status(400).json({ error: 'Выберите PDF-файл' });
@@ -662,25 +426,13 @@ router.post('/quick-publish', requireAdmin, handleQuickPublishUpload, async (req
   const abstract = req.body?.abstract || '';
 
   try {
-    const result = await publishPdfToIssueArchive(db, {
-      issueId,
-      pdfBuffer: req.file.buffer,
-      title,
-      authors,
-      abstract,
-    });
+    const result = await publishPdfToIssueArchive(db, { issueId, pdfBuffer: req.file.buffer, title, authors, abstract });
 
     if (!result.ok) {
       return res.status(400).json({ error: result.error });
     }
 
-    auditLog(
-      req.user.id,
-      'quick_publish',
-      'issue',
-      issueId,
-      `${result.archiveFile} → ${result.folder}`
-    );
+    auditLog(req.user.id, 'quick_publish', 'issue', issueId, `${result.archiveFile} → ${result.folder}`);
 
     res.json({
       success: true,

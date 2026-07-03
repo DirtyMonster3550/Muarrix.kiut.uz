@@ -161,6 +161,8 @@ app.use('/api/file-archive', require('./routes/fileArchive'));
 app.use('/api/submissions', submitLimiter, require('./routes/submissions'));
 app.use('/api/admin/issues', require('./routes/adminIssues'));
 app.use('/api/admin/security', require('./routes/adminSecurity'));
+app.use('/api/admin', require('./routes/adminSettings'));
+app.use('/api/admin', require('./routes/adminUsers'));
 app.use('/api/admin', require('./routes/admin'));
 app.use('/api/review', require('./routes/review'));
 
